@@ -9,90 +9,30 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-        /* ── DARK THEME ── */
         :root[data-theme="dark"] {
-            --bg:        #1C1B2E;
-            --sidebar:   #15142A;
-            --card:      #211F38;
-            --border:    #2A2845;
-            --text:      #E2E0F0;
-            --text2:     #7B79A0;
-            --muted:     #6B6A8A;
-            --muted2:    #4B4A6A;
-            --hover:     #221F40;
-            --hover2:    #2A2750;
-            --search:    #211F38;
-            --topbar:    #15142A;
-            --label-sec: #4B4A6A;
-            --tog-bg:    #2A2845;
-            --shadow:    rgba(0,0,0,0.3);
+            --bg:#1C1B2E; --sidebar:#15142A; --card:#211F38; --border:#2A2845;
+            --text:#E2E0F0; --text2:#7B79A0; --muted:#6B6A8A; --muted2:#4B4A6A;
+            --hover:#221F40; --hover2:#2A2750; --search:#211F38; --topbar:#15142A;
+            --label-sec:#4B4A6A; --tog-bg:#2A2845; --shadow:rgba(0,0,0,0.3);
         }
-
-        /* ── LIGHT THEME ── */
         :root[data-theme="light"] {
-            --bg:        #F4F3FF;
-            --sidebar:   #FFFFFF;
-            --card:      #FFFFFF;
-            --border:    #E5E3F5;
-            --text:      #1C1B2E;
-            --text2:     #5B5A7A;
-            --muted:     #8B89A8;
-            --muted2:    #A09EBF;
-            --hover:     #F0EEFF;
-            --hover2:    #E9E6FF;
-            --search:    #F4F3FF;
-            --topbar:    #FFFFFF;
-            --label-sec: #A09EBF;
-            --tog-bg:    #E5E3F5;
-            --shadow:    rgba(139,92,246,0.08);
+            --bg:#F4F3FF; --sidebar:#FFFFFF; --card:#FFFFFF; --border:#E5E3F5;
+            --text:#1C1B2E; --text2:#5B5A7A; --muted:#8B89A8; --muted2:#A09EBF;
+            --hover:#F0EEFF; --hover2:#E9E6FF; --search:#F4F3FF; --topbar:#FFFFFF;
+            --label-sec:#A09EBF; --tog-bg:#E5E3F5; --shadow:rgba(139,92,246,0.08);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color .25s, border-color .25s, color .2s; }
+        body { font-family: 'DM Sans', sans-serif; background-color: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
 
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            min-height: 100vh;
-        }
-
-        aside {
-            width: 220px; min-height: 100vh;
-            background-color: var(--sidebar);
-            border-right: 1px solid var(--border);
-            display: flex; flex-direction: column;
-            position: sticky; top: 0; height: 100vh;
-            overflow-y: auto; flex-shrink: 0;
-            box-shadow: 2px 0 12px var(--shadow);
-        }
-        .sidebar-logo {
-            padding: 20px 16px 14px;
-            display: flex; align-items: center; gap: 8px;
-            border-bottom: 1px solid var(--border);
-        }
-        .logo-icon {
-            width: 34px; height: 34px;
-            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: 800; font-size: 11px;
-        }
+        aside { width: 220px; min-height: 100vh; background-color: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0; box-shadow: 2px 0 12px var(--shadow); }
+        .sidebar-logo { padding: 20px 16px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+        .logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg,#8B5CF6,#6D28D9); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 11px; }
         .logo-text { font-size: 15px; font-weight: 700; color: var(--text); }
         .logo-sub  { font-size: 10px; color: var(--muted); }
-
         .sidebar-section { padding: 18px 14px 4px; }
-        .sidebar-section-label {
-            font-size: 9px; font-weight: 700; color: var(--label-sec);
-            text-transform: uppercase; letter-spacing: 1.5px;
-            padding: 0 6px; margin-bottom: 6px;
-        }
-        .nav-link {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 10px; border-radius: 8px;
-            font-size: 13px; font-weight: 500; color: var(--text2);
-            text-decoration: none; transition: all 0.15s ease; margin-bottom: 1px;
-        }
+        .sidebar-section-label { font-size: 9px; font-weight: 700; color: var(--label-sec); text-transform: uppercase; letter-spacing: 1.5px; padding: 0 6px; margin-bottom: 6px; }
+        .nav-link { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text2); text-decoration: none; transition: all 0.15s ease; margin-bottom: 1px; }
         .nav-link:hover  { background: var(--hover); color: #8B5CF6; }
         .nav-link.active { background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff; font-weight:600; box-shadow:0 4px 12px rgba(139,92,246,.35); }
         .nav-link i      { width: 16px; font-size: 13px; text-align: center; }
@@ -100,196 +40,94 @@
         .nav-link.logout:hover { background: rgba(239,68,68,.1); color: #EF4444; }
 
         main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-        .topbar {
-            background: var(--topbar); border-bottom: 1px solid var(--border);
-            padding: 12px 28px;
-            display: flex; align-items: center; justify-content: space-between; gap: 16px;
-            box-shadow: 0 2px 8px var(--shadow);
-        }
+        .topbar { background: var(--topbar); border-bottom: 1px solid var(--border); padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 2px 8px var(--shadow); }
         .topbar-title { font-size: 16px; font-weight: 700; color: var(--text); }
-        .search-bar {
-            flex: 1; max-width: 380px;
-            background: var(--search); border: 1px solid var(--border); border-radius: 10px;
-            padding: 8px 14px; display: flex; align-items: center; gap: 8px;
-            color: var(--muted); font-size: 12px;
-        }
+        .search-bar { flex: 1; max-width: 380px; background: var(--search); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
         .topbar-actions { display: flex; align-items: center; gap: 14px; }
-        .icon-btn {
-            width: 34px; height: 34px; border-radius: 8px;
-            background: var(--search); border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--muted); cursor: pointer; font-size: 13px; transition: all .15s;
-            position: relative;
-        }
+        .icon-btn { width: 34px; height: 34px; border-radius: 8px; background: var(--search); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); cursor: pointer; font-size: 13px; transition: all .15s; position: relative; }
         .icon-btn:hover { background: var(--hover2); color: #8B5CF6; }
-        .avatar {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: linear-gradient(135deg,#8B5CF6,#6D28D9);
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 12px; font-weight: 700;
-        }
+        .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#8B5CF6,#6D28D9); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 700; }
         .user-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
         .user-role { font-size: 10px; color: var(--muted); }
-
-        /* Theme Toggle */
-        .theme-toggle {
-            display: flex; align-items: center; gap: 7px;
-            background: var(--tog-bg); border: 1px solid var(--border);
-            border-radius: 20px; padding: 4px 10px;
-            cursor: pointer; user-select: none;
-            font-size: 11px; font-weight: 600; color: var(--text2);
-            transition: all .2s;
-        }
+        .theme-toggle { display: flex; align-items: center; gap: 7px; background: var(--tog-bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; cursor: pointer; user-select: none; font-size: 11px; font-weight: 600; color: var(--text2); }
         .theme-toggle:hover { border-color: #8B5CF6; color: #8B5CF6; }
-        .theme-toggle i { font-size: 11px; }
 
-        .content-wrap { flex: 1; display: flex; overflow: hidden; position: relative; }
-
+        .content-wrap { flex: 1; display: flex; overflow: hidden; }
         .events-panel { flex: 1; overflow-y: auto; padding: 24px 28px; }
-
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .panel-title  { font-size: 20px; font-weight: 700; color: var(--text); }
         .panel-sub    { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
 
-        .filters-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-        .filter-search {
-            background: var(--search); border: 1px solid var(--border); border-radius: 8px;
-            padding: 7px 12px; display: flex; align-items: center; gap: 8px;
-            color: var(--muted); font-size: 12px; flex: 1; max-width: 220px;
-        }
-        .filter-search input {
-            background: transparent; border: none; outline: none;
-            color: var(--text); font-size: 12px; font-family: inherit; width: 100%;
-        }
-        .tabs { display: flex; gap: 4px; }
-        .tab {
-            padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500;
-            cursor: pointer; color: var(--text2); border: 1px solid transparent; transition: all .15s;
-        }
+        .filters-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+        .filter-search { background: var(--search); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; min-width: 180px; }
+        .filter-search input { background: transparent; border: none; outline: none; color: var(--text); font-size: 12px; font-family: inherit; width: 100%; }
+        .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+        .tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text2); border: 1px solid transparent; transition: all .15s; }
         .tab:hover  { background: var(--hover); color: #8B5CF6; }
         .tab.active { background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff; font-weight:600; }
-
-        .btn-create {
-            display: flex; align-items: center; gap: 6px;
-            background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff;
-            border: none; border-radius: 8px; padding: 8px 14px;
-            font-size: 12px; font-weight: 600; cursor: pointer;
-            white-space: nowrap; transition: opacity .15s; font-family: inherit;
-        }
+        .btn-create { display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity .15s; font-family: inherit; }
         .btn-create:hover { opacity: .85; }
 
-        .event-item {
-            background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-            display: flex; align-items: center; gap: 14px;
-            padding: 14px; margin-bottom: 10px; cursor: pointer; transition: border-color .15s;
-            box-shadow: 0 2px 8px var(--shadow);
-        }
+        .event-item { background: var(--card); border: 1px solid var(--border); border-radius: 14px; display: flex; align-items: center; gap: 14px; padding: 14px; margin-bottom: 10px; transition: border-color .15s; box-shadow: 0 2px 8px var(--shadow); }
         .event-item:hover { border-color: #8B5CF6; }
-        .event-thumb {
-            width: 80px; height: 64px; border-radius: 10px;
-            flex-shrink: 0; background: var(--hover2);
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-        }
-        .event-body    { flex: 1; min-width: 0; }
+        .event-thumb { width: 80px; height: 64px; border-radius: 10px; flex-shrink: 0; background: var(--hover2); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .event-body  { flex: 1; min-width: 0; }
         .event-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-        .event-name    { font-size: 14px; font-weight: 600; color: var(--text); }
-        .badge         { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+        .event-name  { font-size: 14px; font-weight: 600; color: var(--text); }
+        .badge       { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
         .badge.upcoming { background: rgba(251,191,36,.15); color: #FBBF24; }
         .badge.past     { background: rgba(107,114,128,.15); color: #9CA3AF; }
         .badge.draft    { background: rgba(99,102,241,.15); color: #818CF8; }
-        .event-desc    { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-        .event-meta    { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-        .meta-item     { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text2); }
-        .meta-item i   { font-size: 9px; color: #8B5CF6; }
+        .event-desc  { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+        .event-meta  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .meta-item   { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text2); }
+        .meta-item i { font-size: 9px; color: #8B5CF6; }
+
+        .btn-edit { background: var(--hover2); border: 1px solid var(--border); color: var(--text2); border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; }
+        .btn-edit:hover { border-color: #8B5CF6; color: #8B5CF6; }
+        .btn-del  { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2); color: #EF4444; border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; }
+        .btn-del:hover { background: rgba(239,68,68,.2); }
 
         /* Drawer */
-        .drawer-backdrop {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55); backdrop-filter: blur(2px);
-            z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-        }
+        .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .drawer-backdrop.open { opacity: 1; pointer-events: all; }
-
-        .create-panel {
-            position: fixed; top: 0; right: 0;
-            height: 100vh; width: 320px;
-            background: #fff; color: #1C1B2E;
-            z-index: 100; overflow-y: auto; padding: 22px 20px;
-            box-shadow: -8px 0 40px rgba(0,0,0,0.4);
-            transform: translateX(100%);
-            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-        }
+        .create-panel { position: fixed; top: 0; right: 0; height: 100vh; width: 340px; background: #fff; color: #1C1B2E; z-index: 100; overflow-y: auto; padding: 22px 20px; box-shadow: -8px 0 40px rgba(0,0,0,0.4); transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
         .create-panel.open { transform: translateX(0); }
-
-        .drawer-close {
-            position: absolute; top: 16px; right: 16px;
-            width: 30px; height: 30px; background: #F3F4F6;
-            border: none; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: #6B7280; font-size: 13px;
-            transition: background .15s, color .15s;
-        }
+        .drawer-close { position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; background: #F3F4F6; border: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6B7280; font-size: 13px; }
         .drawer-close:hover { background: #E5E7EB; color: #111; }
-
-        .cp-title { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 18px; padding-right: 36px; }
+        .cp-title { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 4px; padding-right: 36px; }
+        .cp-mode-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 16px; }
+        .cp-mode-badge.create { background: rgba(139,92,246,.1); color: #8B5CF6; border: 1px solid rgba(139,92,246,.2); }
+        .cp-mode-badge.edit   { background: rgba(251,191,36,.1);  color: #D97706; border: 1px solid rgba(251,191,36,.2); }
 
         .form-group  { margin-bottom: 12px; }
         .form-row    { display: flex; gap: 10px; margin-bottom: 12px; }
         .form-row .form-group { flex: 1; margin-bottom: 0; }
         .form-label  { display: block; font-size: 11px; font-weight: 600; color: #374151; margin-bottom: 4px; }
-        .form-input, .form-select, .form-textarea {
-            width: 100%; background: #F9FAFB; border: 1px solid #E5E7EB;
-            border-radius: 8px; padding: 8px 10px;
-            font-size: 12px; color: #374151; font-family: inherit;
-            outline: none; transition: border-color .15s;
-        }
+        .form-input, .form-select, .form-textarea { width: 100%; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #374151; font-family: inherit; outline: none; transition: border-color .15s; }
         .form-input::placeholder, .form-textarea::placeholder { color: #9CA3AF; }
         .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #8B5CF6; }
         .form-select  { appearance: none; cursor: pointer; }
         .form-textarea { resize: vertical; min-height: 70px; }
 
-        .upload-row { display: flex; gap: 8px; align-items: stretch; }
-        .upload-input {
-            flex: 1; background: #F9FAFB; border: 1px solid #E5E7EB;
-            border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #9CA3AF;
-            font-family: inherit; outline: none;
-        }
-        .btn-upload {
-            background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px;
-            padding: 8px 12px; font-size: 11px; font-weight: 600; color: #374151;
-            cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 4px;
-            font-family: inherit;
-        }
-        .btn-upload:hover { border-color: #8B5CF6; color: #8B5CF6; }
-
+        .current-banner { width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 6px; display: none; }
         .toggle-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; margin-bottom: 16px; }
-        .toggle {
-            width: 36px; height: 20px; background: #8B5CF6; border-radius: 20px;
-            position: relative; cursor: pointer; flex-shrink: 0;
-        }
-        .toggle::after {
-            content: ''; position: absolute; top: 3px; left: 3px;
-            width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: left .2s;
-        }
+        .toggle { width: 36px; height: 20px; background: #8B5CF6; border-radius: 20px; position: relative; cursor: pointer; flex-shrink: 0; }
+        .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: left .2s; }
         .toggle.off { background: #D1D5DB; }
         .toggle.off::after { left: 19px; }
         .toggle-label { font-size: 11px; color: #6B7280; }
 
-        .btn-save {
-            width: 100%; background: linear-gradient(135deg,#8B5CF6,#7C3AED);
-            color: #fff; border: none; border-radius: 10px;
-            padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer;
-            font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px;
-            transition: opacity .15s;
-        }
+        .btn-save { width: 100%; background: linear-gradient(135deg,#8B5CF6,#7C3AED); color: #fff; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; transition: opacity .15s; }
         .btn-save:hover { opacity: .88; }
+        .btn-save:disabled { opacity: .5; cursor: not-allowed; }
 
-        /* Empty / loading state */
         .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
-        .empty-state i { font-size: 36px; margin-bottom: 12px; color: var(--muted2); }
-        .empty-state p { font-size: 13px; }
+        .empty-state i { font-size: 36px; margin-bottom: 12px; color: var(--muted2); display: block; }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 24px; right: 28px; background: #1A1836; border: 1px solid #8B5CF6; border-radius: 10px; padding: 11px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #C4B5FD; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transform: translateY(80px); opacity: 0; transition: transform .3s, opacity .3s; z-index: 200; }
+        .toast.show { transform: translateY(0); opacity: 1; }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -298,7 +136,6 @@
 </head>
 <body>
 
-<!-- ✅ AUTH GUARD -->
 <script>
   if (!localStorage.getItem('dfa_token') || !localStorage.getItem('dfa_admin')) {
     window.location.href = 'index.html';
@@ -307,14 +144,10 @@
   document.documentElement.setAttribute('data-theme', savedTheme);
 </script>
 
-<!-- ══ SIDEBAR ══ -->
 <aside>
     <div class="sidebar-logo">
         <div class="logo-icon">DFA</div>
-        <div>
-            <div class="logo-text">DFATV</div>
-            <div class="logo-sub">Admin Management</div>
-        </div>
+        <div><div class="logo-text">DFATV</div><div class="logo-sub">Admin Management</div></div>
     </div>
     <div class="sidebar-section">
         <div class="sidebar-section-label">Overview</div>
@@ -356,7 +189,6 @@
     </div>
 </aside>
 
-<!-- ══ MAIN ══ -->
 <main>
     <div class="topbar">
         <div class="topbar-title">Events</div>
@@ -365,13 +197,10 @@
             Search events...
         </div>
         <div class="topbar-actions">
-
-            <!-- ✅ THEME TOGGLE -->
             <div class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
                 <i class="fa-solid fa-moon" id="themeIcon"></i>
                 <span id="themeLabel">Dark</span>
             </div>
-
             <div class="icon-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
             <div class="icon-btn" style="position:relative;">
                 <i class="fa-solid fa-bell"></i>
@@ -407,7 +236,7 @@
                     <div class="tab" onclick="setTab(this,'Draft')">Draft</div>
                     <div class="tab" onclick="setTab(this,'Cancelled')">Cancelled</div>
                 </div>
-                <button class="btn-create" onclick="openDrawer()">
+                <button class="btn-create" onclick="openCreateDrawer()">
                     <i class="fa-solid fa-plus"></i> Create Event
                 </button>
             </div>
@@ -417,22 +246,23 @@
     </div>
 </main>
 
-<!-- ══ BACKDROP ══ -->
+<!-- Backdrop -->
 <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
 
-<!-- ══ CREATE EVENT DRAWER ══ -->
+<!-- ══ CREATE / EDIT DRAWER ══ -->
 <div class="create-panel" id="createPanel">
     <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
-    <div class="cp-title">Create Event</div>
+    <div class="cp-title" id="drawerTitle">Create Event</div>
+    <div class="cp-mode-badge create" id="drawerBadge"><i class="fa-solid fa-plus"></i> New Event</div>
 
     <div class="form-group">
-        <label class="form-label">Event Title</label>
+        <label class="form-label">Event Title *</label>
         <input type="text" class="form-input" id="event-title" placeholder="e.g. The Encounter 2025">
     </div>
     <div class="form-row">
         <div class="form-group">
             <label class="form-label">Sub Title</label>
-            <input type="text" class="form-input" id="event-subtitle" placeholder="Short Tagline">
+            <input type="text" class="form-input" id="event-subtitle" placeholder="Short tagline">
         </div>
         <div class="form-group">
             <label class="form-label">Status</label>
@@ -445,7 +275,7 @@
     </div>
     <div class="form-row">
         <div class="form-group">
-            <label class="form-label">Date</label>
+            <label class="form-label">Date *</label>
             <input type="date" class="form-input" id="event-date">
         </div>
         <div class="form-group">
@@ -454,7 +284,7 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="form-label">Location</label>
+        <label class="form-label">Location *</label>
         <input type="text" class="form-input" id="event-location" placeholder="Venue, city">
     </div>
     <div class="form-row">
@@ -469,17 +299,17 @@
     </div>
     <div class="form-group">
         <label class="form-label">Description</label>
-        <textarea class="form-textarea" id="event-description" placeholder="What is the event about"></textarea>
+        <textarea class="form-textarea" id="event-description" placeholder="What is the event about?"></textarea>
     </div>
     <div class="form-group">
-        <label class="form-label">Event Banner / Image</label>
-        <div class="upload-row">
-            <input type="file" class="upload-input" id="event-image" accept="image/*">
-        </div>
+        <label class="form-label">Banner Image</label>
+        <img id="current-banner" class="current-banner" alt="Current banner">
+        <input type="file" class="form-input" id="event-image" accept="image/*" style="padding:4px;">
+        <div style="font-size:10px;color:#9CA3AF;margin-top:4px;" id="bannerHint">Upload a new image to replace</div>
     </div>
     <div class="form-group">
         <label class="form-label">Video Preview URL</label>
-        <input type="text" class="form-input" id="event-video" placeholder="YouTube / Vimeo Link">
+        <input type="text" class="form-input" id="event-video" placeholder="YouTube / Vimeo link">
     </div>
     <div class="form-group">
         <label class="form-label">Tags</label>
@@ -487,26 +317,31 @@
     </div>
     <div class="toggle-row">
         <div class="toggle" id="publishToggle" onclick="this.classList.toggle('off')"></div>
-        <span class="toggle-label">Published (Visible on website)</span>
+        <span class="toggle-label">Published (visible on website)</span>
     </div>
 
     <button class="btn-save" id="saveBtn" onclick="saveEvent()">
-        <i class="fa-solid fa-floppy-disk"></i> Save Event
+        <i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnLabel">Save Event</span>
     </button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+    <i class="fa-solid fa-circle-check" style="color:#34D399;"></i>
+    <span id="toastMsg">Done</span>
 </div>
 
 <script>
     const API = 'https://dfa-backend-lilj.onrender.com/api/v1';
-    let allEvents = [];
-    let currentTab = 'All';
+    let allEvents  = [];
+    let editingId  = null; // null = create mode, string = edit mode
 
-    // ── Auth + session ────────────────────────────────────────────────────────
+    // ── Auth ──────────────────────────────────────────────────────────────────
     function logout() {
         localStorage.removeItem('dfa_token');
         localStorage.removeItem('dfa_admin');
         window.location.href = 'index.html';
     }
-
     const adminData = JSON.parse(localStorage.getItem('dfa_admin') || '{}');
     if (adminData.name) {
         document.getElementById('adminName').textContent = adminData.name;
@@ -515,9 +350,9 @@
         document.getElementById('avatarInitials').textContent = initials;
     }
 
-    // ── Theme toggle ─────────────────────────────────────────────────────────
+    // ── Theme ─────────────────────────────────────────────────────────────────
     function applyThemeUI(theme) {
-        document.getElementById('themeIcon').className  = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        document.getElementById('themeIcon').className    = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
         document.getElementById('themeLabel').textContent = theme === 'dark' ? 'Dark' : 'Light';
     }
     function toggleTheme() {
@@ -528,37 +363,39 @@
     }
     applyThemeUI(savedTheme);
 
-    // ── Render events ─────────────────────────────────────────────────────────
+    // ── Render ────────────────────────────────────────────────────────────────
     function renderEvents(events) {
-        const container = document.getElementById('events-container');
         document.getElementById('eventsSub').textContent = `${allEvents.length} events total`;
-
+        const container = document.getElementById('events-container');
         if (events.length === 0) {
             container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-calendar-days"></i><p>No events found</p></div>`;
             return;
         }
-
         container.innerHTML = events.map(event => {
-            const badgeClass = event.status === 'Upcoming' ? 'upcoming' : event.status === 'Draft' ? 'draft' : 'past';
+            const bc = event.status === 'Upcoming' ? 'upcoming' : event.status === 'Draft' ? 'draft' : 'past';
             const thumb = event.bannerImage
-                ? `<img src="${event.bannerImage}" alt="${event.title}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`
+                ? `<img src="${event.bannerImage}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`
                 : `<i class="fa-solid fa-calendar-days" style="font-size:22px;color:#8B5CF6;"></i>`;
+            const dateStr = event.date ? new Date(event.date).toDateString() : '—';
             return `
             <div class="event-item">
                 <div class="event-thumb">${thumb}</div>
                 <div class="event-body">
                     <div class="event-name-row">
                         <span class="event-name">${event.title}</span>
-                        <span class="badge ${badgeClass}">${event.status}</span>
+                        <span class="badge ${bc}">${event.status}</span>
                     </div>
-                    <div class="event-desc">${(event.description || '').slice(0,100)}${event.description?.length > 100 ? '...' : ''}</div>
+                    <div class="event-desc">${(event.description || '').slice(0,90)}${(event.description||'').length > 90 ? '...' : ''}</div>
                     <div class="event-meta">
-                        <span class="meta-item"><i class="fa-solid fa-calendar"></i> ${new Date(event.date).toDateString()}</span>
-                        <span class="meta-item"><i class="fa-solid fa-location-dot"></i> ${event.location || ''}</span>
+                        <span class="meta-item"><i class="fa-solid fa-calendar"></i> ${dateStr}</span>
+                        <span class="meta-item"><i class="fa-solid fa-location-dot"></i> ${event.location || '—'}</span>
                         <span class="meta-item"><i class="fa-solid fa-ticket"></i> ${event.ticketTiers?.length || 0} tiers</span>
                     </div>
-                    <div style="margin-top:10px;">
-                        <button onclick="deleteEvent('${event._id}')" style="background:#ef4444;color:white;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit;">
+                    <div style="margin-top:10px;display:flex;gap:8px;">
+                        <button class="btn-edit" onclick="openEditDrawer('${event._id}')">
+                            <i class="fa-solid fa-pen"></i> Edit
+                        </button>
+                        <button class="btn-del" onclick="deleteEvent('${event._id}')">
                             <i class="fa-solid fa-trash"></i> Delete
                         </button>
                     </div>
@@ -567,62 +404,132 @@
         }).join('');
     }
 
-    // ── Load events ───────────────────────────────────────────────────────────
+    // ── Load ──────────────────────────────────────────────────────────────────
     async function loadEvents() {
         document.getElementById('events-container').innerHTML =
-            `<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading events...</p></div>`;
+            `<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading...</p></div>`;
         try {
-            const res = await fetch(`${API}/events`);
+            const res    = await fetch(`${API}/events`);
             const result = await res.json();
-            allEvents = result.data?.events || [];
+            allEvents    = result.data?.events || [];
             renderEvents(allEvents);
         } catch(err) {
             document.getElementById('events-container').innerHTML =
-                `<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i><p>Failed to load events</p></div>`;
+                `<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i><p>Failed to load</p></div>`;
         }
     }
 
-    // ── Filter by tab ─────────────────────────────────────────────────────────
     function setTab(el, tab) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
-        currentTab = tab;
-        const filtered = tab === 'All' ? allEvents : allEvents.filter(e => e.status === tab);
-        renderEvents(filtered);
+        renderEvents(tab === 'All' ? allEvents : allEvents.filter(e => e.status === tab));
     }
-
-    // ── Filter by search ──────────────────────────────────────────────────────
     function filterEvents(q) {
-        const filtered = allEvents.filter(e =>
+        renderEvents(allEvents.filter(e =>
             e.title.toLowerCase().includes(q.toLowerCase()) ||
             (e.location || '').toLowerCase().includes(q.toLowerCase())
-        );
-        renderEvents(filtered);
+        ));
     }
 
-    // ── Drawer ────────────────────────────────────────────────────────────────
-    function openDrawer() {
+    // ── Drawer helpers ────────────────────────────────────────────────────────
+    function clearForm() {
+        ['event-title','event-subtitle','event-date','event-time','event-location',
+         'event-capacity','event-deadline','event-description','event-video','event-tags']
+        .forEach(id => document.getElementById(id).value = '');
+        document.getElementById('event-status').value = 'Draft';
+        document.getElementById('event-image').value  = '';
+        document.getElementById('current-banner').style.display = 'none';
+        document.getElementById('publishToggle').classList.remove('off');
+    }
+
+    function openCreateDrawer() {
+        editingId = null;
+        clearForm();
+        document.getElementById('drawerTitle').textContent = 'Create Event';
+        document.getElementById('drawerBadge').className   = 'cp-mode-badge create';
+        document.getElementById('drawerBadge').innerHTML   = '<i class="fa-solid fa-plus"></i> New Event';
+        document.getElementById('saveBtnLabel').textContent = 'Save Event';
+        document.getElementById('bannerHint').style.display = 'none';
         document.getElementById('createPanel').classList.add('open');
         document.getElementById('drawerBackdrop').classList.add('open');
         document.body.style.overflow = 'hidden';
     }
+
+    function openEditDrawer(id) {
+        const event = allEvents.find(e => e._id === id);
+        if (!event) return;
+        editingId = id;
+
+        // Populate fields
+        document.getElementById('event-title').value       = event.title || '';
+        document.getElementById('event-subtitle').value    = event.subTitle || '';
+        document.getElementById('event-status').value      = event.status || 'Draft';
+        document.getElementById('event-location').value    = event.location || '';
+        document.getElementById('event-capacity').value    = event.capacity || '';
+        document.getElementById('event-description').value = event.description || '';
+        document.getElementById('event-video').value       = event.videoPreviewUrl || '';
+        document.getElementById('event-tags').value        = (event.tags || []).join(', ');
+
+        // Date formatting
+        if (event.date) {
+            const d = new Date(event.date);
+            document.getElementById('event-date').value = d.toISOString().split('T')[0];
+        }
+        if (event.registrationDeadline) {
+            const dl = new Date(event.registrationDeadline);
+            document.getElementById('event-deadline').value = dl.toISOString().split('T')[0];
+        }
+        if (event.time) document.getElementById('event-time').value = event.time;
+
+        // Published toggle
+        if (event.isPublished === false) {
+            document.getElementById('publishToggle').classList.add('off');
+        } else {
+            document.getElementById('publishToggle').classList.remove('off');
+        }
+
+        // Show current banner
+        const bannerEl = document.getElementById('current-banner');
+        if (event.bannerImage) {
+            bannerEl.src = event.bannerImage;
+            bannerEl.style.display = 'block';
+            document.getElementById('bannerHint').style.display = 'block';
+        } else {
+            bannerEl.style.display = 'none';
+        }
+
+        document.getElementById('drawerTitle').textContent  = 'Edit Event';
+        document.getElementById('drawerBadge').className    = 'cp-mode-badge edit';
+        document.getElementById('drawerBadge').innerHTML    = '<i class="fa-solid fa-pen"></i> Editing';
+        document.getElementById('saveBtnLabel').textContent = 'Update Event';
+
+        document.getElementById('createPanel').classList.add('open');
+        document.getElementById('drawerBackdrop').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
     function closeDrawer() {
         document.getElementById('createPanel').classList.remove('open');
         document.getElementById('drawerBackdrop').classList.remove('open');
         document.body.style.overflow = '';
+        editingId = null;
     }
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
-    // ── Save event ────────────────────────────────────────────────────────────
+    // ── Save / Update event ───────────────────────────────────────────────────
     async function saveEvent() {
+        const title = document.getElementById('event-title').value.trim();
+        if (!title) { alert('Event title is required'); return; }
+
         const btn = document.getElementById('saveBtn');
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
         try {
-            const token = localStorage.getItem('dfa_token');
+            const token    = localStorage.getItem('dfa_token');
             const formData = new FormData();
-            formData.append('title',       document.getElementById('event-title').value);
+
+            formData.append('title',       title);
             formData.append('subTitle',    document.getElementById('event-subtitle').value);
             formData.append('date',        document.getElementById('event-date').value);
             formData.append('time',        document.getElementById('event-time').value || '18:00');
@@ -633,49 +540,68 @@
             formData.append('isPublished', !document.getElementById('publishToggle').classList.contains('off'));
             formData.append('videoPreviewUrl', document.getElementById('event-video').value);
             formData.append('tags',        document.getElementById('event-tags').value);
-            formData.append('ticketTiers', JSON.stringify([
-                { name: 'Standard', price: 5000, capacity: 200, currency: 'NGN', status: 'Available' }
-            ]));
 
             const imageFile = document.getElementById('event-image').files[0];
             if (imageFile) formData.append('bannerImage', imageFile);
 
-            const res = await fetch(`${API}/admin/events`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
-            });
+            let res;
+            if (editingId) {
+                // EDIT mode — PATCH
+                res = await fetch(`${API}/admin/events/${editingId}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+            } else {
+                // CREATE mode — POST
+                formData.append('ticketTiers', JSON.stringify([
+                    { name: 'Standard', price: 5000, capacity: 200, currency: 'NGN', status: 'Available' }
+                ]));
+                res = await fetch(`${API}/admin/events`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+            }
 
             const result = await res.json();
-            if (!res.ok) throw new Error(result.message || 'Failed to create event');
+            if (!res.ok) throw new Error(result.message || 'Failed');
 
-            alert('Event created successfully!');
-            loadEvents();
+            showToast(editingId ? 'Event updated ✓' : 'Event created ✓');
             closeDrawer();
+            loadEvents();
         } catch(err) {
-            alert(err.message || 'Failed to create event');
+            alert(err.message || 'Failed to save event');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Event';
+            btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnLabel">${editingId ? 'Update Event' : 'Save Event'}</span>`;
         }
     }
 
-    // ── Delete event ──────────────────────────────────────────────────────────
+    // ── Delete ────────────────────────────────────────────────────────────────
     async function deleteEvent(id) {
-        if (!confirm('Delete this event?')) return;
+        if (!confirm('Delete this event? This cannot be undone.')) return;
         try {
             const token = localStorage.getItem('dfa_token');
-            const res = await fetch(`${API}/events/${id}`, {
+            const res   = await fetch(`${API}/events/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const result = await res.json();
             if (!res.ok) throw new Error(result.message || 'Delete failed');
-            alert('Event deleted!');
+            showToast('Event deleted');
             loadEvents();
         } catch(err) {
             alert(err.message || 'Delete failed');
         }
+    }
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
     }
 
     loadEvents();
