@@ -6,6 +6,8 @@
     <title>DFA Admin | Attendees</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- QR Scanner library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
@@ -53,13 +55,11 @@
         .user-role { font-size: 10px; color: var(--muted); }
         .theme-toggle { display: flex; align-items: center; gap: 7px; background: var(--tog-bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; cursor: pointer; user-select: none; font-size: 11px; font-weight: 600; color: var(--text2); }
         .theme-toggle:hover { border-color: #8B5CF6; color: #8B5CF6; }
-        .theme-toggle i { font-size: 11px; }
 
         .attendees-panel { flex: 1; overflow-y: auto; padding: 24px 28px; }
         .panel-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
         .panel-sub   { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
 
-        /* Stats row */
         .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 22px; }
         .stat-mini { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 8px var(--shadow); }
         .stat-mini-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
@@ -94,14 +94,7 @@
         .badge.standard { background: rgba(139,92,246,.15);   color: #C4B5FD; }
         .badge.group    { background: rgba(96,165,250,.15);   color: #60A5FA; }
 
-        /* Check-in button */
-        .btn-checkin {
-            display: inline-flex; align-items: center; gap: 5px;
-            background: rgba(52,211,153,.12); color: #34D399;
-            border: 1px solid rgba(52,211,153,.25); border-radius: 6px;
-            padding: 4px 10px; font-size: 10px; font-weight: 700;
-            cursor: pointer; font-family: inherit; transition: all .15s;
-        }
+        .btn-checkin { display: inline-flex; align-items: center; gap: 5px; background: rgba(52,211,153,.12); color: #34D399; border: 1px solid rgba(52,211,153,.25); border-radius: 6px; padding: 4px 10px; font-size: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .15s; }
         .btn-checkin:hover { background: rgba(52,211,153,.22); }
         .btn-checkin.done { background: rgba(107,114,128,.1); color: var(--muted); border-color: var(--border); cursor: default; }
 
@@ -116,6 +109,54 @@
         .empty-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
         .empty-sub   { font-size: 12px; color: var(--muted); }
 
+        /* ── Check-in Modal ── */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 150; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s; }
+        .modal-backdrop.open { opacity: 1; pointer-events: all; }
+        .checkin-modal { background: #fff; border-radius: 20px; padding: 28px; width: 420px; max-width: 95vw; position: relative; transform: scale(0.95); transition: transform .25s; box-shadow: 0 24px 60px rgba(0,0,0,0.35); }
+        .modal-backdrop.open .checkin-modal { transform: scale(1); }
+        .modal-close { position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; background: #F3F4F6; border: none; border-radius: 8px; cursor: pointer; color: #6B7280; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+        .modal-close:hover { background: #E5E7EB; }
+        .modal-title { font-size: 16px; font-weight: 700; color: #111; margin-bottom: 4px; }
+        .modal-sub   { font-size: 12px; color: #6B7280; margin-bottom: 20px; }
+
+        /* Method selector */
+        .method-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .method-card { border: 2px solid #E5E7EB; border-radius: 12px; padding: 14px 12px; text-align: center; cursor: pointer; transition: all .15s; }
+        .method-card:hover { border-color: #8B5CF6; background: #F5F3FF; }
+        .method-card.selected { border-color: #8B5CF6; background: #F5F3FF; }
+        .method-card i { font-size: 22px; color: #8B5CF6; margin-bottom: 6px; display: block; }
+        .method-card .method-title { font-size: 13px; font-weight: 700; color: #111; }
+        .method-card .method-desc  { font-size: 10px; color: #6B7280; margin-top: 2px; }
+
+        /* QR scanner area */
+        #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; }
+        #qr-reader video { border-radius: 12px; }
+
+        /* Manual code input */
+        .code-input-wrap { display: flex; gap: 8px; }
+        .code-input { flex: 1; background: #F9FAFB; border: 2px solid #E5E7EB; border-radius: 10px; padding: 10px 14px; font-size: 14px; font-family: monospace; outline: none; letter-spacing: 1px; color: #111; }
+        .code-input:focus { border-color: #8B5CF6; }
+        .code-input::placeholder { color: #9CA3AF; font-family: 'DM Sans', sans-serif; letter-spacing: 0; font-size: 12px; }
+        .btn-verify { background: linear-gradient(135deg,#8B5CF6,#7C3AED); color: #fff; border: none; border-radius: 10px; padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; transition: opacity .15s; }
+        .btn-verify:hover { opacity: .88; }
+        .btn-verify:disabled { opacity: .5; cursor: not-allowed; }
+
+        /* Verification result */
+        .verify-result { border-radius: 12px; padding: 14px 16px; margin-top: 16px; display: none; }
+        .verify-result.success { background: #F0FDF4; border: 1px solid #BBF7D0; }
+        .verify-result.error   { background: #FFF1F2; border: 1px solid #FECDD3; }
+        .verify-result-icon { font-size: 28px; margin-bottom: 6px; display: block; text-align: center; }
+        .verify-result-title { font-size: 14px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+        .verify-result.success .verify-result-title { color: #166534; }
+        .verify-result.error   .verify-result-title { color: #9F1239; }
+        .verify-result-sub { font-size: 11px; color: #6B7280; text-align: center; }
+        .verify-result-info { margin-top: 10px; background: #fff; border-radius: 8px; padding: 10px 12px; }
+        .verify-info-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+        .verify-info-label { color: #6B7280; }
+        .verify-info-val   { font-weight: 700; color: #111; }
+        .btn-confirm-checkin { width: 100%; margin-top: 12px; background: linear-gradient(135deg,#34D399,#059669); color: #fff; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-confirm-checkin:hover { opacity: .9; }
+
         /* Drawer */
         .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .drawer-backdrop.open { opacity: 1; pointer-events: all; }
@@ -125,10 +166,7 @@
         .drawer-close:hover { background: #E5E7EB; color: #111; }
         .drawer-title { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 4px; padding-right: 36px; }
         .drawer-sub   { font-size: 11px; color: #6B7280; margin-bottom: 18px; }
-
-        /* Cash payment badge in drawer */
         .cash-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(52,211,153,.1); color: #059669; border: 1px solid rgba(52,211,153,.2); border-radius: 6px; padding: 4px 10px; font-size: 10px; font-weight: 700; margin-bottom: 16px; }
-
         .form-group  { margin-bottom: 12px; }
         .form-row    { display: flex; gap: 10px; margin-bottom: 12px; }
         .form-row .form-group { flex: 1; margin-bottom: 0; }
@@ -139,31 +177,25 @@
         .form-select  { appearance: none; cursor: pointer; }
         .form-textarea { resize: vertical; min-height: 60px; }
         .form-divider  { border: none; border-top: 1px solid #E5E7EB; margin: 14px 0; }
-
-        /* Amount paid row */
         .amount-wrap { position: relative; }
         .amount-prefix { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #6B7280; font-weight: 600; }
         .amount-wrap .form-input { padding-left: 22px; }
-
         .drawer-footer { display: flex; gap: 10px; margin-top: 16px; }
         .btn-cancel { flex: 1; background: #F3F4F6; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; font-family: inherit; }
         .btn-cancel:hover { background: #E5E7EB; }
         .btn-save { flex: 2; background: linear-gradient(135deg,#8B5CF6,#7C3AED); color: #fff; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .btn-save:hover { opacity: .88; }
 
-        /* Toast */
         .toast { position: fixed; bottom: 24px; right: 28px; background: #1A1836; border: 1px solid #8B5CF6; border-radius: 10px; padding: 11px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #C4B5FD; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transform: translateY(80px); opacity: 0; transition: transform .3s ease, opacity .3s ease; z-index: 200; }
         .toast.show { transform: translateY(0); opacity: 1; }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        .add-attendee-drawer::-webkit-scrollbar-thumb { background: #D1D5DB; }
     </style>
 </head>
 <body>
 
-<!-- ✅ AUTH GUARD -->
 <script>
   if (!localStorage.getItem('dfa_token') || !localStorage.getItem('dfa_admin')) {
     window.location.href = 'index.html';
@@ -249,7 +281,6 @@
         <div class="panel-title">Attendees</div>
         <div class="panel-sub">All registered attendees — online purchases and walk-ins</div>
 
-        <!-- Stats -->
         <div class="stats-row">
             <div class="stat-mini">
                 <div class="stat-mini-label">Total Attendees</div>
@@ -273,7 +304,6 @@
             </div>
         </div>
 
-        <!-- Filters -->
         <div class="filters-row">
             <div class="filter-search">
                 <i class="fa-solid fa-magnifying-glass" style="font-size:11px;color:var(--muted);"></i>
@@ -315,13 +345,80 @@
             <div class="empty-state" id="emptyState" style="display:none;">
                 <div class="empty-icon"><i class="fa-solid fa-users" style="color:var(--muted2);font-size:22px;"></i></div>
                 <div class="empty-title">No attendees found</div>
-                <div class="empty-sub">Attendees who purchase tickets online will appear here automatically</div>
+                <div class="empty-sub">Attendees who purchase tickets will appear here</div>
             </div>
         </div>
     </div>
 </main>
 
-<!-- Backdrop -->
+<!-- ══ CHECK-IN MODAL ══ -->
+<div class="modal-backdrop" id="checkinModal">
+    <div class="checkin-modal">
+        <button class="modal-close" onclick="closeCheckinModal()"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-title">Verify & Check In</div>
+        <div class="modal-sub" id="checkinModalSub">Choose how to verify the ticket</div>
+
+        <!-- Method selection -->
+        <div class="method-row" id="methodRow">
+            <div class="method-card" id="methodQR" onclick="selectMethod('qr')">
+                <i class="fa-solid fa-qrcode"></i>
+                <div class="method-title">Scan QR Code</div>
+                <div class="method-desc">Use device camera to scan the QR code on the ticket email</div>
+            </div>
+            <div class="method-card" id="methodCode" onclick="selectMethod('code')">
+                <i class="fa-solid fa-keyboard"></i>
+                <div class="method-title">Enter Ticket Code</div>
+                <div class="method-desc">Type the DFA-XXXXXXXX code from the ticket email</div>
+            </div>
+        </div>
+
+        <!-- QR Scanner -->
+        <div id="qrSection" style="display:none;">
+            <div id="qr-reader" style="margin-bottom:12px;"></div>
+            <button onclick="selectMethod(null)" style="background:none;border:1px solid #E5E7EB;border-radius:8px;padding:6px 14px;font-size:12px;color:#6B7280;cursor:pointer;font-family:inherit;">
+                ← Back
+            </button>
+        </div>
+
+        <!-- Manual code entry -->
+        <div id="codeSection" style="display:none;">
+            <div style="margin-bottom:12px;">
+                <label style="display:block;font-size:11px;font-weight:700;color:#374151;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Code</label>
+                <div class="code-input-wrap">
+                    <input type="text" class="code-input" id="ticketCodeInput"
+                           placeholder="e.g. DFA-A1B2C3D4"
+                           oninput="this.value = this.value.toUpperCase()"
+                           onkeydown="if(event.key==='Enter') verifyTicket()">
+                    <button class="btn-verify" id="verifyBtn" onclick="verifyTicket()">
+                        <i class="fa-solid fa-magnifying-glass"></i> Verify
+                    </button>
+                </div>
+            </div>
+            <button onclick="selectMethod(null)" style="background:none;border:1px solid #E5E7EB;border-radius:8px;padding:6px 14px;font-size:12px;color:#6B7280;cursor:pointer;font-family:inherit;">
+                ← Back
+            </button>
+        </div>
+
+        <!-- Verification result -->
+        <div class="verify-result" id="verifyResult">
+            <span class="verify-result-icon" id="verifyIcon"></span>
+            <div class="verify-result-title" id="verifyTitle"></div>
+            <div class="verify-result-sub"  id="verifySub"></div>
+            <div class="verify-result-info" id="verifyInfo" style="display:none;">
+                <div class="verify-info-row"><span class="verify-info-label">Name</span><span class="verify-info-val" id="vi-name"></span></div>
+                <div class="verify-info-row"><span class="verify-info-label">Event</span><span class="verify-info-val" id="vi-event"></span></div>
+                <div class="verify-info-row"><span class="verify-info-label">Ticket</span><span class="verify-info-val" id="vi-ticket"></span></div>
+                <div class="verify-info-row"><span class="verify-info-label">Ticket ID</span><span class="verify-info-val" id="vi-id"></span></div>
+            </div>
+            <button class="btn-confirm-checkin" id="confirmCheckinBtn" style="display:none;" onclick="confirmCheckin()">
+                <i class="fa-solid fa-circle-check"></i> Confirm Check-In
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Drawer backdrop -->
 <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
 
 <!-- ══ ADD WALK-IN DRAWER ══ -->
@@ -329,11 +426,7 @@
     <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
     <div class="drawer-title">Add Walk-in Attendee</div>
     <div class="drawer-sub">For people paying cash on the spot today</div>
-
-    <div class="cash-badge">
-        <i class="fa-solid fa-money-bill-wave"></i> Cash Payment
-    </div>
-
+    <div class="cash-badge"><i class="fa-solid fa-money-bill-wave"></i> Cash Payment</div>
     <div class="form-row">
         <div class="form-group">
             <label class="form-label">Full Name *</label>
@@ -347,9 +440,7 @@
     <div class="form-group">
         <label class="form-label">Email Address *</label>
         <input type="email" class="form-input" id="f_email" placeholder="email@example.com">
-        <div style="font-size:10px;color:#6B7280;margin-top:4px;">
-            <i class="fa-solid fa-circle-info"></i> QR code ticket will be sent to this email
-        </div>
+        <div style="font-size:10px;color:#6B7280;margin-top:4px;"><i class="fa-solid fa-circle-info"></i> QR code ticket will be sent to this email</div>
     </div>
     <div class="form-group">
         <label class="form-label">Event *</label>
@@ -380,15 +471,11 @@
         <label class="form-label">Special Note</label>
         <textarea class="form-textarea" id="f_note" placeholder="Any special requirement or note"></textarea>
     </div>
-
     <hr class="form-divider">
-
-    <!-- Info box -->
     <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 12px;font-size:11px;color:#166534;margin-bottom:14px;">
         <i class="fa-solid fa-circle-check" style="color:#16A34A;margin-right:6px;"></i>
-        After saving, a confirmation email with QR code will be sent automatically to the attendee.
+        After saving, a confirmation email with QR code will be sent automatically.
     </div>
-
     <div class="drawer-footer">
         <button class="btn-cancel" onclick="closeDrawer()">Cancel</button>
         <button class="btn-save" id="saveBtn" onclick="saveAttendee()">
@@ -397,7 +484,6 @@
     </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast">
     <i class="fa-solid fa-circle-check" style="color:#34D399;"></i>
     <span id="toastMsg">Done</span>
@@ -405,10 +491,13 @@
 
 <script>
     const API = 'https://dfa-backend-lilj.onrender.com/api/v1';
-    let attendees   = [];
-    let eventsData  = [];
+    let attendees  = [];
+    let eventsData = [];
+    let currentCheckinAttendee = null; // attendee being checked in
+    let verifiedAttendeeId     = null; // verified attendee _id ready to check in
+    let html5QrCode            = null;
 
-    // ── Auth + session ────────────────────────────────────────────────────────
+    // ── Auth ──────────────────────────────────────────────────────────────────
     function logout() {
         localStorage.removeItem('dfa_token');
         localStorage.removeItem('dfa_admin');
@@ -441,18 +530,15 @@
             const res    = await fetch(`${API}/events`);
             const result = await res.json();
             eventsData   = result.data?.events || [];
-
             document.getElementById('f_event').innerHTML =
                 '<option value="">Select Event</option>' +
                 eventsData.map(e => `<option value="${e._id}">${e.title}</option>`).join('');
-
             document.getElementById('eventFilter').innerHTML =
                 '<option value="">All Events</option>' +
                 eventsData.map(e => `<option value="${e.title}">${e.title}</option>`).join('');
         } catch(err) { console.error(err); }
     }
 
-    // ── Load ticket tiers for event ───────────────────────────────────────────
     function loadTicketTiers() {
         const id    = document.getElementById('f_event').value;
         const event = eventsData.find(e => e._id === id);
@@ -463,14 +549,9 @@
             return;
         }
         sel.innerHTML = event.ticketTiers.map(t =>
-            `<option value="${t.name}" data-price="${t.price}">
-                ${t.name} — ₦${Number(t.price).toLocaleString()}
-            </option>`
+            `<option value="${t.name}" data-price="${t.price}">${t.name} — ₦${Number(t.price).toLocaleString()}</option>`
         ).join('');
-        // Auto-fill price from first tier
-        const first = event.ticketTiers[0];
-        document.getElementById('f_amount').value = first.price;
-
+        document.getElementById('f_amount').value = event.ticketTiers[0].price;
         sel.onchange = () => {
             const opt = sel.options[sel.selectedIndex];
             document.getElementById('f_amount').value = opt.dataset.price || '';
@@ -481,12 +562,9 @@
     async function loadAttendees() {
         try {
             const token  = localStorage.getItem('dfa_token');
-            const res    = await fetch(`${API}/attendees`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res    = await fetch(`${API}/attendees`, { headers: { 'Authorization': `Bearer ${token}` } });
             const data   = await res.json();
             const raw    = data.attendees || [];
-
             attendees = raw.map(a => ({
                 _id:      a._id,
                 ticketId: a.ticketId || '—',
@@ -500,15 +578,11 @@
                 date:     new Date(a.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
                 isToday:  new Date(a.createdAt).toDateString() === new Date().toDateString(),
             }));
-
             updateStats();
             renderTable(attendees);
-        } catch(err) {
-            console.error('Failed to load attendees', err);
-        }
+        } catch(err) { console.error(err); }
     }
 
-    // ── Stats ─────────────────────────────────────────────────────────────────
     function updateStats() {
         const checked = attendees.filter(a => a.status === 'Checked In').length;
         const pending = attendees.filter(a => a.status === 'Pending').length;
@@ -519,7 +593,6 @@
         document.getElementById('statWalkin').textContent  = walkins;
     }
 
-    // ── Render table ──────────────────────────────────────────────────────────
     function ticketClass(t) {
         if (!t) return 'standard';
         const l = t.toLowerCase();
@@ -531,10 +604,8 @@
     function renderTable(data) {
         const tbody = document.getElementById('attendeeTableBody');
         const empty = document.getElementById('emptyState');
-
         if (data.length === 0) { tbody.innerHTML = ''; empty.style.display = 'flex'; return; }
         empty.style.display = 'none';
-
         const colors = ['#8B5CF6','#6D28D9','#7C3AED','#5B21B6','#4C1D95'];
         tbody.innerHTML = data.map((a, i) => {
             const initials = (a.name || '?').split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
@@ -556,7 +627,7 @@
                 <td style="font-size:12px;color:var(--text2);">${a.phone}</td>
                 <td>
                     <button class="btn-checkin ${isDone ? 'done' : ''}"
-                        onclick="${isDone ? '' : `checkIn('${a._id}', this)`}"
+                        onclick="${isDone ? '' : `openCheckinModal('${a._id}')`}"
                         ${isDone ? 'disabled' : ''}>
                         <i class="fa-solid ${isDone ? 'fa-circle-check' : 'fa-qrcode'}"></i>
                         ${isDone ? 'Checked In' : 'Check In'}
@@ -572,7 +643,6 @@
         }).join('');
     }
 
-    // ── Filter ────────────────────────────────────────────────────────────────
     function filterAttendees() {
         const q      = document.getElementById('searchInput').value.toLowerCase();
         const event  = document.getElementById('eventFilter').value;
@@ -584,11 +654,144 @@
         ));
     }
 
-    // ── Manual check-in ───────────────────────────────────────────────────────
-    async function checkIn(id, btn) {
-        const a = attendees.find(x => x._id === id);
+    // ── CHECK-IN MODAL ────────────────────────────────────────────────────────
+    function openCheckinModal(attendeeId) {
+        currentCheckinAttendee = attendees.find(a => a._id === attendeeId);
+        if (!currentCheckinAttendee) return;
+
+        verifiedAttendeeId = null;
+        document.getElementById('checkinModalSub').textContent = `Verifying ticket for ${currentCheckinAttendee.name}`;
+
+        // Reset to method selection
+        selectMethod(null);
+        resetVerifyResult();
+
+        document.getElementById('checkinModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCheckinModal() {
+        document.getElementById('checkinModal').classList.remove('open');
+        document.body.style.overflow = '';
+        stopQrScanner();
+        resetVerifyResult();
+        selectMethod(null);
+        document.getElementById('ticketCodeInput').value = '';
+    }
+
+    function selectMethod(method) {
+        document.getElementById('methodRow').style.display   = method ? 'none' : 'grid';
+        document.getElementById('qrSection').style.display   = method === 'qr'   ? 'block' : 'none';
+        document.getElementById('codeSection').style.display = method === 'code' ? 'block' : 'none';
+        resetVerifyResult();
+
+        if (method === 'qr') {
+            startQrScanner();
+        } else {
+            stopQrScanner();
+        }
+        if (method === 'code') {
+            setTimeout(() => document.getElementById('ticketCodeInput').focus(), 100);
+        }
+    }
+
+    // ── QR Scanner ────────────────────────────────────────────────────────────
+    function startQrScanner() {
+        if (html5QrCode) return;
+        html5QrCode = new Html5Qrcode('qr-reader');
+        html5QrCode.start(
+            { facingMode: 'environment' },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            async (decodedText) => {
+                // QR code scanned — decodedText is the ticket ID
+                stopQrScanner();
+                document.getElementById('qrSection').style.display = 'none';
+                await verifyAndShowResult(decodedText.trim());
+            },
+            (err) => { /* ignore scan errors */ }
+        ).catch(err => {
+            showVerifyResult(false, '📷 Camera not available', 'Please use the "Enter Ticket Code" option instead.');
+        });
+    }
+
+    function stopQrScanner() {
+        if (html5QrCode) {
+            html5QrCode.stop().catch(() => {});
+            html5QrCode.clear();
+            html5QrCode = null;
+        }
+    }
+
+    // ── Manual verify ─────────────────────────────────────────────────────────
+    async function verifyTicket() {
+        const code = document.getElementById('ticketCodeInput').value.trim().toUpperCase();
+        if (!code) { alert('Please enter a ticket code'); return; }
+        await verifyAndShowResult(code);
+    }
+
+    // ── Core verify logic ─────────────────────────────────────────────────────
+    async function verifyAndShowResult(ticketId) {
+        const btn = document.getElementById('verifyBtn');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; }
+
+        // Find in local attendees first (fast)
+        const found = attendees.find(a => a.ticketId.toUpperCase() === ticketId.toUpperCase());
+
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Verify'; }
+
+        if (!found) {
+            // Not found = fake ticket
+            showVerifyResult(false, '❌ Invalid Ticket', `No ticket with ID "${ticketId}" found in the database. This ticket is not valid.`);
+            verifiedAttendeeId = null;
+            return;
+        }
+
+        if (found.status === 'Checked In') {
+            // Already checked in
+            showVerifyResult(false, '⚠️ Already Checked In', `${found.name} has already been checked in. This ticket cannot be used again.`);
+            verifiedAttendeeId = null;
+            return;
+        }
+
+        // Valid ticket — show info and confirm button
+        verifiedAttendeeId = found._id;
+        document.getElementById('vi-name').textContent   = found.name;
+        document.getElementById('vi-event').textContent  = found.event;
+        document.getElementById('vi-ticket').textContent = found.ticket;
+        document.getElementById('vi-id').textContent     = found.ticketId;
+
+        showVerifyResult(true, '✅ Valid Ticket!', 'Ticket verified successfully. Confirm to check in this attendee.');
+        document.getElementById('verifyInfo').style.display    = 'block';
+        document.getElementById('confirmCheckinBtn').style.display = 'flex';
+    }
+
+    function showVerifyResult(isSuccess, title, sub) {
+        const el = document.getElementById('verifyResult');
+        el.style.display = 'block';
+        el.className     = `verify-result ${isSuccess ? 'success' : 'error'}`;
+        document.getElementById('verifyTitle').textContent = title;
+        document.getElementById('verifySub').textContent   = sub;
+    }
+
+    function resetVerifyResult() {
+        const el = document.getElementById('verifyResult');
+        el.style.display = 'none';
+        el.className     = 'verify-result';
+        document.getElementById('verifyInfo').style.display        = 'none';
+        document.getElementById('confirmCheckinBtn').style.display = 'none';
+        verifiedAttendeeId = null;
+    }
+
+    // ── Confirm check-in after verification ───────────────────────────────────
+    async function confirmCheckin() {
+        if (!verifiedAttendeeId) return;
+        const a = attendees.find(x => x._id === verifiedAttendeeId);
         if (!a) return;
-        if (!confirm(`Check in ${a.name}?`)) return;
+
+        const btn = document.getElementById('confirmCheckinBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking in...';
+
         try {
             const token = localStorage.getItem('dfa_token');
             const res   = await fetch(`${API}/attendees/checkin`, {
@@ -598,14 +801,18 @@
             });
             const result = await res.json();
             if (!result.success) throw new Error(result.message);
+
+            // Update local state
             a.status = 'Checked In';
-            btn.className = 'btn-checkin done';
-            btn.disabled  = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Checked In';
             updateStats();
-            showToast(`${a.name} checked in ✓`);
+            renderTable(attendees);
+
+            closeCheckinModal();
+            showToast(`✓ ${a.name} checked in successfully!`);
         } catch(err) {
-            alert(err.message || 'Check-in failed');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Confirm Check-In';
+            showToast(err.message || 'Check-in failed', true);
         }
     }
 
@@ -614,10 +821,7 @@
         if (!confirm('Delete this attendee?')) return;
         try {
             const token = localStorage.getItem('dfa_token');
-            await fetch(`${API}/attendees/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            await fetch(`${API}/attendees/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
             attendees = attendees.filter(a => a._id !== id);
             updateStats();
             renderTable(attendees);
@@ -636,53 +840,37 @@
         document.getElementById('drawerBackdrop').classList.remove('open');
         document.body.style.overflow = '';
     }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { closeDrawer(); closeCheckinModal(); }
+    });
 
     // ── Save walk-in attendee ─────────────────────────────────────────────────
     async function saveAttendee() {
-        const name   = document.getElementById('f_name').value.trim();
-        const email  = document.getElementById('f_email').value.trim();
-        const phone  = document.getElementById('f_phone').value.trim();
+        const name    = document.getElementById('f_name').value.trim();
+        const email   = document.getElementById('f_email').value.trim();
+        const phone   = document.getElementById('f_phone').value.trim();
         const eventId = document.getElementById('f_event').value;
-        const ticket = document.getElementById('f_ticket').value;
-        const amount = parseFloat(document.getElementById('f_amount').value) || 0;
-        const note   = document.getElementById('f_note').value.trim();
-
+        const ticket  = document.getElementById('f_ticket').value;
+        const amount  = parseFloat(document.getElementById('f_amount').value) || 0;
+        const note    = document.getElementById('f_note').value.trim();
         if (!name || !email || !phone || !eventId || !ticket) {
             alert('Please fill in all required fields (*)'); return;
         }
-
         const btn = document.getElementById('saveBtn');
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating ticket...';
-
         try {
             const token = localStorage.getItem('dfa_token');
-
-            // Find event title
             const event = eventsData.find(e => e._id === eventId);
-
-            const res = await fetch(`${API}/attendees`, {
+            const res   = await fetch(`${API}/attendees`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({
-                    name, email, phone,
-                    eventId,
-                    eventTitle: event?.title || '',
-                    ticketType: ticket,
-                    amountPaid: amount,
-                    specialNote: note
-                })
+                body: JSON.stringify({ name, email, phone, eventId, eventTitle: event?.title || '', ticketType: ticket, amountPaid: amount, specialNote: note })
             });
             const result = await res.json();
             if (!result.success) throw new Error(result.message || 'Failed');
-
             showToast(`Ticket created & email sent to ${email} ✓`);
-            document.getElementById('f_name').value   = '';
-            document.getElementById('f_email').value  = '';
-            document.getElementById('f_phone').value  = '';
-            document.getElementById('f_amount').value = '';
-            document.getElementById('f_note').value   = '';
+            ['f_name','f_email','f_phone','f_amount','f_note'].forEach(id => document.getElementById(id).value = '');
             closeDrawer();
             await loadAttendees();
         } catch(err) {
