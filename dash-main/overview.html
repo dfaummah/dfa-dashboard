@@ -177,6 +177,19 @@
             background: var(--card); border: 1px solid var(--border);
             border-radius: 16px; padding: 18px;
             box-shadow: 0 2px 8px var(--shadow);
+            position: relative;
+        }
+        .stat-card.loading::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 2s infinite;
+            border-radius: 16px;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
         .stat-icon {
             width: 34px; height: 34px; border-radius: 8px;
@@ -215,6 +228,107 @@
         .tbadge.purple { color: #A78BFA; background: rgba(167,139,250,0.12); }
         .tbadge.green  { color: #34D399; background: rgba(52,211,153,0.12); }
 
+        /* ── NOTIFICATION TOAST ── */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .notification-toast {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 20px var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+            pointer-events: auto;
+            min-width: 320px;
+        }
+
+        .notification-toast.success {
+            border-left: 4px solid #34D399;
+        }
+
+        .notification-toast.success .notification-icon {
+            color: #34D399;
+        }
+
+        .notification-toast.error {
+            border-left: 4px solid #EF4444;
+        }
+
+        .notification-toast.error .notification-icon {
+            color: #EF4444;
+        }
+
+        .notification-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .notification-message {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .notification-close {
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 16px;
+            flex-shrink: 0;
+            transition: color 0.2s;
+        }
+
+        .notification-close:hover {
+            color: var(--text);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .notification-toast.removing {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -231,6 +345,9 @@
   const savedTheme = localStorage.getItem('dfa_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
 </script>
+
+<!-- ✅ NOTIFICATION CONTAINER -->
+<div class="notification-container" id="notificationContainer"></div>
 
 <aside>
     <div class="sidebar-logo">
@@ -317,56 +434,56 @@
         <div class="page-sub">Welcome back. Here's what's happening with DFA today.</div>
 
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card loading" id="eventsCard">
                 <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
                 <div class="stat-label">Upcoming Events</div>
-                <div class="stat-value">3</div>
-                <div class="stat-sub">5 Total events</div>
+                <div class="stat-value" id="eventsValue">-</div>
+                <div class="stat-sub" id="eventsSub">Total events</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card loading" id="ticketsCard">
                 <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
                 <div class="stat-label">Ticket Order</div>
-                <div class="stat-value">7</div>
-                <div class="stat-sub">All time</div>
+                <div class="stat-value" id="ticketsValue">-</div>
+                <div class="stat-sub" id="ticketsSub">All time</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card loading" id="revenueCard">
                 <div class="stat-icon"><i class="fa-solid fa-naira-sign"></i></div>
                 <div class="stat-label">Total Revenue</div>
-                <div class="stat-value">0K</div>
-                <div class="stat-sub">0 Pending</div>
+                <div class="stat-value" id="revenueValue">-</div>
+                <div class="stat-sub" id="revenueSub">0 Pending</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card loading" id="subscribersCard">
                 <div class="stat-icon"><i class="fa-solid fa-user-check"></i></div>
                 <div class="stat-label">Subscribers</div>
-                <div class="stat-value">0</div>
-                <div class="stat-sub">Community</div>
+                <div class="stat-value" id="subscribersValue">-</div>
+                <div class="stat-sub" id="subscribersSub">Community</div>
             </div>
         </div>
 
         <div class="stats-grid" style="margin-bottom:20px;">
-            <div class="stat-card">
+            <div class="stat-card loading" id="messagesCard">
                 <div class="stat-icon"><i class="fa-solid fa-envelope"></i></div>
                 <div class="stat-label">New Messages</div>
-                <div class="stat-value">3</div>
-                <div class="stat-sub">Unread contact</div>
+                <div class="stat-value" id="messagesValue">-</div>
+                <div class="stat-sub" id="messagesSub">Unread contact</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card loading" id="videosCard">
                 <div class="stat-icon"><i class="fa-solid fa-play"></i></div>
                 <div class="stat-label">Videos</div>
-                <div class="stat-value">8</div>
-                <div class="stat-sub">Published content</div>
+                <div class="stat-value" id="videosValue">-</div>
+                <div class="stat-sub" id="videosSub">Published content</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card loading" id="blogCard">
                 <div class="stat-icon"><i class="fa-solid fa-newspaper"></i></div>
                 <div class="stat-label">Blog Post</div>
-                <div class="stat-value">0</div>
-                <div class="stat-sub">0 Published</div>
+                <div class="stat-value" id="blogValue">-</div>
+                <div class="stat-sub" id="blogSub">0 Published</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card loading" id="newsletterCard">
                 <div class="stat-icon"><i class="fa-solid fa-bell"></i></div>
                 <div class="stat-label">Active Subscribers</div>
-                <div class="stat-value">0</div>
-                <div class="stat-sub">NewsLetter</div>
+                <div class="stat-value" id="newsletterValue">-</div>
+                <div class="stat-sub" id="newsletterSub">NewsLetter</div>
             </div>
         </div>
 
@@ -435,10 +552,247 @@
 </main>
 
 <script>
+    // ── NOTIFICATION SYSTEM ──────────────────────────────────────────────────────
+    class NotificationManager {
+        constructor(containerId = 'notificationContainer') {
+            this.container = document.getElementById(containerId);
+        }
+
+        show(title, message, type = 'success', duration = 5000) {
+            const toast = document.createElement('div');
+            toast.className = `notification-toast ${type}`;
+            
+            const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            toast.innerHTML = `
+                <div class="notification-icon">
+                    <i class="fa-solid ${iconClass}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <div class="notification-close" onclick="this.parentElement.remove()">
+                    <i class="fa-solid fa-times"></i>
+                </div>
+            `;
+
+            this.container.appendChild(toast);
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.classList.add('removing');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+
+            return toast;
+        }
+
+        success(title, message, duration = 5000) {
+            return this.show(title, message, 'success', duration);
+        }
+
+        error(title, message, duration = 5000) {
+            return this.show(title, message, 'error', duration);
+        }
+    }
+
+    const notificationManager = new NotificationManager();
+
+    // ── PAYMENT NOTIFICATION LISTENER ────────────────────────────────────────────
+    // This simulates listening for payment events from your backend
+    // In production, use WebSocket or Server-Sent Events (SSE)
+    
+    class PaymentListener {
+        constructor(apiBaseUrl = '/api') {
+            this.apiBaseUrl = apiBaseUrl;
+            this.lastPaymentId = localStorage.getItem('lastPaymentId') || null;
+            this.pollingInterval = null;
+        }
+
+        // Start polling for new payments (every 10 seconds)
+        startPolling() {
+            this.pollingInterval = setInterval(() => this.checkForNewPayments(), 10000);
+            // Check immediately on start
+            this.checkForNewPayments();
+        }
+
+        // Stop polling
+        stopPolling() {
+            if (this.pollingInterval) {
+                clearInterval(this.pollingInterval);
+            }
+        }
+
+        // Check for new payments
+        async checkForNewPayments() {
+            try {
+                const response = await fetch(`${this.apiBaseUrl}/orders?status=Successful&limit=1&sort=-createdAt`);
+                if (!response.ok) return;
+
+                const data = await response.json();
+                if (data.data && data.data.length > 0) {
+                    const latestPayment = data.data[0];
+                    
+                    // Only notify if this is a new payment
+                    if (latestPayment._id !== this.lastPaymentId) {
+                        this.lastPaymentId = latestPayment._id;
+                        localStorage.setItem('lastPaymentId', this.lastPaymentId);
+                        this.notifyPayment(latestPayment);
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking for payments:', error);
+            }
+        }
+
+        // Notify about a new payment
+        notifyPayment(payment) {
+            const buyerName = payment.buyerDetails?.name || 'Unknown';
+            const amount = payment.payment?.totalAmount || 0;
+            const ticketType = payment.ticketType || 'Ticket';
+            const quantity = payment.quantity || 1;
+
+            notificationManager.success(
+                '💳 Payment Received!',
+                `${buyerName} paid ₦${amount.toLocaleString()} for ${quantity} ${ticketType} ticket(s)`,
+                5000
+            );
+
+            // Refresh stats when payment is received
+            loadDashboardStats();
+        }
+
+        // Alternative: Listen via WebSocket (for real-time updates)
+        connectWebSocket(wsUrl) {
+            try {
+                const ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    console.log('WebSocket connected for payment notifications');
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'payment' && data.status === 'Successful') {
+                            this.notifyPayment(data.payment);
+                        }
+                    } catch (error) {
+                        console.error('Error parsing WebSocket message:', error);
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                };
+
+                ws.onclose = () => {
+                    console.log('WebSocket disconnected');
+                    // Reconnect after 5 seconds
+                    setTimeout(() => this.connectWebSocket(wsUrl), 5000);
+                };
+
+                return ws;
+            } catch (error) {
+                console.error('Error connecting WebSocket:', error);
+            }
+        }
+    }
+
+    // Initialize payment listener
+    const paymentListener = new PaymentListener('/api');
+
+    // ── DASHBOARD STATS LOADING ──────────────────────────────────────────────────
+    async function loadDashboardStats() {
+        try {
+            // Fetch events
+            const eventsRes = await fetch('/api/events');
+            if (eventsRes.ok) {
+                const eventsData = await eventsRes.json();
+                const totalEvents = eventsData.data?.length || 0;
+                document.getElementById('eventsValue').textContent = totalEvents;
+                document.getElementById('eventsCard').classList.remove('loading');
+            }
+        } catch (error) {
+            console.error('Error loading events:', error);
+            document.getElementById('eventsValue').textContent = '0';
+            document.getElementById('eventsCard').classList.remove('loading');
+        }
+
+        try {
+            // Fetch orders (tickets)
+            const ordersRes = await fetch('/api/orders');
+            if (ordersRes.ok) {
+                const ordersData = await ordersRes.json();
+                const totalOrders = ordersData.data?.length || 0;
+                const totalTickets = ordersData.data?.reduce((sum, order) => sum + (order.quantity || 0), 0) || 0;
+                
+                document.getElementById('ticketsValue').textContent = totalTickets;
+                document.getElementById('ticketsSub').textContent = `${totalOrders} orders`;
+                document.getElementById('ticketsCard').classList.remove('loading');
+            }
+        } catch (error) {
+            console.error('Error loading orders:', error);
+            document.getElementById('ticketsValue').textContent = '0';
+            document.getElementById('ticketsCard').classList.remove('loading');
+        }
+
+        try {
+            // Fetch revenue (successful payments)
+            const paymentsRes = await fetch('/api/orders?status=Successful');
+            if (paymentsRes.ok) {
+                const paymentsData = await paymentsRes.json();
+                const totalRevenue = paymentsData.data?.reduce((sum, order) => sum + (order.payment?.totalAmount || 0), 0) || 0;
+                const pendingRes = await fetch('/api/orders?status=Pending');
+                const pendingData = pendingRes.ok ? await pendingRes.json() : { data: [] };
+                const pendingCount = pendingData.data?.length || 0;
+                
+                document.getElementById('revenueValue').textContent = `₦${(totalRevenue / 1000).toFixed(0)}K`;
+                document.getElementById('revenueSub').textContent = `${pendingCount} Pending`;
+                document.getElementById('revenueCard').classList.remove('loading');
+            }
+        } catch (error) {
+            console.error('Error loading revenue:', error);
+            document.getElementById('revenueValue').textContent = '₦0K';
+            document.getElementById('revenueCard').classList.remove('loading');
+        }
+
+        try {
+            // Fetch attendees (subscribers/community)
+            const attendeesRes = await fetch('/api/attendees');
+            if (attendeesRes.ok) {
+                const attendeesData = await attendeesRes.json();
+                const totalAttendees = attendeesData.data?.length || 0;
+                document.getElementById('subscribersValue').textContent = totalAttendees;
+                document.getElementById('subscribersCard').classList.remove('loading');
+            }
+        } catch (error) {
+            console.error('Error loading attendees:', error);
+            document.getElementById('subscribersValue').textContent = '0';
+            document.getElementById('subscribersCard').classList.remove('loading');
+        }
+
+        // Set placeholder values for stats without API endpoints
+        document.getElementById('messagesValue').textContent = '0';
+        document.getElementById('messagesCard').classList.remove('loading');
+        
+        document.getElementById('videosValue').textContent = '8';
+        document.getElementById('videosCard').classList.remove('loading');
+        
+        document.getElementById('blogValue').textContent = '0';
+        document.getElementById('blogCard').classList.remove('loading');
+        
+        document.getElementById('newsletterValue').textContent = '0';
+        document.getElementById('newsletterCard').classList.remove('loading');
+    }
+
     // ── Logout ───────────────────────────────────────────────────────────────
     function logout() {
         localStorage.removeItem('dfa_token');
         localStorage.removeItem('dfa_admin');
+        paymentListener.stopPolling();
         window.location.href = 'index.html';
     }
 
@@ -529,6 +883,26 @@
             }
         });
     }
+
+    // ── INITIALIZE ON PAGE LOAD ──────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        renderCharts(savedTheme);
+        loadDashboardStats();
+        
+        // Start payment listener polling
+        paymentListener.startPolling();
+
+        // Optional: Connect to WebSocket for real-time updates
+        // Uncomment if you have a WebSocket server set up
+        // const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        // paymentListener.connectWebSocket(`${wsProtocol}//${window.location.host}/ws/payments`);
+
+        // Show a test notification (remove in production)
+        // notificationManager.success('Welcome', 'Dashboard loaded successfully');
+    });
+
+    // Refresh stats every 30 seconds
+    setInterval(loadDashboardStats, 30000);
 </script>
 </body>
 </html>
