@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFA Admin | Attendees</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+        :root[data-theme="dark"] {
+            --bg:#1C1B2E; --sidebar:#15142A; --card:#211F38; --border:#2A2845;
+            --text:#E2E0F0; --text2:#7B79A0; --muted:#6B6A8A; --muted2:#4B4A6A;
+            --hover:#221F40; --hover2:#2A2750; --search:#211F38; --topbar:#15142A;
+            --label-sec:#4B4A6A; --tog-bg:#2A2845; --shadow:rgba(0,0,0,0.3);
+            --thead:#1A1836; --td-border:#23213C; --td-text:#C4C2E0; --tr-hover:#261F45; --input-c:#9390B8;
+        }
+        :root[data-theme="light"] {
+            --bg:#F4F3FF; --sidebar:#FFFFFF; --card:#FFFFFF; --border:#E5E3F5;
+            --text:#1C1B2E; --text2:#5B5A7A; --muted:#8B89A8; --muted2:#A09EBF;
+            --hover:#F0EEFF; --hover2:#E9E6FF; --search:#F4F3FF; --topbar:#FFFFFF;
+            --label-sec:#A09EBF; --tog-bg:#E5E3F5; --shadow:rgba(139,92,246,0.08);
+            --thead:#F4F3FF; --td-border:#EDE9FF; --td-text:#374151; --tr-hover:#F0EEFF; --input-c:#374151;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color .25s, border-color .25s, color .2s; }
+        body { font-family: 'DM Sans', sans-serif; background-color: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+        aside { width: 220px; min-height: 100vh; background-color: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0; box-shadow: 2px 0 12px var(--shadow); }
+        .sidebar-logo { padding: 20px 16px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+        .logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg,#8B5CF6,#6D28D9); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 11px; }
+        .logo-text { font-size: 15px; font-weight: 700; color: var(--text); }
+        .logo-sub  { font-size: 10px; color: var(--muted); }
+        .sidebar-section { padding: 18px 14px 4px; }
+        .sidebar-section-label { font-size: 9px; font-weight: 700; color: var(--label-sec); text-transform: uppercase; letter-spacing: 1.5px; padding: 0 6px; margin-bottom: 6px; }
+        .nav-link { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text2); text-decoration: none; transition: all 0.15s ease; margin-bottom: 1px; }
+        .nav-link:hover  { background: var(--hover); color: #8B5CF6; }
+        .nav-link.active { background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff; font-weight:600; box-shadow:0 4px 12px rgba(139,92,246,.35); }
+        .nav-link i      { width: 16px; font-size: 13px; text-align: center; }
+        .nav-link.logout { color: #EF4444; }
+        .nav-link.logout:hover { background: rgba(239,68,68,.1); color: #EF4444; }
+
+        main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar { background: var(--topbar); border-bottom: 1px solid var(--border); padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 2px 8px var(--shadow); }
+        .topbar-title { font-size: 16px; font-weight: 700; color: var(--text); }
+        .search-bar { flex: 1; max-width: 380px; background: var(--search); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+        .topbar-actions { display: flex; align-items: center; gap: 14px; }
+        .icon-btn { width: 34px; height: 34px; border-radius: 8px; background: var(--search); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); cursor: pointer; font-size: 13px; transition: all .15s; position: relative; }
+        .icon-btn:hover { background: var(--hover2); color: #8B5CF6; }
+        .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#8B5CF6,#6D28D9); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 700; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
+        .user-role { font-size: 10px; color: var(--muted); }
+        .theme-toggle { display: flex; align-items: center; gap: 7px; background: var(--tog-bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; cursor: pointer; user-select: none; font-size: 11px; font-weight: 600; color: var(--text2); }
+        .theme-toggle:hover { border-color: #8B5CF6; color: #8B5CF6; }
+        .theme-toggle i { font-size: 11px; }
+
+        .attendees-panel { flex: 1; overflow-y: auto; padding: 24px 28px; }
+        .panel-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+        .panel-sub   { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+
+        /* Stats row */
+        .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 22px; }
+        .stat-mini { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 8px var(--shadow); }
+        .stat-mini-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+        .stat-mini-value { font-size: 22px; font-weight: 700; color: var(--text); }
+        .stat-mini-sub   { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+        .filters-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+        .filter-search { background: var(--search); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; min-width: 200px; }
+        .filter-search input { background: transparent; border: none; outline: none; color: var(--text); font-size: 12px; font-family: inherit; width: 100%; }
+        .filter-select-wrap { position: relative; }
+        .filter-select { background: var(--search); border: 1px solid var(--border); border-radius: 8px; padding: 7px 32px 7px 12px; font-size: 12px; color: var(--input-c); font-family: inherit; outline: none; cursor: pointer; appearance: none; min-width: 130px; }
+        .filter-select-wrap::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 9px; color: var(--muted); pointer-events: none; }
+        .btn-add { display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity .15s; font-family: inherit; margin-left: auto; }
+        .btn-add:hover { opacity: .85; }
+
+        .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 2px 8px var(--shadow); }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--thead); }
+        th { padding: 10px 16px; text-align: left; font-size: 10px; font-weight: 700; color: var(--muted2); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+        td { padding: 11px 16px; font-size: 12px; color: var(--td-text); border-bottom: 1px solid var(--td-border); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tbody tr { transition: background .15s; }
+        tbody tr:hover { background: var(--tr-hover); }
+
+        .attendee-name  { font-weight: 600; color: var(--text); font-size: 13px; }
+        .attendee-email { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+        .badge { font-size: 9px; font-weight: 700; padding: 3px 9px; border-radius: 20px; display: inline-block; }
+        .badge.checked  { background: rgba(52,211,153,.15);  color: #34D399; }
+        .badge.pending  { background: rgba(251,191,36,.15);   color: #FBBF24; }
+        .badge.vip      { background: rgba(251,191,36,.12);   color: #FBBF24; }
+        .badge.standard { background: rgba(139,92,246,.15);   color: #C4B5FD; }
+        .badge.group    { background: rgba(96,165,250,.15);   color: #60A5FA; }
+
+        /* Check-in button */
+        .btn-checkin {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(52,211,153,.12); color: #34D399;
+            border: 1px solid rgba(52,211,153,.25); border-radius: 6px;
+            padding: 4px 10px; font-size: 10px; font-weight: 700;
+            cursor: pointer; font-family: inherit; transition: all .15s;
+        }
+        .btn-checkin:hover { background: rgba(52,211,153,.22); }
+        .btn-checkin.done { background: rgba(107,114,128,.1); color: var(--muted); border-color: var(--border); cursor: default; }
+
+        .action-btn { background: transparent; border: none; cursor: pointer; color: var(--muted2); font-size: 13px; padding: 4px 6px; border-radius: 6px; transition: background .15s, color .15s; }
+        .action-btn:hover { background: var(--hover2); color: #8B5CF6; }
+        .action-btn.del:hover { background: rgba(239,68,68,.12); color: #EF4444; }
+
+        .ticket-id { font-size: 10px; color: var(--muted); font-family: monospace; }
+
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; }
+        .empty-icon  { width: 56px; height: 56px; border-radius: 16px; background: var(--search); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+        .empty-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+        .empty-sub   { font-size: 12px; color: var(--muted); }
+
+        /* Drawer */
+        .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .drawer-backdrop.open { opacity: 1; pointer-events: all; }
+        .add-attendee-drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 360px; background: #fff; color: #1C1B2E; z-index: 100; overflow-y: auto; padding: 22px 20px; box-shadow: -8px 0 40px rgba(0,0,0,0.4); transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+        .add-attendee-drawer.open { transform: translateX(0); }
+        .drawer-close { position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; background: #F3F4F6; border: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6B7280; font-size: 13px; }
+        .drawer-close:hover { background: #E5E7EB; color: #111; }
+        .drawer-title { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 4px; padding-right: 36px; }
+        .drawer-sub   { font-size: 11px; color: #6B7280; margin-bottom: 18px; }
+
+        /* Cash payment badge in drawer */
+        .cash-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(52,211,153,.1); color: #059669; border: 1px solid rgba(52,211,153,.2); border-radius: 6px; padding: 4px 10px; font-size: 10px; font-weight: 700; margin-bottom: 16px; }
+
+        .form-group  { margin-bottom: 12px; }
+        .form-row    { display: flex; gap: 10px; margin-bottom: 12px; }
+        .form-row .form-group { flex: 1; margin-bottom: 0; }
+        .form-label  { display: block; font-size: 11px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+        .form-input, .form-select, .form-textarea { width: 100%; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #374151; font-family: inherit; outline: none; transition: border-color .15s; }
+        .form-input::placeholder, .form-textarea::placeholder { color: #9CA3AF; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #8B5CF6; }
+        .form-select  { appearance: none; cursor: pointer; }
+        .form-textarea { resize: vertical; min-height: 60px; }
+        .form-divider  { border: none; border-top: 1px solid #E5E7EB; margin: 14px 0; }
+
+        /* Amount paid row */
+        .amount-wrap { position: relative; }
+        .amount-prefix { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #6B7280; font-weight: 600; }
+        .amount-wrap .form-input { padding-left: 22px; }
+
+        .drawer-footer { display: flex; gap: 10px; margin-top: 16px; }
+        .btn-cancel { flex: 1; background: #F3F4F6; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; font-family: inherit; }
+        .btn-cancel:hover { background: #E5E7EB; }
+        .btn-save { flex: 2; background: linear-gradient(135deg,#8B5CF6,#7C3AED); color: #fff; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-save:hover { opacity: .88; }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 24px; right: 28px; background: #1A1836; border: 1px solid #8B5CF6; border-radius: 10px; padding: 11px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #C4B5FD; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transform: translateY(80px); opacity: 0; transition: transform .3s ease, opacity .3s ease; z-index: 200; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .add-attendee-drawer::-webkit-scrollbar-thumb { background: #D1D5DB; }
+    </style>
+</head>
+<body>
+
+<!-- ✅ AUTH GUARD -->
+<script>
+  if (!localStorage.getItem('dfa_token') || !localStorage.getItem('dfa_admin')) {
+    window.location.href = 'index.html';
+  }
+  const savedTheme = localStorage.getItem('dfa_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+</script>
+
+<aside>
+    <div class="sidebar-logo">
+        <div class="logo-icon">DFA</div>
+        <div><div class="logo-text">DFATV</div><div class="logo-sub">Admin Management</div></div>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Overview</div>
+        <a href="overview.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a href="event.html"  class="nav-link"><i class="fa-solid fa-calendar-days"></i> Events</a>
+        <a href="ticket.html" class="nav-link"><i class="fa-solid fa-ticket"></i> Tickets</a>
+        <a href="attend.html" class="nav-link active"><i class="fa-solid fa-users"></i> Attendees</a>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Finance</div>
+        <a href="payment.html" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Content</div>
+        <a href="media.html"       class="nav-link"><i class="fa-solid fa-photo-film"></i> Media Library</a>
+        <a href="video.html"       class="nav-link"><i class="fa-solid fa-play"></i> Video</a>
+        <a href="gallery.html"     class="nav-link"><i class="fa-solid fa-images"></i> Gallery</a>
+        <a href="#"                class="nav-link"><i class="fa-solid fa-newspaper"></i> Blog</a>
+        <a href="web_content.html" class="nav-link"><i class="fa-solid fa-globe"></i> Website Content</a>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Engagement</div>
+        <a href="#" class="nav-link"><i class="fa-solid fa-message"></i> Messages</a>
+        <a href="#" class="nav-link"><i class="fa-solid fa-heart"></i> Community</a>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Admin</div>
+        <a href="staff.html" class="nav-link"><i class="fa-solid fa-shield-halved"></i> Staff & Roles</a>
+        <a href="#"          class="nav-link"><i class="fa-solid fa-chart-bar"></i> Reports</a>
+        <a href="#"          class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+    </div>
+    <div style="margin-top:auto;padding:16px 14px 20px;">
+        <a href="#" class="nav-link logout" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Log out
+        </a>
+    </div>
+</aside>
+
+<main>
+    <div class="topbar">
+        <div class="topbar-title">Attendees</div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass" style="font-size:12px;"></i>
+            Search attendees...
+        </div>
+        <div class="topbar-actions">
+            <div class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+                <i class="fa-solid fa-moon" id="themeIcon"></i>
+                <span id="themeLabel">Dark</span>
+            </div>
+            <div class="icon-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+            <div class="icon-btn">
+                <i class="fa-solid fa-bell"></i>
+                <span style="position:absolute;top:6px;right:6px;width:6px;height:6px;background:#8B5CF6;border-radius:50%;"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="avatar" id="avatarInitials">EE</div>
+                <div>
+                    <div class="user-name" id="adminName">Loading...</div>
+                    <div class="user-role" id="adminRole">Admin</div>
+                </div>
+                <i class="fa-solid fa-right-from-bracket" style="font-size:13px;color:var(--muted);cursor:pointer;" onclick="logout()"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="attendees-panel">
+        <div class="panel-title">Attendees</div>
+        <div class="panel-sub">All registered attendees — online purchases and walk-ins</div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-mini">
+                <div class="stat-mini-label">Total Attendees</div>
+                <div class="stat-mini-value" id="statTotal">—</div>
+                <div class="stat-mini-sub">All events</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-label">Checked In</div>
+                <div class="stat-mini-value" id="statChecked" style="color:#34D399;">—</div>
+                <div class="stat-mini-sub">At the gate</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-label">Pending</div>
+                <div class="stat-mini-value" id="statPending" style="color:#FBBF24;">—</div>
+                <div class="stat-mini-sub">Not yet arrived</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-label">Walk-ins Today</div>
+                <div class="stat-mini-value" id="statWalkin">—</div>
+                <div class="stat-mini-sub">Cash on spot</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-row">
+            <div class="filter-search">
+                <i class="fa-solid fa-magnifying-glass" style="font-size:11px;color:var(--muted);"></i>
+                <input type="text" id="searchInput" placeholder="Search name, email or ticket ID..." oninput="filterAttendees()">
+            </div>
+            <div class="filter-select-wrap">
+                <select class="filter-select" id="eventFilter" onchange="filterAttendees()">
+                    <option value="">All Events</option>
+                </select>
+            </div>
+            <div class="filter-select-wrap">
+                <select class="filter-select" id="statusFilter" onchange="filterAttendees()">
+                    <option value="">All Statuses</option>
+                    <option value="Checked In">Checked In</option>
+                    <option value="Pending">Pending</option>
+                </select>
+            </div>
+            <button class="btn-add" onclick="openDrawer()">
+                <i class="fa-solid fa-user-plus"></i> Add Walk-in
+            </button>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Attendee</th>
+                        <th>Event</th>
+                        <th>Ticket Type</th>
+                        <th>Ticket ID</th>
+                        <th>WhatsApp</th>
+                        <th>Status</th>
+                        <th>Registered</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="attendeeTableBody"></tbody>
+            </table>
+            <div class="empty-state" id="emptyState" style="display:none;">
+                <div class="empty-icon"><i class="fa-solid fa-users" style="color:var(--muted2);font-size:22px;"></i></div>
+                <div class="empty-title">No attendees found</div>
+                <div class="empty-sub">Attendees who purchase tickets online will appear here automatically</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Backdrop -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+
+<!-- ══ ADD WALK-IN DRAWER ══ -->
+<div class="add-attendee-drawer" id="attendeeDrawer">
+    <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
+    <div class="drawer-title">Add Walk-in Attendee</div>
+    <div class="drawer-sub">For people paying cash on the spot today</div>
+
+    <div class="cash-badge">
+        <i class="fa-solid fa-money-bill-wave"></i> Cash Payment
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" class="form-input" id="f_name" placeholder="e.g. John Doe">
+        </div>
+        <div class="form-group">
+            <label class="form-label">WhatsApp Number *</label>
+            <input type="text" class="form-input" id="f_phone" placeholder="+234 800 000 0000">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input type="email" class="form-input" id="f_email" placeholder="email@example.com">
+        <div style="font-size:10px;color:#6B7280;margin-top:4px;">
+            <i class="fa-solid fa-circle-info"></i> QR code ticket will be sent to this email
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Event *</label>
+        <select class="form-select" id="f_event" onchange="loadTicketTiers()">
+            <option value="">Select Event</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Ticket Type *</label>
+        <select class="form-select" id="f_ticket">
+            <option value="">Select event first</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Amount Paid (₦) *</label>
+            <div class="amount-wrap">
+                <span class="amount-prefix">₦</span>
+                <input type="number" class="form-input" id="f_amount" placeholder="5000">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Quantity</label>
+            <input type="number" class="form-input" id="f_qty" value="1" min="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Special Note</label>
+        <textarea class="form-textarea" id="f_note" placeholder="Any special requirement or note"></textarea>
+    </div>
+
+    <hr class="form-divider">
+
+    <!-- Info box -->
+    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 12px;font-size:11px;color:#166534;margin-bottom:14px;">
+        <i class="fa-solid fa-circle-check" style="color:#16A34A;margin-right:6px;"></i>
+        After saving, a confirmation email with QR code will be sent automatically to the attendee.
+    </div>
+
+    <div class="drawer-footer">
+        <button class="btn-cancel" onclick="closeDrawer()">Cancel</button>
+        <button class="btn-save" id="saveBtn" onclick="saveAttendee()">
+            <i class="fa-solid fa-user-plus"></i> Create & Send Ticket
+        </button>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+    <i class="fa-solid fa-circle-check" style="color:#34D399;"></i>
+    <span id="toastMsg">Done</span>
+</div>
+
+<script>
+    const API = 'https://dfa-backend-lilj.onrender.com/api/v1';
+    let attendees   = [];
+    let eventsData  = [];
+
+    // ── Auth + session ────────────────────────────────────────────────────────
+    function logout() {
+        localStorage.removeItem('dfa_token');
+        localStorage.removeItem('dfa_admin');
+        window.location.href = 'index.html';
+    }
+    const adminData = JSON.parse(localStorage.getItem('dfa_admin') || '{}');
+    if (adminData.name) {
+        document.getElementById('adminName').textContent = adminData.name;
+        document.getElementById('adminRole').textContent = adminData.role || 'Admin';
+        const initials = adminData.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+        document.getElementById('avatarInitials').textContent = initials;
+    }
+
+    // ── Theme ─────────────────────────────────────────────────────────────────
+    function applyThemeUI(theme) {
+        document.getElementById('themeIcon').className    = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        document.getElementById('themeLabel').textContent = theme === 'dark' ? 'Dark' : 'Light';
+    }
+    function toggleTheme() {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('dfa_theme', next);
+        applyThemeUI(next);
+    }
+    applyThemeUI(savedTheme);
+
+    // ── Load events ───────────────────────────────────────────────────────────
+    async function loadEvents() {
+        try {
+            const res    = await fetch(`${API}/events`);
+            const result = await res.json();
+            eventsData   = result.data?.events || [];
+
+            document.getElementById('f_event').innerHTML =
+                '<option value="">Select Event</option>' +
+                eventsData.map(e => `<option value="${e._id}">${e.title}</option>`).join('');
+
+            document.getElementById('eventFilter').innerHTML =
+                '<option value="">All Events</option>' +
+                eventsData.map(e => `<option value="${e.title}">${e.title}</option>`).join('');
+        } catch(err) { console.error(err); }
+    }
+
+    // ── Load ticket tiers for event ───────────────────────────────────────────
+    function loadTicketTiers() {
+        const id    = document.getElementById('f_event').value;
+        const event = eventsData.find(e => e._id === id);
+        const sel   = document.getElementById('f_ticket');
+        if (!event?.ticketTiers?.length) {
+            sel.innerHTML = '<option value="">No tiers available</option>';
+            document.getElementById('f_amount').value = '';
+            return;
+        }
+        sel.innerHTML = event.ticketTiers.map(t =>
+            `<option value="${t.name}" data-price="${t.price}">
+                ${t.name} — ₦${Number(t.price).toLocaleString()}
+            </option>`
+        ).join('');
+        // Auto-fill price from first tier
+        const first = event.ticketTiers[0];
+        document.getElementById('f_amount').value = first.price;
+
+        sel.onchange = () => {
+            const opt = sel.options[sel.selectedIndex];
+            document.getElementById('f_amount').value = opt.dataset.price || '';
+        };
+    }
+
+    // ── Load attendees ────────────────────────────────────────────────────────
+    async function loadAttendees() {
+        try {
+            const token  = localStorage.getItem('dfa_token');
+            const res    = await fetch(`${API}/attendees`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data   = await res.json();
+            const raw    = data.attendees || [];
+
+            attendees = raw.map(a => ({
+                _id:      a._id,
+                ticketId: a.ticketId || '—',
+                name:     a.name || '—',
+                email:    a.email || '—',
+                phone:    a.phone || '—',
+                event:    a.eventTitle || '—',
+                ticket:   a.ticketType || '—',
+                amount:   a.amountPaid || 0,
+                status:   a.checkedIn ? 'Checked In' : 'Pending',
+                date:     new Date(a.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+                isToday:  new Date(a.createdAt).toDateString() === new Date().toDateString(),
+            }));
+
+            updateStats();
+            renderTable(attendees);
+        } catch(err) {
+            console.error('Failed to load attendees', err);
+        }
+    }
+
+    // ── Stats ─────────────────────────────────────────────────────────────────
+    function updateStats() {
+        const checked = attendees.filter(a => a.status === 'Checked In').length;
+        const pending = attendees.filter(a => a.status === 'Pending').length;
+        const walkins = attendees.filter(a => a.isToday).length;
+        document.getElementById('statTotal').textContent   = attendees.length;
+        document.getElementById('statChecked').textContent = checked;
+        document.getElementById('statPending').textContent = pending;
+        document.getElementById('statWalkin').textContent  = walkins;
+    }
+
+    // ── Render table ──────────────────────────────────────────────────────────
+    function ticketClass(t) {
+        if (!t) return 'standard';
+        const l = t.toLowerCase();
+        if (l.includes('vip')) return 'vip';
+        if (l.includes('group') || l.includes('school')) return 'group';
+        return 'standard';
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('attendeeTableBody');
+        const empty = document.getElementById('emptyState');
+
+        if (data.length === 0) { tbody.innerHTML = ''; empty.style.display = 'flex'; return; }
+        empty.style.display = 'none';
+
+        const colors = ['#8B5CF6','#6D28D9','#7C3AED','#5B21B6','#4C1D95'];
+        tbody.innerHTML = data.map((a, i) => {
+            const initials = (a.name || '?').split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+            const color    = colors[i % colors.length];
+            const isDone   = a.status === 'Checked In';
+            return `<tr>
+                <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="width:32px;height:32px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0;">${initials}</div>
+                        <div>
+                            <div class="attendee-name">${a.name}</div>
+                            <div class="attendee-email">${a.email}</div>
+                        </div>
+                    </div>
+                </td>
+                <td style="font-size:12px;">${a.event}</td>
+                <td><span class="badge ${ticketClass(a.ticket)}">${a.ticket}</span></td>
+                <td><span class="ticket-id">${a.ticketId}</span></td>
+                <td style="font-size:12px;color:var(--text2);">${a.phone}</td>
+                <td>
+                    <button class="btn-checkin ${isDone ? 'done' : ''}"
+                        onclick="${isDone ? '' : `checkIn('${a._id}', this)`}"
+                        ${isDone ? 'disabled' : ''}>
+                        <i class="fa-solid ${isDone ? 'fa-circle-check' : 'fa-qrcode'}"></i>
+                        ${isDone ? 'Checked In' : 'Check In'}
+                    </button>
+                </td>
+                <td style="font-size:11px;color:var(--muted);">${a.date}</td>
+                <td>
+                    <button class="action-btn del" title="Delete" onclick="deleteAttendee('${a._id}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ── Filter ────────────────────────────────────────────────────────────────
+    function filterAttendees() {
+        const q      = document.getElementById('searchInput').value.toLowerCase();
+        const event  = document.getElementById('eventFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        renderTable(attendees.filter(a =>
+            (!q      || a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q) || a.ticketId.toLowerCase().includes(q)) &&
+            (!event  || a.event === event) &&
+            (!status || a.status === status)
+        ));
+    }
+
+    // ── Manual check-in ───────────────────────────────────────────────────────
+    async function checkIn(id, btn) {
+        const a = attendees.find(x => x._id === id);
+        if (!a) return;
+        if (!confirm(`Check in ${a.name}?`)) return;
+        try {
+            const token = localStorage.getItem('dfa_token');
+            const res   = await fetch(`${API}/attendees/checkin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ ticketId: a.ticketId })
+            });
+            const result = await res.json();
+            if (!result.success) throw new Error(result.message);
+            a.status = 'Checked In';
+            btn.className = 'btn-checkin done';
+            btn.disabled  = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Checked In';
+            updateStats();
+            showToast(`${a.name} checked in ✓`);
+        } catch(err) {
+            alert(err.message || 'Check-in failed');
+        }
+    }
+
+    // ── Delete attendee ───────────────────────────────────────────────────────
+    async function deleteAttendee(id) {
+        if (!confirm('Delete this attendee?')) return;
+        try {
+            const token = localStorage.getItem('dfa_token');
+            await fetch(`${API}/attendees/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            attendees = attendees.filter(a => a._id !== id);
+            updateStats();
+            renderTable(attendees);
+            showToast('Attendee deleted');
+        } catch(err) { alert('Delete failed'); }
+    }
+
+    // ── Drawer ────────────────────────────────────────────────────────────────
+    function openDrawer() {
+        document.getElementById('attendeeDrawer').classList.add('open');
+        document.getElementById('drawerBackdrop').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer() {
+        document.getElementById('attendeeDrawer').classList.remove('open');
+        document.getElementById('drawerBackdrop').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+    // ── Save walk-in attendee ─────────────────────────────────────────────────
+    async function saveAttendee() {
+        const name   = document.getElementById('f_name').value.trim();
+        const email  = document.getElementById('f_email').value.trim();
+        const phone  = document.getElementById('f_phone').value.trim();
+        const eventId = document.getElementById('f_event').value;
+        const ticket = document.getElementById('f_ticket').value;
+        const amount = parseFloat(document.getElementById('f_amount').value) || 0;
+        const note   = document.getElementById('f_note').value.trim();
+
+        if (!name || !email || !phone || !eventId || !ticket) {
+            alert('Please fill in all required fields (*)'); return;
+        }
+
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating ticket...';
+
+        try {
+            const token = localStorage.getItem('dfa_token');
+
+            // Find event title
+            const event = eventsData.find(e => e._id === eventId);
+
+            const res = await fetch(`${API}/attendees`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    name, email, phone,
+                    eventId,
+                    eventTitle: event?.title || '',
+                    ticketType: ticket,
+                    amountPaid: amount,
+                    specialNote: note
+                })
+            });
+            const result = await res.json();
+            if (!result.success) throw new Error(result.message || 'Failed');
+
+            showToast(`Ticket created & email sent to ${email} ✓`);
+            document.getElementById('f_name').value   = '';
+            document.getElementById('f_email').value  = '';
+            document.getElementById('f_phone').value  = '';
+            document.getElementById('f_amount').value = '';
+            document.getElementById('f_note').value   = '';
+            closeDrawer();
+            await loadAttendees();
+        } catch(err) {
+            alert(err.message || 'Failed to create attendee');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create & Send Ticket';
+        }
+    }
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    loadEvents();
+    loadAttendees();
+</script>
+</body>
+</html>

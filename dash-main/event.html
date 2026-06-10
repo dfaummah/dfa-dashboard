@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFA Admin | Events</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+        /* ── DARK THEME ── */
+        :root[data-theme="dark"] {
+            --bg:        #1C1B2E;
+            --sidebar:   #15142A;
+            --card:      #211F38;
+            --border:    #2A2845;
+            --text:      #E2E0F0;
+            --text2:     #7B79A0;
+            --muted:     #6B6A8A;
+            --muted2:    #4B4A6A;
+            --hover:     #221F40;
+            --hover2:    #2A2750;
+            --search:    #211F38;
+            --topbar:    #15142A;
+            --label-sec: #4B4A6A;
+            --tog-bg:    #2A2845;
+            --shadow:    rgba(0,0,0,0.3);
+        }
+
+        /* ── LIGHT THEME ── */
+        :root[data-theme="light"] {
+            --bg:        #F4F3FF;
+            --sidebar:   #FFFFFF;
+            --card:      #FFFFFF;
+            --border:    #E5E3F5;
+            --text:      #1C1B2E;
+            --text2:     #5B5A7A;
+            --muted:     #8B89A8;
+            --muted2:    #A09EBF;
+            --hover:     #F0EEFF;
+            --hover2:    #E9E6FF;
+            --search:    #F4F3FF;
+            --topbar:    #FFFFFF;
+            --label-sec: #A09EBF;
+            --tog-bg:    #E5E3F5;
+            --shadow:    rgba(139,92,246,0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color .25s, border-color .25s, color .2s; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        aside {
+            width: 220px; min-height: 100vh;
+            background-color: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            position: sticky; top: 0; height: 100vh;
+            overflow-y: auto; flex-shrink: 0;
+            box-shadow: 2px 0 12px var(--shadow);
+        }
+        .sidebar-logo {
+            padding: 20px 16px 14px;
+            display: flex; align-items: center; gap: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo-icon {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 800; font-size: 11px;
+        }
+        .logo-text { font-size: 15px; font-weight: 700; color: var(--text); }
+        .logo-sub  { font-size: 10px; color: var(--muted); }
+
+        .sidebar-section { padding: 18px 14px 4px; }
+        .sidebar-section-label {
+            font-size: 9px; font-weight: 700; color: var(--label-sec);
+            text-transform: uppercase; letter-spacing: 1.5px;
+            padding: 0 6px; margin-bottom: 6px;
+        }
+        .nav-link {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 10px; border-radius: 8px;
+            font-size: 13px; font-weight: 500; color: var(--text2);
+            text-decoration: none; transition: all 0.15s ease; margin-bottom: 1px;
+        }
+        .nav-link:hover  { background: var(--hover); color: #8B5CF6; }
+        .nav-link.active { background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff; font-weight:600; box-shadow:0 4px 12px rgba(139,92,246,.35); }
+        .nav-link i      { width: 16px; font-size: 13px; text-align: center; }
+        .nav-link.logout { color: #EF4444; }
+        .nav-link.logout:hover { background: rgba(239,68,68,.1); color: #EF4444; }
+
+        main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        .topbar {
+            background: var(--topbar); border-bottom: 1px solid var(--border);
+            padding: 12px 28px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+        .topbar-title { font-size: 16px; font-weight: 700; color: var(--text); }
+        .search-bar {
+            flex: 1; max-width: 380px;
+            background: var(--search); border: 1px solid var(--border); border-radius: 10px;
+            padding: 8px 14px; display: flex; align-items: center; gap: 8px;
+            color: var(--muted); font-size: 12px;
+        }
+        .topbar-actions { display: flex; align-items: center; gap: 14px; }
+        .icon-btn {
+            width: 34px; height: 34px; border-radius: 8px;
+            background: var(--search); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--muted); cursor: pointer; font-size: 13px; transition: all .15s;
+            position: relative;
+        }
+        .icon-btn:hover { background: var(--hover2); color: #8B5CF6; }
+        .avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: linear-gradient(135deg,#8B5CF6,#6D28D9);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 12px; font-weight: 700;
+        }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
+        .user-role { font-size: 10px; color: var(--muted); }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            display: flex; align-items: center; gap: 7px;
+            background: var(--tog-bg); border: 1px solid var(--border);
+            border-radius: 20px; padding: 4px 10px;
+            cursor: pointer; user-select: none;
+            font-size: 11px; font-weight: 600; color: var(--text2);
+            transition: all .2s;
+        }
+        .theme-toggle:hover { border-color: #8B5CF6; color: #8B5CF6; }
+        .theme-toggle i { font-size: 11px; }
+
+        .content-wrap { flex: 1; display: flex; overflow: hidden; position: relative; }
+
+        .events-panel { flex: 1; overflow-y: auto; padding: 24px 28px; }
+
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .panel-title  { font-size: 20px; font-weight: 700; color: var(--text); }
+        .panel-sub    { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
+        .filters-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+        .filter-search {
+            background: var(--search); border: 1px solid var(--border); border-radius: 8px;
+            padding: 7px 12px; display: flex; align-items: center; gap: 8px;
+            color: var(--muted); font-size: 12px; flex: 1; max-width: 220px;
+        }
+        .filter-search input {
+            background: transparent; border: none; outline: none;
+            color: var(--text); font-size: 12px; font-family: inherit; width: 100%;
+        }
+        .tabs { display: flex; gap: 4px; }
+        .tab {
+            padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500;
+            cursor: pointer; color: var(--text2); border: 1px solid transparent; transition: all .15s;
+        }
+        .tab:hover  { background: var(--hover); color: #8B5CF6; }
+        .tab.active { background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff; font-weight:600; }
+
+        .btn-create {
+            display: flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff;
+            border: none; border-radius: 8px; padding: 8px 14px;
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            white-space: nowrap; transition: opacity .15s; font-family: inherit;
+        }
+        .btn-create:hover { opacity: .85; }
+
+        .event-item {
+            background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px; margin-bottom: 10px; cursor: pointer; transition: border-color .15s;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+        .event-item:hover { border-color: #8B5CF6; }
+        .event-thumb {
+            width: 80px; height: 64px; border-radius: 10px;
+            flex-shrink: 0; background: var(--hover2);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .event-body    { flex: 1; min-width: 0; }
+        .event-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .event-name    { font-size: 14px; font-weight: 600; color: var(--text); }
+        .badge         { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+        .badge.upcoming { background: rgba(251,191,36,.15); color: #FBBF24; }
+        .badge.past     { background: rgba(107,114,128,.15); color: #9CA3AF; }
+        .badge.draft    { background: rgba(99,102,241,.15); color: #818CF8; }
+        .event-desc    { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+        .event-meta    { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .meta-item     { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text2); }
+        .meta-item i   { font-size: 9px; color: #8B5CF6; }
+
+        /* Drawer */
+        .drawer-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(2px);
+            z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .drawer-backdrop.open { opacity: 1; pointer-events: all; }
+
+        .create-panel {
+            position: fixed; top: 0; right: 0;
+            height: 100vh; width: 320px;
+            background: #fff; color: #1C1B2E;
+            z-index: 100; overflow-y: auto; padding: 22px 20px;
+            box-shadow: -8px 0 40px rgba(0,0,0,0.4);
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        .create-panel.open { transform: translateX(0); }
+
+        .drawer-close {
+            position: absolute; top: 16px; right: 16px;
+            width: 30px; height: 30px; background: #F3F4F6;
+            border: none; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #6B7280; font-size: 13px;
+            transition: background .15s, color .15s;
+        }
+        .drawer-close:hover { background: #E5E7EB; color: #111; }
+
+        .cp-title { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 18px; padding-right: 36px; }
+
+        .form-group  { margin-bottom: 12px; }
+        .form-row    { display: flex; gap: 10px; margin-bottom: 12px; }
+        .form-row .form-group { flex: 1; margin-bottom: 0; }
+        .form-label  { display: block; font-size: 11px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%; background: #F9FAFB; border: 1px solid #E5E7EB;
+            border-radius: 8px; padding: 8px 10px;
+            font-size: 12px; color: #374151; font-family: inherit;
+            outline: none; transition: border-color .15s;
+        }
+        .form-input::placeholder, .form-textarea::placeholder { color: #9CA3AF; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #8B5CF6; }
+        .form-select  { appearance: none; cursor: pointer; }
+        .form-textarea { resize: vertical; min-height: 70px; }
+
+        .upload-row { display: flex; gap: 8px; align-items: stretch; }
+        .upload-input {
+            flex: 1; background: #F9FAFB; border: 1px solid #E5E7EB;
+            border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #9CA3AF;
+            font-family: inherit; outline: none;
+        }
+        .btn-upload {
+            background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px;
+            padding: 8px 12px; font-size: 11px; font-weight: 600; color: #374151;
+            cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 4px;
+            font-family: inherit;
+        }
+        .btn-upload:hover { border-color: #8B5CF6; color: #8B5CF6; }
+
+        .toggle-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; margin-bottom: 16px; }
+        .toggle {
+            width: 36px; height: 20px; background: #8B5CF6; border-radius: 20px;
+            position: relative; cursor: pointer; flex-shrink: 0;
+        }
+        .toggle::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: left .2s;
+        }
+        .toggle.off { background: #D1D5DB; }
+        .toggle.off::after { left: 19px; }
+        .toggle-label { font-size: 11px; color: #6B7280; }
+
+        .btn-save {
+            width: 100%; background: linear-gradient(135deg,#8B5CF6,#7C3AED);
+            color: #fff; border: none; border-radius: 10px;
+            padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer;
+            font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px;
+            transition: opacity .15s;
+        }
+        .btn-save:hover { opacity: .88; }
+
+        /* Empty / loading state */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+        .empty-state i { font-size: 36px; margin-bottom: 12px; color: var(--muted2); }
+        .empty-state p { font-size: 13px; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<!-- ✅ AUTH GUARD -->
+<script>
+  if (!localStorage.getItem('dfa_token') || !localStorage.getItem('dfa_admin')) {
+    window.location.href = 'index.html';
+  }
+  const savedTheme = localStorage.getItem('dfa_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+</script>
+
+<!-- ══ SIDEBAR ══ -->
+<aside>
+    <div class="sidebar-logo">
+        <div class="logo-icon">DFA</div>
+        <div>
+            <div class="logo-text">DFATV</div>
+            <div class="logo-sub">Admin Management</div>
+        </div>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Overview</div>
+        <a href="overview.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a href="event.html"  class="nav-link active"><i class="fa-solid fa-calendar-days"></i> Events</a>
+        <a href="ticket.html" class="nav-link"><i class="fa-solid fa-ticket"></i> Tickets</a>
+        <a href="attend.html" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Finance</div>
+        <a href="payment.html" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Content</div>
+        <a href="media.html"       class="nav-link"><i class="fa-solid fa-photo-film"></i> Media Library</a>
+        <a href="video.html"       class="nav-link"><i class="fa-solid fa-play"></i> Video</a>
+        <a href="gallery.html"     class="nav-link"><i class="fa-solid fa-images"></i> Gallery</a>
+        <a href="#"                class="nav-link"><i class="fa-solid fa-newspaper"></i> Blog</a>
+        <a href="web_content.html" class="nav-link"><i class="fa-solid fa-globe"></i> Website Content</a>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Engagement</div>
+        <a href="#" class="nav-link"><i class="fa-solid fa-message"></i> Messages</a>
+        <a href="#" class="nav-link"><i class="fa-solid fa-heart"></i> Community</a>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-label">Admin</div>
+        <a href="staff.html" class="nav-link"><i class="fa-solid fa-shield-halved"></i> Staff & Roles</a>
+        <a href="#"          class="nav-link"><i class="fa-solid fa-chart-bar"></i> Reports</a>
+        <a href="#"          class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+    </div>
+    <div style="margin-top:auto;padding:16px 14px 20px;">
+        <a href="#" class="nav-link logout" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Log out
+        </a>
+    </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main>
+    <div class="topbar">
+        <div class="topbar-title">Events</div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass" style="font-size:12px;"></i>
+            Search events...
+        </div>
+        <div class="topbar-actions">
+
+            <!-- ✅ THEME TOGGLE -->
+            <div class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+                <i class="fa-solid fa-moon" id="themeIcon"></i>
+                <span id="themeLabel">Dark</span>
+            </div>
+
+            <div class="icon-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+            <div class="icon-btn" style="position:relative;">
+                <i class="fa-solid fa-bell"></i>
+                <span style="position:absolute;top:6px;right:6px;width:6px;height:6px;background:#8B5CF6;border-radius:50%;"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="avatar" id="avatarInitials">EE</div>
+                <div>
+                    <div class="user-name" id="adminName">Loading...</div>
+                    <div class="user-role" id="adminRole">Admin</div>
+                </div>
+                <i class="fa-solid fa-right-from-bracket" style="font-size:13px;color:var(--muted);cursor:pointer;" onclick="logout()"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-wrap">
+        <div class="events-panel">
+            <div class="panel-header">
+                <div class="panel-title">Events</div>
+            </div>
+            <div class="panel-sub" id="eventsSub">Loading events...</div>
+
+            <div class="filters-row">
+                <div class="filter-search">
+                    <i class="fa-solid fa-magnifying-glass" style="font-size:11px;color:var(--muted);"></i>
+                    <input type="text" placeholder="Search..." oninput="filterEvents(this.value)">
+                </div>
+                <div class="tabs">
+                    <div class="tab active" onclick="setTab(this,'All')">All</div>
+                    <div class="tab" onclick="setTab(this,'Upcoming')">Upcoming</div>
+                    <div class="tab" onclick="setTab(this,'Past')">Past</div>
+                    <div class="tab" onclick="setTab(this,'Draft')">Draft</div>
+                    <div class="tab" onclick="setTab(this,'Cancelled')">Cancelled</div>
+                </div>
+                <button class="btn-create" onclick="openDrawer()">
+                    <i class="fa-solid fa-plus"></i> Create Event
+                </button>
+            </div>
+
+            <div id="events-container"></div>
+        </div>
+    </div>
+</main>
+
+<!-- ══ BACKDROP ══ -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+
+<!-- ══ CREATE EVENT DRAWER ══ -->
+<div class="create-panel" id="createPanel">
+    <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
+    <div class="cp-title">Create Event</div>
+
+    <div class="form-group">
+        <label class="form-label">Event Title</label>
+        <input type="text" class="form-input" id="event-title" placeholder="e.g. The Encounter 2025">
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Sub Title</label>
+            <input type="text" class="form-input" id="event-subtitle" placeholder="Short Tagline">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-select" id="event-status">
+                <option>Draft</option>
+                <option>Upcoming</option>
+                <option>Cancelled</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="event-date">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Time</label>
+            <input type="time" class="form-input" id="event-time">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Location</label>
+        <input type="text" class="form-input" id="event-location" placeholder="Venue, city">
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Capacity</label>
+            <input type="number" class="form-input" id="event-capacity" placeholder="1000">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Reg. Deadline</label>
+            <input type="date" class="form-input" id="event-deadline">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="event-description" placeholder="What is the event about"></textarea>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Event Banner / Image</label>
+        <div class="upload-row">
+            <input type="file" class="upload-input" id="event-image" accept="image/*">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Video Preview URL</label>
+        <input type="text" class="form-input" id="event-video" placeholder="YouTube / Vimeo Link">
+    </div>
+    <div class="form-group">
+        <label class="form-label">Tags</label>
+        <input type="text" class="form-input" id="event-tags" placeholder="Faith, community (comma separated)">
+    </div>
+    <div class="toggle-row">
+        <div class="toggle" id="publishToggle" onclick="this.classList.toggle('off')"></div>
+        <span class="toggle-label">Published (Visible on website)</span>
+    </div>
+
+    <button class="btn-save" id="saveBtn" onclick="saveEvent()">
+        <i class="fa-solid fa-floppy-disk"></i> Save Event
+    </button>
+</div>
+
+<script>
+    const API = 'https://dfa-backend-lilj.onrender.com/api/v1';
+    let allEvents = [];
+    let currentTab = 'All';
+
+    // ── Auth + session ────────────────────────────────────────────────────────
+    function logout() {
+        localStorage.removeItem('dfa_token');
+        localStorage.removeItem('dfa_admin');
+        window.location.href = 'index.html';
+    }
+
+    const adminData = JSON.parse(localStorage.getItem('dfa_admin') || '{}');
+    if (adminData.name) {
+        document.getElementById('adminName').textContent = adminData.name;
+        document.getElementById('adminRole').textContent = adminData.role || 'Admin';
+        const initials = adminData.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+        document.getElementById('avatarInitials').textContent = initials;
+    }
+
+    // ── Theme toggle ─────────────────────────────────────────────────────────
+    function applyThemeUI(theme) {
+        document.getElementById('themeIcon').className  = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        document.getElementById('themeLabel').textContent = theme === 'dark' ? 'Dark' : 'Light';
+    }
+    function toggleTheme() {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('dfa_theme', next);
+        applyThemeUI(next);
+    }
+    applyThemeUI(savedTheme);
+
+    // ── Render events ─────────────────────────────────────────────────────────
+    function renderEvents(events) {
+        const container = document.getElementById('events-container');
+        document.getElementById('eventsSub').textContent = `${allEvents.length} events total`;
+
+        if (events.length === 0) {
+            container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-calendar-days"></i><p>No events found</p></div>`;
+            return;
+        }
+
+        container.innerHTML = events.map(event => {
+            const badgeClass = event.status === 'Upcoming' ? 'upcoming' : event.status === 'Draft' ? 'draft' : 'past';
+            const thumb = event.bannerImage
+                ? `<img src="${event.bannerImage}" alt="${event.title}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`
+                : `<i class="fa-solid fa-calendar-days" style="font-size:22px;color:#8B5CF6;"></i>`;
+            return `
+            <div class="event-item">
+                <div class="event-thumb">${thumb}</div>
+                <div class="event-body">
+                    <div class="event-name-row">
+                        <span class="event-name">${event.title}</span>
+                        <span class="badge ${badgeClass}">${event.status}</span>
+                    </div>
+                    <div class="event-desc">${(event.description || '').slice(0,100)}${event.description?.length > 100 ? '...' : ''}</div>
+                    <div class="event-meta">
+                        <span class="meta-item"><i class="fa-solid fa-calendar"></i> ${new Date(event.date).toDateString()}</span>
+                        <span class="meta-item"><i class="fa-solid fa-location-dot"></i> ${event.location || ''}</span>
+                        <span class="meta-item"><i class="fa-solid fa-ticket"></i> ${event.ticketTiers?.length || 0} tiers</span>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <button onclick="deleteEvent('${event._id}')" style="background:#ef4444;color:white;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit;">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Load events ───────────────────────────────────────────────────────────
+    async function loadEvents() {
+        document.getElementById('events-container').innerHTML =
+            `<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading events...</p></div>`;
+        try {
+            const res = await fetch(`${API}/events`);
+            const result = await res.json();
+            allEvents = result.data?.events || [];
+            renderEvents(allEvents);
+        } catch(err) {
+            document.getElementById('events-container').innerHTML =
+                `<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i><p>Failed to load events</p></div>`;
+        }
+    }
+
+    // ── Filter by tab ─────────────────────────────────────────────────────────
+    function setTab(el, tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        currentTab = tab;
+        const filtered = tab === 'All' ? allEvents : allEvents.filter(e => e.status === tab);
+        renderEvents(filtered);
+    }
+
+    // ── Filter by search ──────────────────────────────────────────────────────
+    function filterEvents(q) {
+        const filtered = allEvents.filter(e =>
+            e.title.toLowerCase().includes(q.toLowerCase()) ||
+            (e.location || '').toLowerCase().includes(q.toLowerCase())
+        );
+        renderEvents(filtered);
+    }
+
+    // ── Drawer ────────────────────────────────────────────────────────────────
+    function openDrawer() {
+        document.getElementById('createPanel').classList.add('open');
+        document.getElementById('drawerBackdrop').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer() {
+        document.getElementById('createPanel').classList.remove('open');
+        document.getElementById('drawerBackdrop').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+    // ── Save event ────────────────────────────────────────────────────────────
+    async function saveEvent() {
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+        try {
+            const token = localStorage.getItem('dfa_token');
+            const formData = new FormData();
+            formData.append('title',       document.getElementById('event-title').value);
+            formData.append('subTitle',    document.getElementById('event-subtitle').value);
+            formData.append('date',        document.getElementById('event-date').value);
+            formData.append('time',        document.getElementById('event-time').value || '18:00');
+            formData.append('location',    document.getElementById('event-location').value);
+            formData.append('description', document.getElementById('event-description').value);
+            formData.append('capacity',    document.getElementById('event-capacity').value || 500);
+            formData.append('status',      document.getElementById('event-status').value);
+            formData.append('isPublished', !document.getElementById('publishToggle').classList.contains('off'));
+            formData.append('videoPreviewUrl', document.getElementById('event-video').value);
+            formData.append('tags',        document.getElementById('event-tags').value);
+            formData.append('ticketTiers', JSON.stringify([
+                { name: 'Standard', price: 5000, capacity: 200, currency: 'NGN', status: 'Available' }
+            ]));
+
+            const imageFile = document.getElementById('event-image').files[0];
+            if (imageFile) formData.append('bannerImage', imageFile);
+
+            const res = await fetch(`${API}/admin/events`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Failed to create event');
+
+            alert('Event created successfully!');
+            loadEvents();
+            closeDrawer();
+        } catch(err) {
+            alert(err.message || 'Failed to create event');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Event';
+        }
+    }
+
+    // ── Delete event ──────────────────────────────────────────────────────────
+    async function deleteEvent(id) {
+        if (!confirm('Delete this event?')) return;
+        try {
+            const token = localStorage.getItem('dfa_token');
+            const res = await fetch(`${API}/events/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Delete failed');
+            alert('Event deleted!');
+            loadEvents();
+        } catch(err) {
+            alert(err.message || 'Delete failed');
+        }
+    }
+
+    loadEvents();
+</script>
+</body>
+</html>

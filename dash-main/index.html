@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFA Admin | Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #1C1B2E;
+            --surface:   #15142A;
+            --card:      #211F38;
+            --border:    #2A2845;
+            --border2:   #1E1C35;
+            --muted:     #6B6A8A;
+            --muted2:    #4B4A6A;
+            --text:      #E2E0F0;
+            --text2:     #9390B8;
+            --purple:    #8B5CF6;
+            --purple2:   #7C3AED;
+            --purple3:   #6D28D9;
+            --accent:    #C4B5FD;
+            --red:       #EF4444;
+            --green:     #34D399;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background grid + glow effects */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .glow-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .glow-blob.one {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
+            top: -100px; left: -100px;
+        }
+        .glow-blob.two {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(109,40,217,0.12) 0%, transparent 70%);
+            bottom: -80px; right: -80px;
+        }
+
+        /* Wrapper */
+        .login-wrap {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 420px;
+            padding: 20px;
+            animation: fadeUp .5s cubic-bezier(0.4,0,0.2,1) both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Logo */
+        .logo-row {
+            display: flex; align-items: center; gap: 12px;
+            justify-content: center; margin-bottom: 32px;
+        }
+        .logo-icon {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 800; font-size: 13px;
+            letter-spacing: -0.5px;
+            box-shadow: 0 8px 24px rgba(139,92,246,0.4);
+        }
+        .logo-text-wrap { line-height: 1; }
+        .logo-text { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+        .logo-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+        /* Card */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px 28px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+        }
+
+        .card-title {
+            font-size: 18px; font-weight: 700; color: #fff;
+            margin-bottom: 6px;
+        }
+        .card-sub {
+            font-size: 12px; color: var(--muted); margin-bottom: 28px;
+        }
+
+        /* Form */
+        .f-group { margin-bottom: 16px; }
+
+        .f-label {
+            display: block; font-size: 11px; font-weight: 600;
+            color: #7B79A0; margin-bottom: 6px; letter-spacing: 0.3px;
+        }
+
+        .f-input-wrap {
+            position: relative;
+        }
+
+        .f-input-icon {
+            position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+            color: var(--muted2); font-size: 12px; pointer-events: none;
+        }
+
+        .f-input {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 40px 11px 36px;
+            font-size: 13px; color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .f-input::placeholder { color: var(--muted2); }
+        .f-input:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.12);
+        }
+
+        .f-eye {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer;
+            color: var(--muted2); font-size: 12px; padding: 4px;
+            transition: color .15s;
+        }
+        .f-eye:hover { color: var(--accent); }
+
+        /* Role hint */
+        .role-hint {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 10px; color: var(--muted); margin-top: 22px; margin-bottom: 20px;
+            padding: 9px 12px; background: var(--card);
+            border: 1px solid var(--border2); border-radius: 8px;
+        }
+        .role-hint i { color: var(--purple); font-size: 10px; }
+
+        /* Button */
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+            color: #fff; border: none; border-radius: 10px;
+            padding: 12px; font-size: 13px; font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer; letter-spacing: 0.2px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: opacity .15s, transform .1s;
+            box-shadow: 0 6px 20px rgba(139,92,246,0.4);
+        }
+        .btn-login:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
+        .btn-login:active:not(:disabled) { transform: translateY(0); }
+        .btn-login:disabled { opacity: .6; cursor: not-allowed; }
+
+        /* Spinner */
+        .spinner {
+            width: 14px; height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .6s linear infinite;
+            display: none;
+        }
+        .btn-login.loading .spinner { display: block; }
+        .btn-login.loading .btn-label { display: none; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Error banner */
+        .error-banner {
+            display: none; align-items: center; gap: 8px;
+            background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+            border-radius: 8px; padding: 10px 12px;
+            font-size: 12px; color: #F87171; margin-bottom: 16px;
+        }
+        .error-banner.show { display: flex; }
+        .error-banner i { font-size: 11px; flex-shrink: 0; }
+
+        /* Footer note */
+        .login-footer {
+            text-align: center; margin-top: 20px;
+            font-size: 11px; color: var(--muted2);
+        }
+        .login-footer a { color: var(--muted); text-decoration: none; }
+        .login-footer a:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<div class="glow-blob one"></div>
+<div class="glow-blob two"></div>
+
+<div class="login-wrap">
+
+    <div class="logo-row">
+        <div class="logo-icon">DFA</div>
+        <div class="logo-text-wrap">
+            <div class="logo-text">DFATV</div>
+            <div class="logo-sub">Admin Management</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Welcome back</div>
+        <div class="card-sub">Sign in to your admin account to continue</div>
+
+        <!-- Error banner -->
+        <div class="error-banner" id="errorBanner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="errorMsg">Invalid credentials. Please try again.</span>
+        </div>
+
+        <!-- Email -->
+        <div class="f-group">
+            <label class="f-label" for="email">Email Address</label>
+            <div class="f-input-wrap">
+                <i class="f-input-icon fa-solid fa-envelope"></i>
+                <input
+                    type="email" id="email" class="f-input"
+                    placeholder="admin@dfatv.com"
+                    autocomplete="email"
+                >
+            </div>
+        </div>
+
+        <!-- Password -->
+        <div class="f-group">
+            <label class="f-label" for="password">Password</label>
+            <div class="f-input-wrap">
+                <i class="f-input-icon fa-solid fa-lock"></i>
+                <input
+                    type="password" id="password" class="f-input"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                >
+                <button class="f-eye" type="button" onclick="togglePassword()" id="eyeBtn">
+                    <i class="fa-solid fa-eye" id="eyeIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Role hint -->
+        <div class="role-hint">
+            <i class="fa-solid fa-shield-halved"></i>
+            Access is restricted to authorised staff only. Contact your Super Admin if you need an account.
+        </div>
+
+        <!-- Submit -->
+        <button class="btn-login" id="loginBtn" onclick="handleLogin()">
+            <div class="spinner"></div>
+            <span class="btn-label"><i class="fa-solid fa-arrow-right-to-bracket"></i>&nbsp; Sign In</span>
+        </button>
+    </div>
+
+    <div class="login-footer">
+        Having trouble? <a href="mailto:support@dfatv.com">Contact support</a>
+    </div>
+
+</div>
+
+<script>
+    // ── Config ──────────────────────────────────────────────────────────────
+   const API_BASE = 'https://dfa-backend-lilj.onrender.com/api/v1';
+
+    // Role → default redirect page
+    const ROLE_REDIRECT = {
+        'Super Admin':        'overview.html',
+        'Operations Manager': 'event.html',
+        'Customer Support':   'attend.html',
+        'Content Manager':    'video.html',
+        'Finance Manager':    'payment.html',
+    };
+
+    // ── Toggle password visibility ──────────────────────────────────────────
+    function togglePassword() {
+        const input = document.getElementById('password');
+        const icon  = document.getElementById('eyeIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fa-solid fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fa-solid fa-eye';
+        }
+    }
+
+    // ── Show / hide error ───────────────────────────────────────────────────
+    function showError(msg) {
+        document.getElementById('errorMsg').textContent = msg;
+        document.getElementById('errorBanner').classList.add('show');
+    }
+    function hideError() {
+        document.getElementById('errorBanner').classList.remove('show');
+    }
+
+    // ── Set loading state ───────────────────────────────────────────────────
+    function setLoading(on) {
+        const btn = document.getElementById('loginBtn');
+        btn.disabled = on;
+        if (on) btn.classList.add('loading');
+        else    btn.classList.remove('loading');
+    }
+
+    // ── Handle login ────────────────────────────────────────────────────────
+    async function handleLogin() {
+        hideError();
+
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!email || !password) {
+            showError('Please enter your email and password.');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const res = await fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                // Server returned an error
+                showError(data.message || 'Login failed. Please try again.');
+                return;
+            }
+
+            // ── Success: store token + admin info ──
+            const { token, data: payload } = data;
+            const admin = payload?.admin;
+
+            localStorage.setItem('dfa_token', token);
+            localStorage.setItem('dfa_admin', JSON.stringify(admin));
+
+            // Redirect based on role
+            const role     = admin?.role || 'Super Admin';
+            const redirect = ROLE_REDIRECT[role] || 'index.html';
+            window.location.href = redirect;
+
+        } catch (err) {
+            console.error('Login error:', err);
+            showError('Unable to connect to the server. Please check your connection.');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // ── Allow Enter key to submit ───────────────────────────────────────────
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleLogin();
+    });
+
+    // ── Redirect if already logged in ──────────────────────────────────────
+    (function checkSession() {
+        const token = localStorage.getItem('dfa_token');
+        const admin = JSON.parse(localStorage.getItem('dfa_admin') || 'null');
+        if (token && admin) {
+            const role     = admin.role || 'Super Admin';
+            const redirect = ROLE_REDIRECT[role] || 'index.html';
+            window.location.href = redirect;
+        }
+    })();
+</script>
+</body>
+</html>
