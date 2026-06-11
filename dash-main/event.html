@@ -554,8 +554,16 @@
                 });
             } else {
                 // CREATE mode — POST /events  ✅ matches router: .post(upload, createEvent)
+                // ✅ FIXED: Changed 'name' to 'ticketName' to match Event model schema
                 formData.append('ticketTiers', JSON.stringify([
-                    { name: 'Standard', price: 5000, capacity: 200, currency: 'NGN', status: 'Available' }
+                    { 
+                        ticketName: 'Standard',
+                        ticketType: 'Standard',
+                        price: 5000, 
+                        capacity: 200, 
+                        currency: 'NGN', 
+                        status: 'Available' 
+                    }
                 ]));
                 res = await fetch(`${API}/events`, {
                     method: 'POST',
