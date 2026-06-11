@@ -546,25 +546,15 @@
 
             let res;
             if (editingId) {
-                // EDIT mode — PUT /events/:id  ✅ matches router: .put(upload, updateEvent)
+                // EDIT mode — PUT /events/:id
                 res = await fetch(`${API}/events/${editingId}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
                 });
             } else {
-                // CREATE mode — POST /events  ✅ matches router: .post(upload, createEvent)
-                // ✅ FIXED: Changed 'name' to 'ticketName' to match Event model schema
-                formData.append('ticketTiers', JSON.stringify([
-                    { 
-                        ticketName: 'Standard',
-                        ticketType: 'Standard',
-                        price: 5000, 
-                        capacity: 200, 
-                        currency: 'NGN', 
-                        status: 'Available' 
-                    }
-                ]));
+                // CREATE mode — POST /events
+                // ✅ FIXED: DO NOT append ticketTiers - let admin add them manually via ticket.html
                 res = await fetch(`${API}/events`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
