@@ -8,171 +8,105 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
-
         :root[data-theme="dark"] {
-            --bg:        #1C1B2E;
-            --sidebar:   #15142A;
-            --card:      #211F38;
-            --border:    #2A2845;
-            --text:      #E2E0F0;
-            --text2:     #7B79A0;
-            --muted:     #6B6A8A;
-            --muted2:    #4B4A6A;
-            --hover:     #221F40;
-            --hover2:    #2A2750;
-            --search:    #211F38;
-            --topbar:    #15142A;
-            --label-sec: #4B4A6A;
-            --tog-bg:    #2A2845;
-            --shadow:    rgba(0,0,0,0.3);
-            --grp-border:#2A2845;
-            --grp-text:  #4B4A6A;
-            --input-c:   #9390B8;
+            --bg:#1C1B2E;--sidebar:#15142A;--card:#211F38;--border:#2A2845;
+            --text:#E2E0F0;--text2:#7B79A0;--muted:#6B6A8A;--muted2:#4B4A6A;
+            --hover:#221F40;--hover2:#2A2750;--search:#211F38;--topbar:#15142A;
+            --label-sec:#4B4A6A;--tog-bg:#2A2845;--shadow:rgba(0,0,0,0.3);
+            --grp-border:#2A2845;--grp-text:#4B4A6A;--input-c:#9390B8;
         }
         :root[data-theme="light"] {
-            --bg:        #F4F3FF;
-            --sidebar:   #FFFFFF;
-            --card:      #FFFFFF;
-            --border:    #E5E3F5;
-            --text:      #1C1B2E;
-            --text2:     #5B5A7A;
-            --muted:     #8B89A8;
-            --muted2:    #A09EBF;
-            --hover:     #F0EEFF;
-            --hover2:    #E9E6FF;
-            --search:    #F4F3FF;
-            --topbar:    #FFFFFF;
-            --label-sec: #A09EBF;
-            --tog-bg:    #E5E3F5;
-            --shadow:    rgba(139,92,246,0.08);
-            --grp-border:#E5E3F5;
-            --grp-text:  #A09EBF;
-            --input-c:   #374151;
+            --bg:#F4F3FF;--sidebar:#FFFFFF;--card:#FFFFFF;--border:#E5E3F5;
+            --text:#1C1B2E;--text2:#5B5A7A;--muted:#8B89A8;--muted2:#A09EBF;
+            --hover:#F0EEFF;--hover2:#E9E6FF;--search:#F4F3FF;--topbar:#FFFFFF;
+            --label-sec:#A09EBF;--tog-bg:#E5E3F5;--shadow:rgba(139,92,246,0.08);
+            --grp-border:#E5E3F5;--grp-text:#A09EBF;--input-c:#374151;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color .25s, border-color .25s, color .2s; }
-        body { font-family: 'DM Sans', sans-serif; background-color: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
-
-        aside {
-            width: 220px; min-height: 100vh;
-            background-color: var(--sidebar); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column;
-            position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0;
-            box-shadow: 2px 0 12px var(--shadow);
-        }
-        .sidebar-logo { padding: 20px 16px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
-        .logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg,#8B5CF6,#6D28D9); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 11px; }
-        .logo-text { font-size: 15px; font-weight: 700; color: var(--text); }
-        .logo-sub  { font-size: 10px; color: var(--muted); }
-        .sidebar-section { padding: 18px 14px 4px; }
-        .sidebar-section-label { font-size: 9px; font-weight: 700; color: var(--label-sec); text-transform: uppercase; letter-spacing: 1.5px; padding: 0 6px; margin-bottom: 6px; }
-        .nav-link { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text2); text-decoration: none; transition: all 0.15s ease; margin-bottom: 1px; }
-        .nav-link:hover  { background: var(--hover); color: #8B5CF6; }
-        .nav-link.active { background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff; font-weight:600; box-shadow:0 4px 12px rgba(139,92,246,.35); }
-        .nav-link i      { width: 16px; font-size: 13px; text-align: center; }
-        .nav-link.logout { color: #EF4444; }
-        .nav-link.logout:hover { background: rgba(239,68,68,.1); color: #EF4444; }
-
-        main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-        .topbar { background: var(--topbar); border-bottom: 1px solid var(--border); padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 2px 8px var(--shadow); }
-        .topbar-title { font-size: 16px; font-weight: 700; color: var(--text); }
-        .search-bar { flex: 1; max-width: 380px; background: var(--search); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
-        .topbar-actions { display: flex; align-items: center; gap: 14px; }
-        .icon-btn { width: 34px; height: 34px; border-radius: 8px; background: var(--search); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); cursor: pointer; font-size: 13px; transition: all .15s; position: relative; }
-        .icon-btn:hover { background: var(--hover2); color: #8B5CF6; }
-        .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#8B5CF6,#6D28D9); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 700; }
-        .user-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
-        .user-role { font-size: 10px; color: var(--muted); }
-
-        .theme-toggle { display: flex; align-items: center; gap: 7px; background: var(--tog-bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; cursor: pointer; user-select: none; font-size: 11px; font-weight: 600; color: var(--text2); }
-        .theme-toggle:hover { border-color: #8B5CF6; color: #8B5CF6; }
-        .theme-toggle i { font-size: 11px; }
-
-        .tickets-panel { flex: 1; overflow-y: auto; padding: 24px 28px; }
-        .panel-title { font-size: 20px; font-weight: 700; color: var(--text); }
-        .panel-sub   { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
-
-        .filters-row { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
-        .filter-search { background: var(--search); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; min-width: 200px; }
-        .filter-search input { background: transparent; border: none; outline: none; color: var(--text); font-size: 12px; font-family: inherit; width: 100%; }
-        .filter-select-wrap { position: relative; }
-        .filter-select { background: var(--search); border: 1px solid var(--border); border-radius: 8px; padding: 7px 32px 7px 12px; font-size: 12px; color: var(--input-c); font-family: inherit; outline: none; cursor: pointer; appearance: none; min-width: 130px; }
-        .filter-select-wrap::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 9px; color: var(--muted); pointer-events: none; }
-
-        .btn-add { display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity .15s; font-family: inherit; margin-left: auto; }
-        .btn-add:hover { opacity: .85; }
-
-        .event-group { margin-bottom: 28px; }
-        .event-group-label { font-size: 9px; font-weight: 700; color: var(--grp-text); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--grp-border); }
-
-        .ticket-grid { display: flex; flex-wrap: wrap; gap: 12px; }
-        .ticket-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; min-width: 160px; flex: 0 0 auto; cursor: pointer; transition: border-color .15s, transform .15s; position: relative; box-shadow: 0 2px 8px var(--shadow); }
-        .ticket-card:hover { border-color: #8B5CF6; transform: translateY(-1px); }
-        .ticket-type-label { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-        .ticket-price { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-        .ticket-price.standard { color: #C4B5FD; }
-        .ticket-price.vip      { color: #FBBF24; }
-        .ticket-price.group    { color: #34D399; }
-        .ticket-price.school   { color: #60A5FA; }
-        .ticket-avail { font-size: 10px; font-weight: 500; }
-        .avail-ok   { color: #34D399; }
-        .avail-low  { color: #FBBF24; }
-        .avail-sold { color: #EF4444; }
-        .ticket-card-menu { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 6px; background: transparent; border: none; display: flex; align-items: center; justify-content: center; color: var(--muted2); cursor: pointer; font-size: 11px; transition: background .15s, color .15s; }
-        .ticket-card-menu:hover { background: var(--hover2); color: #8B5CF6; }
-
-        .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
-        .empty-state i { font-size: 36px; margin-bottom: 12px; color: var(--muted2); display: block; }
-
-        /* Drawer */
-        .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-        .drawer-backdrop.open { opacity: 1; pointer-events: all; }
-        .add-ticket-drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 340px; background: #fff; color: #1C1B2E; z-index: 100; overflow-y: auto; padding: 22px 20px; box-shadow: -8px 0 40px rgba(0,0,0,0.4); transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
-        .add-ticket-drawer.open { transform: translateX(0); }
-        .drawer-close { position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; background: #F3F4F6; border: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6B7280; font-size: 13px; }
-        .drawer-close:hover { background: #E5E7EB; color: #111; }
-        .drawer-title { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 20px; padding-right: 36px; }
-
-        .form-group  { margin-bottom: 14px; }
-        .form-row    { display: flex; gap: 10px; margin-bottom: 14px; }
-        .form-row .form-group { flex: 1; margin-bottom: 0; }
-        .form-label  { display: block; font-size: 11px; font-weight: 600; color: #374151; margin-bottom: 4px; }
-        .form-input, .form-select, .form-textarea { width: 100%; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #374151; font-family: inherit; outline: none; transition: border-color .15s; }
-        .form-input::placeholder, .form-textarea::placeholder { color: #9CA3AF; }
-        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #8B5CF6; }
-        .form-select { appearance: none; cursor: pointer; }
-        .form-textarea { resize: vertical; min-height: 70px; }
-        .price-wrap { position: relative; }
-        .price-prefix { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #6B7280; font-weight: 600; }
-        .price-wrap .form-input { padding-left: 22px; }
-        .toggle-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 10px; background: #F9FAFB; border: 1px solid #E5E7EB; margin-bottom: 10px; cursor: pointer; }
-        .toggle { width: 36px; height: 20px; background: #8B5CF6; border-radius: 20px; position: relative; cursor: pointer; flex-shrink: 0; margin-top: 1px; }
-        .toggle::after { content: ''; position: absolute; top: 3px; left: 17px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: left .2s; }
-        .toggle.off { background: #D1D5DB; }
-        .toggle.off::after { left: 3px; }
-        .toggle-name { font-size: 12px; font-weight: 600; color: #111; }
-        .toggle-desc { font-size: 10px; color: #9CA3AF; margin-top: 1px; }
-        .drawer-footer { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-cancel { flex: 1; background: #F3F4F6; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; font-family: inherit; }
-        .btn-cancel:hover { background: #E5E7EB; }
-        .btn-save { flex: 2; background: linear-gradient(135deg,#8B5CF6,#7C3AED); color: #fff; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .btn-save:hover { opacity: .88; }
-        .form-divider { border: none; border-top: 1px solid #E5E7EB; margin: 16px 0; }
-
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        .add-ticket-drawer::-webkit-scrollbar-thumb { background: #D1D5DB; }
+        *{box-sizing:border-box;margin:0;padding:0;transition:background-color .25s,border-color .25s,color .2s;}
+        body{font-family:'DM Sans',sans-serif;background-color:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+        aside{width:220px;min-height:100vh;background-color:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;box-shadow:2px 0 12px var(--shadow);}
+        .sidebar-logo{padding:20px 16px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+        .logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:11px;}
+        .logo-text{font-size:15px;font-weight:700;color:var(--text);}.logo-sub{font-size:10px;color:var(--muted);}
+        .sidebar-section{padding:18px 14px 4px;}
+        .sidebar-section-label{font-size:9px;font-weight:700;color:var(--label-sec);text-transform:uppercase;letter-spacing:1.5px;padding:0 6px;margin-bottom:6px;}
+        .nav-link{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);text-decoration:none;transition:all 0.15s ease;margin-bottom:1px;}
+        .nav-link:hover{background:var(--hover);color:#8B5CF6;}
+        .nav-link.active{background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;font-weight:600;box-shadow:0 4px 12px rgba(139,92,246,.35);}
+        .nav-link i{width:16px;font-size:13px;text-align:center;}
+        .nav-link.logout{color:#EF4444;}.nav-link.logout:hover{background:rgba(239,68,68,.1);color:#EF4444;}
+        main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+        .topbar{background:var(--topbar);border-bottom:1px solid var(--border);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 2px 8px var(--shadow);}
+        .topbar-title{font-size:16px;font-weight:700;color:var(--text);}
+        .search-bar{flex:1;max-width:380px;background:var(--search);border:1px solid var(--border);border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;}
+        .topbar-actions{display:flex;align-items:center;gap:14px;}
+        .icon-btn{width:34px;height:34px;border-radius:8px;background:var(--search);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;font-size:13px;transition:all .15s;position:relative;}
+        .icon-btn:hover{background:var(--hover2);color:#8B5CF6;}
+        .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#8B5CF6,#6D28D9);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;}
+        .user-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.2;}.user-role{font-size:10px;color:var(--muted);}
+        .theme-toggle{display:flex;align-items:center;gap:7px;background:var(--tog-bg);border:1px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;user-select:none;font-size:11px;font-weight:600;color:var(--text2);}
+        .theme-toggle:hover{border-color:#8B5CF6;color:#8B5CF6;}
+        .tickets-panel{flex:1;overflow-y:auto;padding:24px 28px;}
+        .panel-title{font-size:20px;font-weight:700;color:var(--text);}
+        .panel-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+        .filters-row{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
+        .filter-search{background:var(--search);border:1px solid var(--border);border-radius:8px;padding:7px 12px;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;min-width:200px;}
+        .filter-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:12px;font-family:inherit;width:100%;}
+        .filter-select-wrap{position:relative;}
+        .filter-select{background:var(--search);border:1px solid var(--border);border-radius:8px;padding:7px 32px 7px 12px;font-size:12px;color:var(--input-c);font-family:inherit;outline:none;cursor:pointer;appearance:none;min-width:130px;}
+        .filter-select-wrap::after{content:'\f078';font-family:'Font Awesome 6 Free';font-weight:900;position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--muted);pointer-events:none;}
+        .btn-add{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s;font-family:inherit;margin-left:auto;}
+        .btn-add:hover{opacity:.85;}
+        .event-group{margin-bottom:28px;}
+        .event-group-label{font-size:9px;font-weight:700;color:var(--grp-text);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--grp-border);}
+        .ticket-grid{display:flex;flex-wrap:wrap;gap:12px;}
+        .ticket-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;min-width:160px;flex:0 0 auto;cursor:pointer;transition:border-color .15s,transform .15s;position:relative;box-shadow:0 2px 8px var(--shadow);}
+        .ticket-card:hover{border-color:#8B5CF6;transform:translateY(-1px);}
+        .ticket-type-label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+        .ticket-price{font-size:22px;font-weight:700;margin-bottom:6px;}
+        .ticket-price.standard{color:#C4B5FD;}.ticket-price.vip{color:#FBBF24;}.ticket-price.group{color:#34D399;}.ticket-price.school{color:#60A5FA;}
+        .ticket-avail{font-size:10px;font-weight:500;}
+        .avail-ok{color:#34D399;}.avail-low{color:#FBBF24;}.avail-sold{color:#EF4444;}
+        .ticket-card-menu{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:6px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;color:var(--muted2);cursor:pointer;font-size:11px;transition:background .15s,color .15s;}
+        .ticket-card-menu:hover{background:var(--hover2);color:#8B5CF6;}
+        .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+        .empty-state i{font-size:36px;margin-bottom:12px;color:var(--muted2);display:block;}
+        .drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(2px);z-index:99;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
+        .drawer-backdrop.open{opacity:1;pointer-events:all;}
+        .add-ticket-drawer{position:fixed;top:0;right:0;height:100vh;width:340px;background:#fff;color:#1C1B2E;z-index:100;overflow-y:auto;padding:22px 20px;box-shadow:-8px 0 40px rgba(0,0,0,0.4);transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);}
+        .add-ticket-drawer.open{transform:translateX(0);}
+        .drawer-close{position:absolute;top:16px;right:16px;width:30px;height:30px;background:#F3F4F6;border:none;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#6B7280;font-size:13px;}
+        .drawer-close:hover{background:#E5E7EB;color:#111;}
+        .drawer-title{font-size:15px;font-weight:700;color:#111;margin-bottom:20px;padding-right:36px;}
+        .form-group{margin-bottom:14px;}.form-row{display:flex;gap:10px;margin-bottom:14px;}.form-row .form-group{flex:1;margin-bottom:0;}
+        .form-label{display:block;font-size:11px;font-weight:600;color:#374151;margin-bottom:4px;}
+        .form-input,.form-select,.form-textarea{width:100%;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px;font-size:12px;color:#374151;font-family:inherit;outline:none;transition:border-color .15s;}
+        .form-input::placeholder,.form-textarea::placeholder{color:#9CA3AF;}
+        .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:#8B5CF6;}
+        .form-select{appearance:none;cursor:pointer;}.form-textarea{resize:vertical;min-height:70px;}
+        .price-wrap{position:relative;}.price-prefix{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:#6B7280;font-weight:600;}
+        .price-wrap .form-input{padding-left:22px;}
+        .toggle-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;background:#F9FAFB;border:1px solid #E5E7EB;margin-bottom:10px;cursor:pointer;}
+        .toggle{width:36px;height:20px;background:#8B5CF6;border-radius:20px;position:relative;cursor:pointer;flex-shrink:0;margin-top:1px;}
+        .toggle::after{content:'';position:absolute;top:3px;left:17px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+        .toggle.off{background:#D1D5DB;}.toggle.off::after{left:3px;}
+        .toggle-name{font-size:12px;font-weight:600;color:#111;}.toggle-desc{font-size:10px;color:#9CA3AF;margin-top:1px;}
+        .drawer-footer{display:flex;gap:10px;margin-top:20px;}
+        .btn-cancel{flex:1;background:#F3F4F6;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit;}
+        .btn-cancel:hover{background:#E5E7EB;}
+        .btn-save{flex:2;background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+        .btn-save:hover{opacity:.88;}
+        .form-divider{border:none;border-top:1px solid #E5E7EB;margin:16px 0;}
+        .toast{position:fixed;bottom:24px;right:28px;background:#1A1836;border:1px solid #8B5CF6;border-radius:10px;padding:11px 16px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#C4B5FD;box-shadow:0 8px 24px rgba(0,0,0,0.4);transform:translateY(80px);opacity:0;transition:transform .3s,opacity .3s;z-index:200;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+        .add-ticket-drawer::-webkit-scrollbar-thumb{background:#D1D5DB;}
     </style>
 </head>
 <body>
 
-<!-- ✅ AUTH GUARD -->
 <script>
-  if (!localStorage.getItem('dfa_token') || !localStorage.getItem('dfa_admin')) {
-    window.location.href = 'index.html';
-  }
+  if (!localStorage.getItem('dfa_token') || !localStorage.getItem('dfa_admin')) { window.location.href = 'index.html'; }
   const savedTheme = localStorage.getItem('dfa_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
 </script>
@@ -216,35 +150,21 @@
         <a href="#"          class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
     </div>
     <div style="margin-top:auto;padding:16px 14px 20px;">
-        <a href="#" class="nav-link logout" onclick="logout()">
-            <i class="fa-solid fa-right-from-bracket"></i> Log out
-        </a>
+        <a href="#" class="nav-link logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Log out</a>
     </div>
 </aside>
 
 <main>
     <div class="topbar">
         <div class="topbar-title">Tickets</div>
-        <div class="search-bar">
-            <i class="fa-solid fa-magnifying-glass" style="font-size:12px;"></i>
-            Search tickets...
-        </div>
+        <div class="search-bar"><i class="fa-solid fa-magnifying-glass" style="font-size:12px;"></i> Search tickets...</div>
         <div class="topbar-actions">
-            <div class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
-                <i class="fa-solid fa-moon" id="themeIcon"></i>
-                <span id="themeLabel">Dark</span>
-            </div>
+            <div class="theme-toggle" onclick="toggleTheme()" id="themeBtn"><i class="fa-solid fa-moon" id="themeIcon"></i><span id="themeLabel">Dark</span></div>
             <div class="icon-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
-            <div class="icon-btn">
-                <i class="fa-solid fa-bell"></i>
-                <span style="position:absolute;top:6px;right:6px;width:6px;height:6px;background:#8B5CF6;border-radius:50%;"></span>
-            </div>
+            <div class="icon-btn"><i class="fa-solid fa-bell"></i><span style="position:absolute;top:6px;right:6px;width:6px;height:6px;background:#8B5CF6;border-radius:50%;"></span></div>
             <div style="display:flex;align-items:center;gap:10px;">
                 <div class="avatar" id="avatarInitials">EE</div>
-                <div>
-                    <div class="user-name" id="adminName">Loading...</div>
-                    <div class="user-role" id="adminRole">Admin</div>
-                </div>
+                <div><div class="user-name" id="adminName">Loading...</div><div class="user-role" id="adminRole">Admin</div></div>
                 <i class="fa-solid fa-right-from-bracket" style="font-size:13px;color:var(--muted);cursor:pointer;" onclick="logout()"></i>
             </div>
         </div>
@@ -253,7 +173,6 @@
     <div class="tickets-panel">
         <div class="panel-title">Ticket Types</div>
         <div class="panel-sub" id="ticketSub">Loading...</div>
-
         <div class="filters-row">
             <div class="filter-search">
                 <i class="fa-solid fa-magnifying-glass" style="font-size:11px;color:var(--muted);"></i>
@@ -264,65 +183,60 @@
                     <option value="">All Events</option>
                 </select>
             </div>
-            <button class="btn-add" onclick="openDrawer()">
-                <i class="fa-solid fa-plus"></i> Add Ticket Type
-            </button>
+            <button class="btn-add" onclick="openDrawer()"><i class="fa-solid fa-plus"></i> Add Ticket Type</button>
         </div>
-
         <div id="tickets-container"></div>
     </div>
 </main>
 
-<!-- Backdrop -->
 <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
 
-<!-- Add Ticket Drawer -->
 <div class="add-ticket-drawer" id="ticketDrawer">
     <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
     <div class="drawer-title">Add Ticket Type</div>
 
     <div class="form-group">
-        <label class="form-label">Event</label>
-        <select class="form-select" id="ticket-event"><option value="">Loading events...</option></select>
+        <label class="form-label">Event *</label>
+        <select class="form-select" id="ticket-event"><option value="">Select Event</option></select>
     </div>
     <hr class="form-divider">
     <div class="form-row">
         <div class="form-group">
-            <label class="form-label">Ticket Name</label>
-            <input type="text" class="form-input" id="ticket-name" placeholder="VIP Access">
+            <label class="form-label">Ticket Name *</label>
+            <input type="text" class="form-input" id="ticket-name" placeholder="e.g. VIP Access">
         </div>
         <div class="form-group">
-            <label class="form-label">Ticket Type</label>
+            <label class="form-label">Ticket Type *</label>
             <select class="form-select" id="ticket-type">
-                <option>Standard</option>
-                <option>VIP</option>
-                <option>Group Pass</option>
-                <option>School Pass</option>
-                <option>Early Bird</option>
-                <option>Free</option>
+                <option value="Standard">Standard</option>
+                <option value="VIP">VIP</option>
+                <option value="Group Pass">Group Pass</option>
+                <option value="School Pass">School Pass</option>
+                <option value="Early Bird">Early Bird</option>
+                <option value="Free">Free</option>
             </select>
         </div>
     </div>
     <div class="form-row">
         <div class="form-group">
-            <label class="form-label">Price (₦)</label>
+            <label class="form-label">Price (N) *</label>
             <div class="price-wrap">
-                <span class="price-prefix">₦</span>
+                <span class="price-prefix">N</span>
                 <input type="number" class="form-input" id="ticket-price" placeholder="5000">
             </div>
         </div>
         <div class="form-group">
-            <label class="form-label">Quantity</label>
+            <label class="form-label">Quantity *</label>
             <input type="number" class="form-input" id="ticket-capacity" placeholder="100">
         </div>
     </div>
     <div class="form-group">
         <label class="form-label">Status</label>
         <select class="form-select" id="ticket-status">
-            <option>Available</option>
-            <option>Sold Out</option>
-            <option>Hidden</option>
-            <option>Coming Soon</option>
+            <option value="Available">Available</option>
+            <option value="Sold Out">Sold Out</option>
+            <option value="Hidden">Hidden</option>
+            <option value="Coming Soon">Coming Soon</option>
         </select>
     </div>
     <div class="form-group">
@@ -330,21 +244,20 @@
         <textarea class="form-textarea" id="ticket-perks" placeholder="List what's included, one per line"></textarea>
     </div>
     <hr class="form-divider">
-    <div class="toggle-item" onclick="toggleSwitch(this)">
+    <div class="toggle-item" id="toggle-discounts" onclick="toggleSwitch(this)">
         <div class="toggle off"></div>
         <div class="toggle-info">
             <div class="toggle-name">Enable Discounts</div>
             <div class="toggle-desc">Allow promo codes on this ticket</div>
         </div>
     </div>
-    <div class="toggle-item" onclick="toggleSwitch(this)">
+    <div class="toggle-item" id="toggle-group" onclick="toggleSwitch(this)">
         <div class="toggle off"></div>
         <div class="toggle-info">
             <div class="toggle-name">Group Ticket</div>
             <div class="toggle-desc">Allows multiple attendees per purchase</div>
         </div>
     </div>
-
     <div class="drawer-footer">
         <button class="btn-cancel" onclick="closeDrawer()">Cancel</button>
         <button class="btn-save" id="saveTicketBtn" onclick="saveTicketTier()">
@@ -353,16 +266,13 @@
     </div>
 </div>
 
+<div class="toast" id="toast"><i class="fa-solid fa-circle-check" style="color:#34D399;"></i><span id="toastMsg">Done</span></div>
+
 <script>
-    const API = 'https://dfaummah-server.onrender.com/api/v1';
+    const API = 'https://dfa-backend-lilj.onrender.com/api/v1';
     let allEvents = [];
 
-    // ── Auth + session ────────────────────────────────────────────────────────
-    function logout() {
-        localStorage.removeItem('dfa_token');
-        localStorage.removeItem('dfa_admin');
-        window.location.href = 'index.html';
-    }
+    function logout() { localStorage.removeItem('dfa_token'); localStorage.removeItem('dfa_admin'); window.location.href = 'index.html'; }
     const adminData = JSON.parse(localStorage.getItem('dfa_admin') || '{}');
     if (adminData.name) {
         document.getElementById('adminName').textContent = adminData.name;
@@ -371,7 +281,6 @@
         document.getElementById('avatarInitials').textContent = initials;
     }
 
-    // ── Theme toggle ──────────────────────────────────────────────────────────
     function applyThemeUI(theme) {
         document.getElementById('themeIcon').className    = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
         document.getElementById('themeLabel').textContent = theme === 'dark' ? 'Dark' : 'Light';
@@ -384,7 +293,6 @@
     }
     applyThemeUI(savedTheme);
 
-    // ── Drawer ────────────────────────────────────────────────────────────────
     function openDrawer() {
         document.getElementById('ticketDrawer').classList.add('open');
         document.getElementById('drawerBackdrop').classList.add('open');
@@ -398,23 +306,17 @@
     function toggleSwitch(item) { item.querySelector('.toggle').classList.toggle('off'); }
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
-    // ── Load events ───────────────────────────────────────────────────────────
     async function loadEvents() {
         try {
             const res    = await fetch(`${API}/events`);
             const result = await res.json();
             allEvents    = result.data?.events || [];
-
-            // Fill drawer dropdown
             const sel = document.getElementById('ticket-event');
             sel.innerHTML = '<option value="">Select Event</option>' +
                 allEvents.map(e => `<option value="${e._id}">${e.title}</option>`).join('');
-
-            // Fill filter dropdown
             const filter = document.getElementById('eventFilter');
             filter.innerHTML = '<option value="">All Events</option>' +
                 allEvents.map(e => `<option value="${e._id}">${e.title}</option>`).join('');
-
             renderTickets(allEvents);
         } catch(err) {
             document.getElementById('tickets-container').innerHTML =
@@ -422,38 +324,35 @@
         }
     }
 
-    // ── Render tickets ────────────────────────────────────────────────────────
     function renderTickets(events) {
         const container = document.getElementById('tickets-container');
         const total = events.reduce((sum, e) => sum + (e.ticketTiers?.length || 0), 0);
         document.getElementById('ticketSub').textContent =
             `${total} ticket type${total !== 1 ? 's' : ''} across ${events.length} event${events.length !== 1 ? 's' : ''}`;
-
         if (events.length === 0) {
             container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-ticket"></i><p>No tickets found</p></div>`;
             return;
         }
-
         const priceColors = ['standard','vip','group','school','standard'];
         container.innerHTML = events.map(event => {
             const tiersHTML = (event.ticketTiers || []).map((tier, i) => {
-                const sold     = tier.sold || 0;
-                const left     = tier.capacity - sold;
-                const pct      = tier.capacity > 0 ? (sold / tier.capacity) * 100 : 0;
+                const sold       = tier.sold || 0;
+                const left       = tier.capacity - sold;
+                const pct        = tier.capacity > 0 ? (sold / tier.capacity) * 100 : 0;
                 const availClass = pct >= 100 ? 'avail-sold' : pct >= 80 ? 'avail-low' : 'avail-ok';
                 const availText  = pct >= 100 ? 'Sold Out' : `${left} Left`;
                 const colorClass = priceColors[i % priceColors.length];
+                const displayName = tier.ticketName || tier.name || 'Ticket';
                 return `
                 <div class="ticket-card">
                     <button class="ticket-card-menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                    <div class="ticket-type-label">${tier.name}</div>
-                    <div class="ticket-price ${colorClass}">₦${Number(tier.price).toLocaleString()}</div>
+                    <div class="ticket-type-label">${displayName}</div>
+                    <div class="ticket-price ${colorClass}">N${Number(tier.price).toLocaleString()}</div>
                     <div class="ticket-avail ${availClass}">
                         <i class="fa-solid fa-circle" style="font-size:6px;margin-right:4px;"></i>${availText}
                     </div>
                 </div>`;
             }).join('');
-
             return `
             <div class="event-group">
                 <div class="event-group-label">${event.title}</div>
@@ -468,7 +367,6 @@
         }).join('');
     }
 
-    // ── Filter ────────────────────────────────────────────────────────────────
     function filterByEvent(id) {
         if (!id) { renderTickets(allEvents); return; }
         renderTickets(allEvents.filter(e => e._id === id));
@@ -478,21 +376,28 @@
         const filtered = allEvents.map(e => ({
             ...e,
             ticketTiers: (e.ticketTiers || []).filter(t =>
-                t.name.toLowerCase().includes(q.toLowerCase())
+                (t.ticketName || t.name || '').toLowerCase().includes(q.toLowerCase())
             )
         })).filter(e => e.ticketTiers.length > 0);
         renderTickets(filtered);
     }
 
-    // ── Save ticket tier ──────────────────────────────────────────────────────
     async function saveTicketTier() {
-        const eventId  = document.getElementById('ticket-event').value;
-        const name     = document.getElementById('ticket-name').value || document.getElementById('ticket-type').value;
-        const price    = document.getElementById('ticket-price').value;
-        const capacity = document.getElementById('ticket-capacity').value;
-        const status   = document.getElementById('ticket-status').value;
+        const eventId         = document.getElementById('ticket-event').value;
+        const ticketName      = document.getElementById('ticket-name').value.trim();
+        const ticketType      = document.getElementById('ticket-type').value;
+        const price           = document.getElementById('ticket-price').value;
+        const capacity        = document.getElementById('ticket-capacity').value;
+        const status          = document.getElementById('ticket-status').value;
+        const perks           = document.getElementById('ticket-perks').value;
+        const enableDiscounts = !document.getElementById('toggle-discounts').querySelector('.toggle').classList.contains('off');
+        const isGroupTicket   = !document.getElementById('toggle-group').querySelector('.toggle').classList.contains('off');
+        const finalName       = ticketName || ticketType;
 
-        if (!eventId || !name || !price || !capacity) { alert('Please fill all required fields'); return; }
+        if (!eventId || !finalName || !price || !capacity) {
+            alert('Please fill all required fields: Event, Ticket Name, Price, Quantity');
+            return;
+        }
 
         const btn = document.getElementById('saveTicketBtn');
         btn.disabled = true;
@@ -500,25 +405,45 @@
 
         try {
             const token = localStorage.getItem('dfa_token');
-            const res = await fetch(`${API}/events/${eventId}/tickets`, {
+            const res = await fetch(`${API}/events/${eventId}/tiers`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ name, price: Number(price), capacity: Number(capacity), currency: 'NGN', status })
+                body: JSON.stringify({
+                    ticketName:      finalName,
+                    ticketType:      ticketType,
+                    price:           Number(price),
+                    capacity:        Number(capacity),
+                    status:          status,
+                    perks:           perks,
+                    enableDiscounts: enableDiscounts,
+                    isGroupTicket:   isGroupTicket
+                })
             });
             const result = await res.json();
             if (!res.ok) throw new Error(result.message || 'Failed to add ticket');
-            alert('Ticket type added!');
+            showToast('Ticket type added!');
             await loadEvents();
             closeDrawer();
+            document.getElementById('ticket-name').value     = '';
+            document.getElementById('ticket-price').value    = '';
+            document.getElementById('ticket-capacity').value = '';
+            document.getElementById('ticket-perks').value    = '';
         } catch(err) {
             alert(err.message || 'Failed to add ticket');
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
         }
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
     }
 
     loadEvents();
