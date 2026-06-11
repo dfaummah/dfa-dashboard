@@ -249,7 +249,7 @@
 <!-- Backdrop -->
 <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
 
-<!-- ══ CREATE / EDIT DRAWER ══ -->
+<!-- CREATE / EDIT DRAWER -->
 <div class="create-panel" id="createPanel">
     <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
     <div class="cp-title" id="drawerTitle">Create Event</div>
@@ -333,8 +333,8 @@
 
 <script>
     const API = 'https://dfaummah-server.onrender.com/api/v1';
-    let allEvents  = [];
-    let editingId  = null; // null = create mode, string = edit mode
+    let allEvents = [];
+    let editingId = null; // null = create mode, string = edit mode
 
     // ── Auth ──────────────────────────────────────────────────────────────────
     function logout() {
@@ -445,9 +445,9 @@
     function openCreateDrawer() {
         editingId = null;
         clearForm();
-        document.getElementById('drawerTitle').textContent = 'Create Event';
-        document.getElementById('drawerBadge').className   = 'cp-mode-badge create';
-        document.getElementById('drawerBadge').innerHTML   = '<i class="fa-solid fa-plus"></i> New Event';
+        document.getElementById('drawerTitle').textContent  = 'Create Event';
+        document.getElementById('drawerBadge').className    = 'cp-mode-badge create';
+        document.getElementById('drawerBadge').innerHTML    = '<i class="fa-solid fa-plus"></i> New Event';
         document.getElementById('saveBtnLabel').textContent = 'Save Event';
         document.getElementById('bannerHint').style.display = 'none';
         document.getElementById('createPanel').classList.add('open');
@@ -529,35 +529,35 @@
             const token    = localStorage.getItem('dfa_token');
             const formData = new FormData();
 
-            formData.append('title',       title);
-            formData.append('subTitle',    document.getElementById('event-subtitle').value);
-            formData.append('date',        document.getElementById('event-date').value);
-            formData.append('time',        document.getElementById('event-time').value || '18:00');
-            formData.append('location',    document.getElementById('event-location').value);
-            formData.append('description', document.getElementById('event-description').value);
-            formData.append('capacity',    document.getElementById('event-capacity').value || 500);
-            formData.append('status',      document.getElementById('event-status').value);
-            formData.append('isPublished', !document.getElementById('publishToggle').classList.contains('off'));
+            formData.append('title',           title);
+            formData.append('subTitle',        document.getElementById('event-subtitle').value);
+            formData.append('date',            document.getElementById('event-date').value);
+            formData.append('time',            document.getElementById('event-time').value || '18:00');
+            formData.append('location',        document.getElementById('event-location').value);
+            formData.append('description',     document.getElementById('event-description').value);
+            formData.append('capacity',        document.getElementById('event-capacity').value || 500);
+            formData.append('status',          document.getElementById('event-status').value);
+            formData.append('isPublished',     !document.getElementById('publishToggle').classList.contains('off'));
             formData.append('videoPreviewUrl', document.getElementById('event-video').value);
-            formData.append('tags',        document.getElementById('event-tags').value);
+            formData.append('tags',            document.getElementById('event-tags').value);
 
             const imageFile = document.getElementById('event-image').files[0];
             if (imageFile) formData.append('bannerImage', imageFile);
 
             let res;
             if (editingId) {
-                // EDIT mode — PATCH
-                res = await fetch(`${API}/admin/events/${editingId}`, {
-                    method: 'PATCH',
+                // EDIT mode — PUT /events/:id  ✅ matches router: .put(upload, updateEvent)
+                res = await fetch(`${API}/events/${editingId}`, {
+                    method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
                 });
             } else {
-                // CREATE mode — POST
+                // CREATE mode — POST /events  ✅ matches router: .post(upload, createEvent)
                 formData.append('ticketTiers', JSON.stringify([
                     { name: 'Standard', price: 5000, capacity: 200, currency: 'NGN', status: 'Available' }
                 ]));
-                res = await fetch(`${API}/admin/events`, {
+                res = await fetch(`${API}/events`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
