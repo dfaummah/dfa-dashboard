@@ -751,7 +751,7 @@
             let res;
             if (editingId) {
                 res = await fetch(`${API}/content/videos/${editingId}`, {
-                    method: 'PATCH',
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(payload)
                 });
