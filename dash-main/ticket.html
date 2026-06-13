@@ -77,7 +77,10 @@
         .add-ticket-drawer.open{transform:translateX(0);}
         .drawer-close{position:absolute;top:16px;right:16px;width:30px;height:30px;background:#F3F4F6;border:none;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#6B7280;font-size:13px;}
         .drawer-close:hover{background:#E5E7EB;color:#111;}
-        .drawer-title{font-size:15px;font-weight:700;color:#111;margin-bottom:20px;padding-right:36px;}
+        .drawer-title{font-size:15px;font-weight:700;color:#111;margin-bottom:4px;padding-right:36px;}
+        .drawer-mode-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:16px;}
+        .drawer-mode-badge.create{background:rgba(139,92,246,.1);color:#8B5CF6;border:1px solid rgba(139,92,246,.2);}
+        .drawer-mode-badge.edit{background:rgba(251,191,36,.1);color:#D97706;border:1px solid rgba(251,191,36,.2);}
         .form-group{margin-bottom:14px;}.form-row{display:flex;gap:10px;margin-bottom:14px;}.form-row .form-group{flex:1;margin-bottom:0;}
         .form-label{display:block;font-size:11px;font-weight:600;color:#374151;margin-bottom:4px;}
         .form-input,.form-select,.form-textarea{width:100%;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px;font-size:12px;color:#374151;font-family:inherit;outline:none;transition:border-color .15s;}
@@ -96,6 +99,8 @@
         .btn-cancel:hover{background:#E5E7EB;}
         .btn-save{flex:2;background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
         .btn-save:hover{opacity:.88;}
+        .btn-delete{width:100%;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#EF4444;border-radius:10px;padding:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;transition:background .15s;}
+        .btn-delete:hover{background:rgba(239,68,68,.15);}
         .form-divider{border:none;border-top:1px solid #E5E7EB;margin:16px 0;}
         .toast{position:fixed;bottom:24px;right:28px;background:#1A1836;border:1px solid #8B5CF6;border-radius:10px;padding:11px 16px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#C4B5FD;box-shadow:0 8px 24px rgba(0,0,0,0.4);transform:translateY(80px);opacity:0;transition:transform .3s,opacity .3s;z-index:200;}
         .toast.show{transform:translateY(0);opacity:1;}
@@ -183,7 +188,7 @@
                     <option value="">All Events</option>
                 </select>
             </div>
-            <button class="btn-add" onclick="openDrawer()"><i class="fa-solid fa-plus"></i> Add Ticket Type</button>
+            <button class="btn-add" onclick="openCreateDrawer()"><i class="fa-solid fa-plus"></i> Add Ticket Type</button>
         </div>
         <div id="tickets-container"></div>
     </div>
@@ -193,7 +198,8 @@
 
 <div class="add-ticket-drawer" id="ticketDrawer">
     <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
-    <div class="drawer-title">Add Ticket Type</div>
+    <div class="drawer-title" id="drawerTitle">Add Ticket Type</div>
+    <div class="drawer-mode-badge create" id="drawerBadge"><i class="fa-solid fa-plus"></i> New Ticket</div>
 
     <div class="form-group">
         <label class="form-label">Event *</label>
@@ -261,16 +267,21 @@
     <div class="drawer-footer">
         <button class="btn-cancel" onclick="closeDrawer()">Cancel</button>
         <button class="btn-save" id="saveTicketBtn" onclick="saveTicketTier()">
-            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+            <i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnLabel">Save Changes</span>
         </button>
     </div>
+    <button class="btn-delete" id="deleteTicketBtn" onclick="deleteTicketTier()" style="display:none;">
+        <i class="fa-solid fa-trash"></i> Delete Ticket Type
+    </button>
 </div>
 
 <div class="toast" id="toast"><i class="fa-solid fa-circle-check" style="color:#34D399;"></i><span id="toastMsg">Done</span></div>
 
 <script>
-    const API = 'https://dfaummah-server.onrender.com/api/v1';
-    let allEvents = [];
+    const API = 'https://dfa-backend-lilj.onrender.com/api/v1';
+    let allEvents  = [];
+    let editingEventId = null; // event the tier belongs to
+    let editingTierId  = null; // null = create mode, string = edit mode
 
     function logout() { localStorage.removeItem('dfa_token'); localStorage.removeItem('dfa_admin'); window.location.href = 'index.html'; }
     const adminData = JSON.parse(localStorage.getItem('dfa_admin') || '{}');
@@ -293,6 +304,7 @@
     }
     applyThemeUI(savedTheme);
 
+    // ── Drawer ────────────────────────────────────────────────────────────────
     function openDrawer() {
         document.getElementById('ticketDrawer').classList.add('open');
         document.getElementById('drawerBackdrop').classList.add('open');
@@ -302,9 +314,77 @@
         document.getElementById('ticketDrawer').classList.remove('open');
         document.getElementById('drawerBackdrop').classList.remove('open');
         document.body.style.overflow = '';
+        editingEventId = null;
+        editingTierId  = null;
     }
     function toggleSwitch(item) { item.querySelector('.toggle').classList.toggle('off'); }
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+    function clearForm() {
+        document.getElementById('ticket-name').value     = '';
+        document.getElementById('ticket-price').value    = '';
+        document.getElementById('ticket-capacity').value = '';
+        document.getElementById('ticket-perks').value    = '';
+        document.getElementById('ticket-type').value     = 'Standard';
+        document.getElementById('ticket-status').value   = 'Available';
+        document.getElementById('toggle-discounts').querySelector('.toggle').classList.add('off');
+        document.getElementById('toggle-group').querySelector('.toggle').classList.add('off');
+    }
+
+    // ── Open in CREATE mode ──────────────────────────────────────────────────
+    function openCreateDrawer() {
+        editingEventId = null;
+        editingTierId  = null;
+        clearForm();
+        document.getElementById('ticket-event').disabled = false;
+
+        document.getElementById('drawerTitle').textContent = 'Add Ticket Type';
+        document.getElementById('drawerBadge').className   = 'drawer-mode-badge create';
+        document.getElementById('drawerBadge').innerHTML   = '<i class="fa-solid fa-plus"></i> New Ticket';
+        document.getElementById('saveBtnLabel').textContent = 'Save Changes';
+        document.getElementById('deleteTicketBtn').style.display = 'none';
+
+        openDrawer();
+    }
+
+    // ── Open in EDIT mode ────────────────────────────────────────────────────
+    function openEditDrawer(eventId, tierId) {
+        const event = allEvents.find(e => e._id === eventId);
+        if (!event) return;
+        const tier = (event.ticketTiers || []).find(t => t._id === tierId);
+        if (!tier) return;
+
+        editingEventId = eventId;
+        editingTierId  = tierId;
+
+        // Populate event dropdown (locked to this event)
+        const sel = document.getElementById('ticket-event');
+        sel.innerHTML = `<option value="${event._id}">${event.title}</option>`;
+        sel.value = event._id;
+        sel.disabled = true; // can't move a tier to another event
+
+        // Populate fields
+        document.getElementById('ticket-name').value     = tier.ticketName || tier.name || '';
+        document.getElementById('ticket-type').value     = tier.ticketType || 'Standard';
+        document.getElementById('ticket-price').value    = tier.price ?? '';
+        document.getElementById('ticket-capacity').value = tier.capacity ?? '';
+        document.getElementById('ticket-status').value   = tier.status || 'Available';
+        document.getElementById('ticket-perks').value    = Array.isArray(tier.perks) ? tier.perks.join('\n') : (tier.perks || '');
+
+        // Toggles
+        const discToggle  = document.getElementById('toggle-discounts').querySelector('.toggle');
+        const groupToggle = document.getElementById('toggle-group').querySelector('.toggle');
+        if (tier.enableDiscounts) discToggle.classList.remove('off'); else discToggle.classList.add('off');
+        if (tier.isGroupTicket)   groupToggle.classList.remove('off'); else groupToggle.classList.add('off');
+
+        document.getElementById('drawerTitle').textContent = 'Edit Ticket Type';
+        document.getElementById('drawerBadge').className   = 'drawer-mode-badge edit';
+        document.getElementById('drawerBadge').innerHTML   = '<i class="fa-solid fa-pen"></i> Editing';
+        document.getElementById('saveBtnLabel').textContent = 'Update Ticket';
+        document.getElementById('deleteTicketBtn').style.display = (tier.sold > 0) ? 'none' : 'flex';
+
+        openDrawer();
+    }
 
     async function loadEvents() {
         try {
@@ -344,8 +424,10 @@
                 const colorClass = priceColors[i % priceColors.length];
                 const displayName = tier.ticketName || tier.name || 'Ticket';
                 return `
-                <div class="ticket-card">
-                    <button class="ticket-card-menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                <div class="ticket-card" onclick="openEditDrawer('${event._id}','${tier._id}')">
+                    <button class="ticket-card-menu" onclick="event.stopPropagation(); openEditDrawer('${event._id}','${tier._id}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
                     <div class="ticket-type-label">${displayName}</div>
                     <div class="ticket-price ${colorClass}">N${Number(tier.price).toLocaleString()}</div>
                     <div class="ticket-avail ${availClass}">
@@ -358,7 +440,7 @@
                 <div class="event-group-label">${event.title}</div>
                 <div class="ticket-grid">
                     ${tiersHTML}
-                    <div class="ticket-card" onclick="openDrawer()" style="border-style:dashed;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;min-height:90px;opacity:0.5;">
+                    <div class="ticket-card" onclick="openCreateDrawer(); document.getElementById('ticket-event').value='${event._id}';" style="border-style:dashed;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;min-height:90px;opacity:0.5;">
                         <i class="fa-solid fa-plus" style="color:var(--muted);font-size:16px;"></i>
                         <span style="font-size:10px;color:var(--muted);font-weight:600;">Add Type</span>
                     </div>
@@ -382,6 +464,7 @@
         renderTickets(filtered);
     }
 
+    // ── Save (Create or Update) ──────────────────────────────────────────────
     async function saveTicketTier() {
         const eventId         = document.getElementById('ticket-event').value;
         const ticketName      = document.getElementById('ticket-name').value.trim();
@@ -403,39 +486,83 @@
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
+        const payload = {
+            ticketName:      finalName,
+            ticketType:      ticketType,
+            price:           Number(price),
+            capacity:        Number(capacity),
+            status:          status,
+            perks:           perks,
+            enableDiscounts: enableDiscounts,
+            isGroupTicket:   isGroupTicket
+        };
+
         try {
             const token = localStorage.getItem('dfa_token');
-            const res = await fetch(`${API}/events/${eventId}/tiers`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    ticketName:      finalName,
-                    ticketType:      ticketType,
-                    price:           Number(price),
-                    capacity:        Number(capacity),
-                    status:          status,
-                    perks:           perks,
-                    enableDiscounts: enableDiscounts,
-                    isGroupTicket:   isGroupTicket
-                })
-            });
+            let res;
+
+            if (editingTierId) {
+                // EDIT mode — PUT /events/:eventId/tiers/:tierId
+                res = await fetch(`${API}/events/${editingEventId}/tiers/${editingTierId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                // CREATE mode — POST /events/:eventId/tiers
+                res = await fetch(`${API}/events/${eventId}/tiers`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+            }
+
             const result = await res.json();
-            if (!res.ok) throw new Error(result.message || 'Failed to add ticket');
-            showToast('Ticket type added!');
+            if (!res.ok) throw new Error(result.message || 'Failed to save ticket');
+
+            showToast(editingTierId ? 'Ticket type updated!' : 'Ticket type added!');
             await loadEvents();
             closeDrawer();
-            document.getElementById('ticket-name').value     = '';
-            document.getElementById('ticket-price').value    = '';
-            document.getElementById('ticket-capacity').value = '';
-            document.getElementById('ticket-perks').value    = '';
         } catch(err) {
-            alert(err.message || 'Failed to add ticket');
+            alert(err.message || 'Failed to save ticket');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
+            btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnLabel">${editingTierId ? 'Update Ticket' : 'Save Changes'}</span>`;
+        }
+    }
+
+    // ── Delete ticket tier ───────────────────────────────────────────────────
+    async function deleteTicketTier() {
+        if (!editingEventId || !editingTierId) return;
+        if (!confirm('Delete this ticket type? This cannot be undone.')) return;
+
+        const btn = document.getElementById('deleteTicketBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+
+        try {
+            const token = localStorage.getItem('dfa_token');
+            const res = await fetch(`${API}/events/${editingEventId}/tiers/${editingTierId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Failed to delete ticket');
+
+            showToast('Ticket type deleted');
+            await loadEvents();
+            closeDrawer();
+        } catch(err) {
+            alert(err.message || 'Failed to delete ticket');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete Ticket Type';
         }
     }
 
