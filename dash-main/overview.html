@@ -207,6 +207,7 @@
         .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         .chart-title  { font-size: 13px; font-weight: 600; color: var(--text); }
         .chart-badge  { font-size: 10px; color: var(--muted); background: var(--hover2); padding: 3px 8px; border-radius: 20px; }
+        .chart-canvas-wrap { position: relative; height: 220px; }
 
         .events-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .event-card {
@@ -428,14 +429,18 @@
                     <div class="chart-title">Ticket Sales by Event</div>
                     <div class="chart-badge">Active Events</div>
                 </div>
-                <canvas id="barChart" height="160"></canvas>
+                <div class="chart-canvas-wrap">
+                    <canvas id="barChart"></canvas>
+                </div>
             </div>
             <div class="chart-card">
                 <div class="chart-header">
                     <div class="chart-title">Capacity Used vs Remaining</div>
                     <div class="chart-badge">Global</div>
                 </div>
-                <canvas id="lineChart" height="160"></canvas>
+                <div class="chart-canvas-wrap">
+                    <canvas id="lineChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -535,7 +540,7 @@
 
     async function loadDashboardStats() {
         try {
-            const res = await fetch(`${API}/admin/dashboard-stats`, {
+            const res = await fetch(`${API}/admin/stats`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const result = await res.json();
@@ -718,6 +723,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } },
@@ -744,6 +750,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 cutout: '70%',
                 plugins: {
                     legend: {
