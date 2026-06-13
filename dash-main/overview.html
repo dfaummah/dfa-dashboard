@@ -10,7 +10,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-        /* ── DARK THEME (default) ── */
         :root[data-theme="dark"] {
             --bg:        #1C1B2E;
             --sidebar:   #15142A;
@@ -32,7 +31,6 @@
             --shadow:    rgba(0,0,0,0.3);
         }
 
-        /* ── LIGHT THEME ── */
         :root[data-theme="light"] {
             --bg:        #F4F3FF;
             --sidebar:   #FFFFFF;
@@ -153,7 +151,6 @@
         .user-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
         .user-role { font-size: 10px; color: var(--muted); }
 
-        /* ── Theme Toggle ── */
         .theme-toggle {
             display: flex; align-items: center; gap: 7px;
             background: var(--tog-bg); border: 1px solid var(--border);
@@ -227,8 +224,11 @@
         .tbadge.yellow { color: #F59E0B; background: rgba(245,158,11,0.12); }
         .tbadge.purple { color: #A78BFA; background: rgba(167,139,250,0.12); }
         .tbadge.green  { color: #34D399; background: rgba(52,211,153,0.12); }
+        .tbadge.red    { color: #F87171; background: rgba(248,113,113,0.12); }
 
-        /* ── NOTIFICATION TOAST ── */
+        .empty-events { grid-column: 1 / -1; text-align: center; padding: 30px; color: var(--muted); font-size: 12px; }
+        .empty-events i { font-size: 26px; margin-bottom: 8px; display: block; color: var(--muted2); }
+
         .notification-container {
             position: fixed;
             top: 20px;
@@ -254,80 +254,21 @@
             min-width: 320px;
         }
 
-        .notification-toast.success {
-            border-left: 4px solid #34D399;
-        }
+        .notification-toast.success { border-left: 4px solid #34D399; }
+        .notification-toast.success .notification-icon { color: #34D399; }
+        .notification-toast.error { border-left: 4px solid #EF4444; }
+        .notification-toast.error .notification-icon { color: #EF4444; }
 
-        .notification-toast.success .notification-icon {
-            color: #34D399;
-        }
+        .notification-icon { font-size: 18px; flex-shrink: 0; }
+        .notification-content { flex: 1; }
+        .notification-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+        .notification-message { font-size: 12px; color: var(--muted); }
+        .notification-close { cursor: pointer; color: var(--muted); font-size: 16px; flex-shrink: 0; transition: color 0.2s; }
+        .notification-close:hover { color: var(--text); }
 
-        .notification-toast.error {
-            border-left: 4px solid #EF4444;
-        }
-
-        .notification-toast.error .notification-icon {
-            color: #EF4444;
-        }
-
-        .notification-icon {
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        .notification-content {
-            flex: 1;
-        }
-
-        .notification-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 2px;
-        }
-
-        .notification-message {
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .notification-close {
-            cursor: pointer;
-            color: var(--muted);
-            font-size: 16px;
-            flex-shrink: 0;
-            transition: color 0.2s;
-        }
-
-        .notification-close:hover {
-            color: var(--text);
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-        }
-
-        .notification-toast.removing {
-            animation: slideOut 0.3s ease-in forwards;
-        }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+        .notification-toast.removing { animation: slideOut 0.3s ease-in forwards; }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -336,17 +277,14 @@
 </head>
 <body>
 
-<!-- ✅ AUTH GUARD -->
 <script>
   if (!localStorage.getItem('dfa_token') || !localStorage.getItem('dfa_admin')) {
     window.location.href = 'index.html';
   }
-  // Apply saved theme immediately to prevent flash
   const savedTheme = localStorage.getItem('dfa_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
 </script>
 
-<!-- ✅ NOTIFICATION CONTAINER -->
 <div class="notification-container" id="notificationContainer"></div>
 
 <aside>
@@ -406,13 +344,10 @@
             Search users, taskers, staff...
         </div>
         <div class="topbar-actions">
-
-            <!-- ✅ THEME TOGGLE -->
             <div class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
                 <i class="fa-solid fa-moon" id="themeIcon"></i>
                 <span id="themeLabel">Dark</span>
             </div>
-
             <div class="icon-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
             <div class="icon-btn" style="position:relative;">
                 <i class="fa-solid fa-bell"></i>
@@ -435,14 +370,14 @@
 
         <div class="stats-grid">
             <div class="stat-card loading" id="eventsCard">
-                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-                <div class="stat-label">Upcoming Events</div>
+                <div class="stat-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                <div class="stat-label">Active Events</div>
                 <div class="stat-value" id="eventsValue">-</div>
                 <div class="stat-sub" id="eventsSub">Total events</div>
             </div>
             <div class="stat-card loading" id="ticketsCard">
                 <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
-                <div class="stat-label">Ticket Order</div>
+                <div class="stat-label">Tickets Sold</div>
                 <div class="stat-value" id="ticketsValue">-</div>
                 <div class="stat-sub" id="ticketsSub">All time</div>
             </div>
@@ -456,16 +391,16 @@
                 <div class="stat-icon"><i class="fa-solid fa-user-check"></i></div>
                 <div class="stat-label">Subscribers</div>
                 <div class="stat-value" id="subscribersValue">-</div>
-                <div class="stat-sub" id="subscribersSub">Community</div>
+                <div class="stat-sub" id="subscribersSub">Unique buyers</div>
             </div>
         </div>
 
         <div class="stats-grid" style="margin-bottom:20px;">
-            <div class="stat-card loading" id="messagesCard">
-                <div class="stat-icon"><i class="fa-solid fa-envelope"></i></div>
-                <div class="stat-label">New Messages</div>
-                <div class="stat-value" id="messagesValue">-</div>
-                <div class="stat-sub" id="messagesSub">Unread contact</div>
+            <div class="stat-card loading" id="checkinCard">
+                <div class="stat-icon"><i class="fa-solid fa-qrcode"></i></div>
+                <div class="stat-label">Checked In</div>
+                <div class="stat-value" id="checkinValue">-</div>
+                <div class="stat-sub" id="checkinSub">Check-in rate</div>
             </div>
             <div class="stat-card loading" id="videosCard">
                 <div class="stat-icon"><i class="fa-solid fa-play"></i></div>
@@ -473,322 +408,247 @@
                 <div class="stat-value" id="videosValue">-</div>
                 <div class="stat-sub" id="videosSub">Published content</div>
             </div>
-            <div class="stat-card loading" id="blogCard">
-                <div class="stat-icon"><i class="fa-solid fa-newspaper"></i></div>
-                <div class="stat-label">Blog Post</div>
-                <div class="stat-value" id="blogValue">-</div>
-                <div class="stat-sub" id="blogSub">0 Published</div>
+            <div class="stat-card loading" id="capacityCard">
+                <div class="stat-icon"><i class="fa-solid fa-chair"></i></div>
+                <div class="stat-label">Capacity Remaining</div>
+                <div class="stat-value" id="capacityValue">-</div>
+                <div class="stat-sub" id="capacitySub">Across active events</div>
             </div>
-            <div class="stat-card loading" id="newsletterCard">
-                <div class="stat-icon"><i class="fa-solid fa-bell"></i></div>
-                <div class="stat-label">Active Subscribers</div>
-                <div class="stat-value" id="newsletterValue">-</div>
-                <div class="stat-sub" id="newsletterSub">NewsLetter</div>
+            <div class="stat-card loading" id="ordersCard">
+                <div class="stat-icon"><i class="fa-solid fa-receipt"></i></div>
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-value" id="ordersValue">-</div>
+                <div class="stat-sub" id="ordersSub">All statuses</div>
             </div>
         </div>
 
         <div class="charts-row">
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">Ticket Sales</div>
-                    <div class="chart-badge">Monthly</div>
+                    <div class="chart-title">Ticket Sales by Event</div>
+                    <div class="chart-badge">Active Events</div>
                 </div>
                 <canvas id="barChart" height="160"></canvas>
             </div>
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">Revenue Trend</div>
-                    <div class="chart-badge">Monthly</div>
+                    <div class="chart-title">Capacity Used vs Remaining</div>
+                    <div class="chart-badge">Global</div>
                 </div>
                 <canvas id="lineChart" height="160"></canvas>
             </div>
         </div>
 
-        <div class="events-row">
-            <div class="event-card">
-                <div class="event-img" style="background:linear-gradient(135deg,#4C1D95,#2D1B69);display:flex;align-items:center;justify-content:center;">
-                    <i class="fa-solid fa-music" style="color:#A78BFA;font-size:20px;"></i>
-                </div>
-                <div class="event-info">
-                    <div class="event-name">The Encounter</div>
-                    <div class="event-date">May 17, 2026</div>
-                    <div class="ticket-badges">
-                        <span class="tbadge yellow">14 left</span>
-                        <span class="tbadge purple">7 Left</span>
-                        <span class="tbadge green">50 left</span>
-                    </div>
-                </div>
-            </div>
-            <div class="event-card">
-                <div class="event-img" style="background:linear-gradient(135deg,#1E3A5F,#0F2040);display:flex;align-items:center;justify-content:center;">
-                    <i class="fa-solid fa-microphone" style="color:#60A5FA;font-size:20px;"></i>
-                </div>
-                <div class="event-info">
-                    <div class="event-name">Ramadan Reflections Live</div>
-                    <div class="event-date">May 17, 2026</div>
-                    <div class="ticket-badges">
-                        <span class="tbadge yellow">4 left</span>
-                        <span class="tbadge purple">7 Left</span>
-                        <span class="tbadge green">50 left</span>
-                    </div>
-                </div>
-            </div>
-            <div class="event-card">
-                <div class="event-img" style="background:linear-gradient(135deg,#1A3A2A,#0D2019);display:flex;align-items:center;justify-content:center;">
-                    <i class="fa-solid fa-calendar-star" style="color:#34D399;font-size:20px;"></i>
-                </div>
-                <div class="event-info">
-                    <div class="event-name">DFA Annual Conference</div>
-                    <div class="event-date">May 17, 2026</div>
-                    <div class="ticket-badges">
-                        <span class="tbadge yellow">14 left</span>
-                        <span class="tbadge purple">7 Left</span>
-                        <span class="tbadge green">50 left</span>
-                    </div>
-                </div>
-            </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin:20px 0 12px;">Active Events</div>
+        <div class="events-row" id="eventsRow">
+            <div class="empty-events"><i class="fa-solid fa-spinner fa-spin"></i>Loading active events...</div>
         </div>
     </div>
 </main>
 
 <script>
-    // ── NOTIFICATION SYSTEM ──────────────────────────────────────────────────────
+    const API = 'https://dfaummah-server.onrender.com/api/v1';
+    const token = localStorage.getItem('dfa_token');
+
+    // ── NOTIFICATION SYSTEM ──────────────────────────────────────────────────
     class NotificationManager {
         constructor(containerId = 'notificationContainer') {
             this.container = document.getElementById(containerId);
         }
-
         show(title, message, type = 'success', duration = 5000) {
             const toast = document.createElement('div');
             toast.className = `notification-toast ${type}`;
-            
             const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-            
             toast.innerHTML = `
-                <div class="notification-icon">
-                    <i class="fa-solid ${iconClass}"></i>
-                </div>
+                <div class="notification-icon"><i class="fa-solid ${iconClass}"></i></div>
                 <div class="notification-content">
                     <div class="notification-title">${title}</div>
                     <div class="notification-message">${message}</div>
                 </div>
-                <div class="notification-close" onclick="this.parentElement.remove()">
-                    <i class="fa-solid fa-times"></i>
-                </div>
+                <div class="notification-close" onclick="this.parentElement.remove()"><i class="fa-solid fa-times"></i></div>
             `;
-
             this.container.appendChild(toast);
-
             if (duration > 0) {
                 setTimeout(() => {
                     toast.classList.add('removing');
                     setTimeout(() => toast.remove(), 300);
                 }, duration);
             }
-
             return toast;
         }
-
-        success(title, message, duration = 5000) {
-            return this.show(title, message, 'success', duration);
-        }
-
-        error(title, message, duration = 5000) {
-            return this.show(title, message, 'error', duration);
-        }
+        success(title, message, duration = 5000) { return this.show(title, message, 'success', duration); }
+        error(title, message, duration = 5000)   { return this.show(title, message, 'error', duration); }
     }
-
     const notificationManager = new NotificationManager();
 
-    // ── PAYMENT NOTIFICATION LISTENER ────────────────────────────────────────────
-    // This simulates listening for payment events from your backend
-    // In production, use WebSocket or Server-Sent Events (SSE)
-    
+    // ── PAYMENT NOTIFICATION LISTENER (uses real orders endpoint) ────────────
     class PaymentListener {
-        constructor(apiBaseUrl = '/api') {
-            this.apiBaseUrl = apiBaseUrl;
+        constructor() {
             this.lastPaymentId = localStorage.getItem('lastPaymentId') || null;
             this.pollingInterval = null;
         }
-
-        // Start polling for new payments (every 10 seconds)
         startPolling() {
-            this.pollingInterval = setInterval(() => this.checkForNewPayments(), 10000);
-            // Check immediately on start
+            this.pollingInterval = setInterval(() => this.checkForNewPayments(), 20000);
             this.checkForNewPayments();
         }
-
-        // Stop polling
         stopPolling() {
-            if (this.pollingInterval) {
-                clearInterval(this.pollingInterval);
-            }
+            if (this.pollingInterval) clearInterval(this.pollingInterval);
         }
-
-        // Check for new payments
         async checkForNewPayments() {
             try {
-                const response = await fetch(`${this.apiBaseUrl}/orders?status=Successful&limit=1&sort=-createdAt`);
-                if (!response.ok) return;
+                const res = await fetch(`${API}/orders?status=Successful`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+                const result = await res.json();
+                const orders = result.data?.orders || [];
+                if (orders.length === 0) return;
 
-                const data = await response.json();
-                if (data.data && data.data.length > 0) {
-                    const latestPayment = data.data[0];
-                    
-                    // Only notify if this is a new payment
-                    if (latestPayment._id !== this.lastPaymentId) {
-                        this.lastPaymentId = latestPayment._id;
-                        localStorage.setItem('lastPaymentId', this.lastPaymentId);
-                        this.notifyPayment(latestPayment);
-                    }
+                const latest = orders[0]; // sorted by createdAt desc from backend
+                if (latest._id !== this.lastPaymentId) {
+                    const isFirstRun = this.lastPaymentId === null;
+                    this.lastPaymentId = latest._id;
+                    localStorage.setItem('lastPaymentId', this.lastPaymentId);
+                    if (!isFirstRun) this.notifyPayment(latest);
                 }
-            } catch (error) {
-                console.error('Error checking for payments:', error);
+            } catch (err) {
+                console.error('Error checking for payments:', err);
             }
         }
-
-        // Notify about a new payment
         notifyPayment(payment) {
-            const buyerName = payment.buyerDetails?.name || 'Unknown';
-            const amount = payment.payment?.totalAmount || 0;
+            const buyerName  = payment.buyerDetails?.name || 'Unknown';
+            const amount     = payment.payment?.totalAmount || 0;
             const ticketType = payment.ticketType || 'Ticket';
-            const quantity = payment.quantity || 1;
-
+            const quantity   = payment.quantity || 1;
             notificationManager.success(
                 '💳 Payment Received!',
                 `${buyerName} paid ₦${amount.toLocaleString()} for ${quantity} ${ticketType} ticket(s)`,
-                5000
+                6000
             );
-
-            // Refresh stats when payment is received
             loadDashboardStats();
         }
-
-        // Alternative: Listen via WebSocket (for real-time updates)
-        connectWebSocket(wsUrl) {
-            try {
-                const ws = new WebSocket(wsUrl);
-
-                ws.onopen = () => {
-                    console.log('WebSocket connected for payment notifications');
-                };
-
-                ws.onmessage = (event) => {
-                    try {
-                        const data = JSON.parse(event.data);
-                        if (data.type === 'payment' && data.status === 'Successful') {
-                            this.notifyPayment(data.payment);
-                        }
-                    } catch (error) {
-                        console.error('Error parsing WebSocket message:', error);
-                    }
-                };
-
-                ws.onerror = (error) => {
-                    console.error('WebSocket error:', error);
-                };
-
-                ws.onclose = () => {
-                    console.log('WebSocket disconnected');
-                    // Reconnect after 5 seconds
-                    setTimeout(() => this.connectWebSocket(wsUrl), 5000);
-                };
-
-                return ws;
-            } catch (error) {
-                console.error('Error connecting WebSocket:', error);
-            }
-        }
     }
+    const paymentListener = new PaymentListener();
 
-    // Initialize payment listener
-    const paymentListener = new PaymentListener('/api');
+    // ── DASHBOARD STATS (real backend) ───────────────────────────────────────
+    function fmtAmount(n) { return '₦' + Number(n || 0).toLocaleString(); }
 
-    // ── DASHBOARD STATS LOADING ──────────────────────────────────────────────────
     async function loadDashboardStats() {
         try {
-            // Fetch events
-            const eventsRes = await fetch('/api/events');
-            if (eventsRes.ok) {
-                const eventsData = await eventsRes.json();
-                const totalEvents = eventsData.data?.length || 0;
-                document.getElementById('eventsValue').textContent = totalEvents;
-                document.getElementById('eventsCard').classList.remove('loading');
-            }
-        } catch (error) {
-            console.error('Error loading events:', error);
-            document.getElementById('eventsValue').textContent = '0';
+            const res = await fetch(`${API}/admin/dashboard-stats`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Failed to load dashboard stats');
+
+            const stats = result.data?.stats || {};
+
+            // ── Top stat cards ──
+            document.getElementById('eventsValue').textContent = stats.activeEventsBreakdown?.length ?? 0;
+            document.getElementById('eventsSub').textContent   = `${stats.totalEvents ?? 0} total events`;
             document.getElementById('eventsCard').classList.remove('loading');
-        }
 
-        try {
-            // Fetch orders (tickets)
-            const ordersRes = await fetch('/api/orders');
-            if (ordersRes.ok) {
-                const ordersData = await ordersRes.json();
-                const totalOrders = ordersData.data?.length || 0;
-                const totalTickets = ordersData.data?.reduce((sum, order) => sum + (order.quantity || 0), 0) || 0;
-                
-                document.getElementById('ticketsValue').textContent = totalTickets;
-                document.getElementById('ticketsSub').textContent = `${totalOrders} orders`;
-                document.getElementById('ticketsCard').classList.remove('loading');
-            }
-        } catch (error) {
-            console.error('Error loading orders:', error);
-            document.getElementById('ticketsValue').textContent = '0';
+            document.getElementById('ticketsValue').textContent = (stats.globalSales?.globalSold ?? 0).toLocaleString();
+            document.getElementById('ticketsSub').textContent   = `${stats.totalOrders ?? 0} orders`;
             document.getElementById('ticketsCard').classList.remove('loading');
-        }
 
-        try {
-            // Fetch revenue (successful payments)
-            const paymentsRes = await fetch('/api/orders?status=Successful');
-            if (paymentsRes.ok) {
-                const paymentsData = await paymentsRes.json();
-                const totalRevenue = paymentsData.data?.reduce((sum, order) => sum + (order.payment?.totalAmount || 0), 0) || 0;
-                const pendingRes = await fetch('/api/orders?status=Pending');
-                const pendingData = pendingRes.ok ? await pendingRes.json() : { data: [] };
-                const pendingCount = pendingData.data?.length || 0;
-                
-                document.getElementById('revenueValue').textContent = `₦${(totalRevenue / 1000).toFixed(0)}K`;
-                document.getElementById('revenueSub').textContent = `${pendingCount} Pending`;
-                document.getElementById('revenueCard').classList.remove('loading');
-            }
-        } catch (error) {
-            console.error('Error loading revenue:', error);
-            document.getElementById('revenueValue').textContent = '₦0K';
+            document.getElementById('revenueValue').textContent = fmtAmount(stats.totalRevenue);
             document.getElementById('revenueCard').classList.remove('loading');
-        }
 
-        try {
-            // Fetch attendees (subscribers/community)
-            const attendeesRes = await fetch('/api/attendees');
-            if (attendeesRes.ok) {
-                const attendeesData = await attendeesRes.json();
-                const totalAttendees = attendeesData.data?.length || 0;
-                document.getElementById('subscribersValue').textContent = totalAttendees;
-                document.getElementById('subscribersCard').classList.remove('loading');
-            }
-        } catch (error) {
-            console.error('Error loading attendees:', error);
-            document.getElementById('subscribersValue').textContent = '0';
+            document.getElementById('subscribersValue').textContent = stats.totalSubscribers ?? 0;
             document.getElementById('subscribersCard').classList.remove('loading');
+
+            // ── Second row ──
+            const av = stats.attendanceVelocity || {};
+            document.getElementById('checkinValue').textContent = `${av.totalCheckedIn ?? 0} / ${av.totalGenerated ?? 0}`;
+            document.getElementById('checkinSub').textContent   = `${av.checkInRate ?? '0%'} checked in`;
+            document.getElementById('checkinCard').classList.remove('loading');
+
+            const gs = stats.globalSales || {};
+            document.getElementById('capacityValue').textContent = (gs.globalRemaining ?? 0).toLocaleString();
+            document.getElementById('capacitySub').textContent   = `${(gs.globalSold ?? 0).toLocaleString()} sold of ${(gs.globalCapacity ?? 0).toLocaleString()}`;
+            document.getElementById('capacityCard').classList.remove('loading');
+
+            document.getElementById('ordersValue').textContent = stats.totalOrders ?? 0;
+            document.getElementById('ordersCard').classList.remove('loading');
+
+            // ── Pending count for revenue sub ──
+            try {
+                const pendingRes = await fetch(`${API}/orders?status=Pending`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const pendingResult = await pendingRes.json();
+                const pendingCount = pendingResult.data?.orders?.length ?? 0;
+                document.getElementById('revenueSub').textContent = `${pendingCount} Pending`;
+            } catch (e) {
+                document.getElementById('revenueSub').textContent = '0 Pending';
+            }
+
+            // ── Charts + active events ──
+            renderCharts(savedThemeLive(), stats.activeEventsBreakdown || []);
+            renderEvents(stats.activeEventsBreakdown || []);
+
+        } catch (err) {
+            console.error('Error loading dashboard stats:', err);
+            ['eventsCard','ticketsCard','revenueCard','subscribersCard','checkinCard','videosCard','capacityCard','ordersCard']
+                .forEach(id => document.getElementById(id).classList.remove('loading'));
+            document.getElementById('eventsRow').innerHTML =
+                `<div class="empty-events"><i class="fa-solid fa-circle-exclamation"></i>Failed to load dashboard data</div>`;
         }
 
-        // Set placeholder values for stats without API endpoints
-        document.getElementById('messagesValue').textContent = '0';
-        document.getElementById('messagesCard').classList.remove('loading');
-        
-        document.getElementById('videosValue').textContent = '8';
+        // ── Videos count (separate, public endpoint) ──
+        try {
+            const vRes = await fetch(`${API}/content/videos`);
+            const vResult = await vRes.json();
+            const videos = vResult.data?.videos || [];
+            const published = videos.filter(v => v.isPublished).length;
+            document.getElementById('videosValue').textContent = published;
+            document.getElementById('videosSub').textContent   = `${videos.length} total`;
+        } catch (e) {
+            document.getElementById('videosValue').textContent = '0';
+        }
         document.getElementById('videosCard').classList.remove('loading');
-        
-        document.getElementById('blogValue').textContent = '0';
-        document.getElementById('blogCard').classList.remove('loading');
-        
-        document.getElementById('newsletterValue').textContent = '0';
-        document.getElementById('newsletterCard').classList.remove('loading');
     }
 
-    // ── Logout ───────────────────────────────────────────────────────────────
+    // ── Render Active Events row ─────────────────────────────────────────────
+    function renderEvents(events) {
+        const row = document.getElementById('eventsRow');
+        if (!events || events.length === 0) {
+            row.innerHTML = `<div class="empty-events"><i class="fa-solid fa-calendar-xmark"></i>No active events right now</div>`;
+            return;
+        }
+
+        const gradients = [
+            'linear-gradient(135deg,#4C1D95,#2D1B69)',
+            'linear-gradient(135deg,#1E3A5F,#0F2040)',
+            'linear-gradient(135deg,#1A3A2A,#0D2019)',
+        ];
+        const icons = ['fa-music','fa-microphone','fa-calendar-star'];
+
+        row.innerHTML = events.slice(0, 6).map((ev, i) => {
+            const dateStr = ev.date ? new Date(ev.date).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
+            const tierBadges = (ev.tiers || []).slice(0, 3).map((t, ti) => {
+                const left = t.remaining ?? (t.capacity - t.sold);
+                const cls  = left <= 0 ? 'red' : (left <= 10 ? 'yellow' : (ti % 2 === 0 ? 'purple' : 'green'));
+                const label = left <= 0 ? 'Sold out' : `${left} left`;
+                return `<span class="tbadge ${cls}">${label}</span>`;
+            }).join('');
+
+            return `
+            <div class="event-card">
+                <div class="event-img" style="background:${gradients[i % gradients.length]};display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid ${icons[i % icons.length]}" style="color:#A78BFA;font-size:20px;"></i>
+                </div>
+                <div class="event-info">
+                    <div class="event-name">${ev.title}</div>
+                    <div class="event-date">${dateStr}</div>
+                    <div class="ticket-badges">${tierBadges || '<span class="tbadge purple">No tiers</span>'}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Logout ────────────────────────────────────────────────────────────────
     function logout() {
         localStorage.removeItem('dfa_token');
         localStorage.removeItem('dfa_admin');
@@ -796,7 +656,7 @@
         window.location.href = 'index.html';
     }
 
-    // ── Load admin info ───────────────────────────────────────────────────────
+    // ── Load admin info ──────────────────────────────────────────────────────
     const adminData = JSON.parse(localStorage.getItem('dfa_admin') || '{}');
     if (adminData.name) {
         document.getElementById('adminName').textContent = adminData.name;
@@ -806,6 +666,9 @@
     }
 
     // ── Theme Toggle ─────────────────────────────────────────────────────────
+    function savedThemeLive() {
+        return document.documentElement.getAttribute('data-theme') || 'dark';
+    }
     function applyThemeUI(theme) {
         const icon  = document.getElementById('themeIcon');
         const label = document.getElementById('themeLabel');
@@ -816,10 +679,8 @@
             icon.className  = 'fa-solid fa-sun';
             label.textContent = 'Light';
         }
-        // Rebuild charts with correct colors
-        renderCharts(theme);
+        renderCharts(theme, lastEventsData);
     }
-
     function toggleTheme() {
         const current = document.documentElement.getAttribute('data-theme');
         const next    = current === 'dark' ? 'light' : 'dark';
@@ -827,81 +688,79 @@
         localStorage.setItem('dfa_theme', next);
         applyThemeUI(next);
     }
-
-    // Apply saved theme UI on load
     applyThemeUI(savedTheme);
 
-    // ── Charts ───────────────────────────────────────────────────────────────
+    // ── Charts (driven by real activeEventsBreakdown) ────────────────────────
     let barChartInst, lineChartInst;
+    let lastEventsData = [];
 
-    function renderCharts(theme) {
+    function renderCharts(theme, eventsData) {
+        eventsData = eventsData || lastEventsData;
+        lastEventsData = eventsData;
+
         const gridColor = theme === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)';
         const tickColor = theme === 'dark' ? '#6B6A8A' : '#9390B8';
 
         if (barChartInst)  barChartInst.destroy();
         if (lineChartInst) lineChartInst.destroy();
 
+        // Bar chart: tickets sold per active event
+        const barLabels = eventsData.length ? eventsData.map(e => e.title.length > 14 ? e.title.slice(0,14)+'…' : e.title) : ['No data'];
+        const barData    = eventsData.length ? eventsData.map(e => e.totalSold || 0) : [0];
+
         const barCtx = document.getElementById('barChart').getContext('2d');
         barChartInst = new Chart(barCtx, {
             type: 'bar',
             data: {
-                labels: ['Jan','Feb','Mar','Apr','May','Jun'],
-                datasets: [{ data: [55,65,78,78,68,38], backgroundColor: 'rgba(139,92,246,0.75)', borderRadius: 6, borderSkipped: false }]
+                labels: barLabels,
+                datasets: [{ data: barData, backgroundColor: 'rgba(139,92,246,0.75)', borderRadius: 6, borderSkipped: false }]
             },
             options: {
                 responsive: true,
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } },
-                    y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 }, stepSize: 20 }, min: 0, max: 100 }
+                    y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } }, beginAtZero: true }
                 }
             }
         });
 
+        // "Line" chart repurposed as capacity used vs remaining (doughnut-style via line for consistency -> use pie)
+        const totalSold      = eventsData.reduce((s,e) => s + (e.totalSold || 0), 0);
+        const totalCapacity  = eventsData.reduce((s,e) => s + (e.totalCapacity || 0), 0);
+        const totalRemaining = Math.max(totalCapacity - totalSold, 0);
+
         const lineCtx = document.getElementById('lineChart').getContext('2d');
-        const gradient = lineCtx.createLinearGradient(0, 0, 0, 200);
-        gradient.addColorStop(0, 'rgba(139,92,246,0.4)');
-        gradient.addColorStop(1, 'rgba(139,92,246,0.02)');
         lineChartInst = new Chart(lineCtx, {
-            type: 'line',
+            type: 'doughnut',
             data: {
-                labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+                labels: ['Sold', 'Remaining'],
                 datasets: [{
-                    data: [50,55,65,72,68,45],
-                    borderColor: '#8B5CF6', borderWidth: 2,
-                    backgroundColor: gradient, fill: true, tension: 0.4,
-                    pointBackgroundColor: '#8B5CF6', pointRadius: 4, pointHoverRadius: 6
+                    data: [totalSold, totalRemaining],
+                    backgroundColor: ['#8B5CF6', theme === 'dark' ? '#2A2845' : '#E5E3F5'],
+                    borderWidth: 0,
                 }]
             },
             options: {
                 responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } },
-                    y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 }, stepSize: 20 }, min: 0, max: 100 }
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: tickColor, font: { size: 11 } }
+                    }
                 }
             }
         });
     }
 
-    // ── INITIALIZE ON PAGE LOAD ──────────────────────────────────────────────
+    // ── INITIALIZE ────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
-        renderCharts(savedTheme);
+        renderCharts(savedTheme, []);
         loadDashboardStats();
-        
-        // Start payment listener polling
         paymentListener.startPolling();
-
-        // Optional: Connect to WebSocket for real-time updates
-        // Uncomment if you have a WebSocket server set up
-        // const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        // paymentListener.connectWebSocket(`${wsProtocol}//${window.location.host}/ws/payments`);
-
-        // Show a test notification (remove in production)
-        // notificationManager.success('Welcome', 'Dashboard loaded successfully');
     });
 
-    // Refresh stats every 30 seconds
     setInterval(loadDashboardStats, 30000);
 </script>
 </body>
