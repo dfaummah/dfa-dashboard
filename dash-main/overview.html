@@ -665,6 +665,10 @@
         document.getElementById('avatarInitials').textContent = initials;
     }
 
+    // ── Charts (driven by real activeEventsBreakdown) ────────────────────────
+    let barChartInst, lineChartInst;
+    let lastEventsData = [];
+
     // ── Theme Toggle ─────────────────────────────────────────────────────────
     function savedThemeLive() {
         return document.documentElement.getAttribute('data-theme') || 'dark';
@@ -691,9 +695,6 @@
     applyThemeUI(savedTheme);
 
     // ── Charts (driven by real activeEventsBreakdown) ────────────────────────
-    let barChartInst, lineChartInst;
-    let lastEventsData = [];
-
     function renderCharts(theme, eventsData) {
         eventsData = eventsData || lastEventsData;
         lastEventsData = eventsData;
