@@ -40,7 +40,6 @@
             overflow: hidden;
         }
 
-        /* Background grid + glow effects */
         body::before {
             content: '';
             position: fixed;
@@ -70,7 +69,6 @@
             bottom: -80px; right: -80px;
         }
 
-        /* Wrapper */
         .login-wrap {
             position: relative; z-index: 1;
             width: 100%; max-width: 420px;
@@ -83,7 +81,6 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* Logo */
         .logo-row {
             display: flex; align-items: center; gap: 12px;
             justify-content: center; margin-bottom: 32px;
@@ -101,7 +98,6 @@
         .logo-text { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
         .logo-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-        /* Card */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -118,7 +114,6 @@
             font-size: 12px; color: var(--muted); margin-bottom: 28px;
         }
 
-        /* Form */
         .f-group { margin-bottom: 16px; }
 
         .f-label {
@@ -160,7 +155,6 @@
         }
         .f-eye:hover { color: var(--accent); }
 
-        /* Role hint */
         .role-hint {
             display: flex; align-items: center; gap: 6px;
             font-size: 10px; color: var(--muted); margin-top: 22px; margin-bottom: 20px;
@@ -169,7 +163,6 @@
         }
         .role-hint i { color: var(--purple); font-size: 10px; }
 
-        /* Button */
         .btn-login {
             width: 100%;
             background: linear-gradient(135deg, #8B5CF6, #7C3AED);
@@ -185,7 +178,6 @@
         .btn-login:active:not(:disabled) { transform: translateY(0); }
         .btn-login:disabled { opacity: .6; cursor: not-allowed; }
 
-        /* Spinner */
         .spinner {
             width: 14px; height: 14px;
             border: 2px solid rgba(255,255,255,0.3);
@@ -199,7 +191,6 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Error banner */
         .error-banner {
             display: none; align-items: center; gap: 8px;
             background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
@@ -209,7 +200,6 @@
         .error-banner.show { display: flex; }
         .error-banner i { font-size: 11px; flex-shrink: 0; }
 
-        /* Footer note */
         .login-footer {
             text-align: center; margin-top: 20px;
             font-size: 11px; color: var(--muted2);
@@ -237,13 +227,11 @@
         <div class="card-title">Welcome back</div>
         <div class="card-sub">Sign in to your admin account to continue</div>
 
-        <!-- Error banner -->
         <div class="error-banner" id="errorBanner">
             <i class="fa-solid fa-circle-exclamation"></i>
             <span id="errorMsg">Invalid credentials. Please try again.</span>
         </div>
 
-        <!-- Email -->
         <div class="f-group">
             <label class="f-label" for="email">Email Address</label>
             <div class="f-input-wrap">
@@ -256,7 +244,6 @@
             </div>
         </div>
 
-        <!-- Password -->
         <div class="f-group">
             <label class="f-label" for="password">Password</label>
             <div class="f-input-wrap">
@@ -272,13 +259,11 @@
             </div>
         </div>
 
-        <!-- Role hint -->
         <div class="role-hint">
             <i class="fa-solid fa-shield-halved"></i>
             Access is restricted to authorised staff only. Contact your Super Admin if you need an account.
         </div>
 
-        <!-- Submit -->
         <button class="btn-login" id="loginBtn" onclick="handleLogin()">
             <div class="spinner"></div>
             <span class="btn-label"><i class="fa-solid fa-arrow-right-to-bracket"></i>&nbsp; Sign In</span>
@@ -293,7 +278,7 @@
 
 <script>
     // ── Config ──────────────────────────────────────────────────────────────
-   const API = 'https://dfaummah-server.onrender.com/api/v1';
+    const API = 'https://dfaummah-server.onrender.com/api/v1';
 
     // Role → default redirect page
     const ROLE_REDIRECT = {
@@ -358,19 +343,16 @@
             const data = await res.json();
 
             if (!res.ok) {
-                // Server returned an error
                 showError(data.message || 'Login failed. Please try again.');
                 return;
             }
 
-            // ── Success: store token + admin info ──
             const { token, data: payload } = data;
             const admin = payload?.admin;
 
             localStorage.setItem('dfa_token', token);
             localStorage.setItem('dfa_admin', JSON.stringify(admin));
 
-            // Redirect based on role
             const role     = admin?.role || 'Super Admin';
             const redirect = ROLE_REDIRECT[role] || 'index.html';
             window.location.href = redirect;
