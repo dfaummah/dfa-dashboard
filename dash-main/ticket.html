@@ -535,17 +535,18 @@
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
+        // ✅ Build payload matching backend expectations
         const payload = {
-            ticketName:      finalName,
-            ticketType:      ticketType,
-            price:           Number(price),
-            capacity:        Number(capacity),
-            status:          status,
-            perks:           perks,
+            ticketName: finalName,
+            ticketType: ticketType,
+            price: Number(price),
+            capacity: Number(capacity),
+            status: status,
+            perks: perks.trim() ? perks.split('\n').filter(p => p.trim()) : [],
             enableEarlyBird: enableEarlyBird,
-            earlyBirdPrice:  enableEarlyBird ? Number(earlyBirdPrice) : null,
+            earlyBirdPrice: enableEarlyBird ? Number(earlyBirdPrice) : undefined,
             enableDiscounts: enableDiscounts,
-            isGroupTicket:   isGroupTicket
+            isGroupTicket: isGroupTicket
         };
 
         try {
@@ -553,6 +554,7 @@
             let res;
 
             if (editingTierId) {
+                // EDIT mode
                 res = await fetch(`${API}/events/${editingEventId}/tiers/${editingTierId}`, {
                     method: 'PUT',
                     headers: {
@@ -562,6 +564,7 @@
                     body: JSON.stringify(payload)
                 });
             } else {
+                // CREATE mode
                 res = await fetch(`${API}/events/${eventId}/tiers`, {
                     method: 'POST',
                     headers: {
@@ -580,6 +583,7 @@
             closeDrawer();
         } catch(err) {
             alert(err.message || 'Failed to save ticket');
+            console.error('Error:', err);
         } finally {
             btn.disabled = false;
             btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnLabel">${editingTierId ? 'Update Ticket' : 'Save Changes'}</span>`;
