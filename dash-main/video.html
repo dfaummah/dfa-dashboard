@@ -18,7 +18,6 @@
             min-height: 100vh;
         }
 
-        /* ── Sidebar ── */
         aside {
             width: 220px; min-height: 100vh;
             background-color: #15142A;
@@ -59,7 +58,6 @@
         .nav-link.logout { color: #EF4444; }
         .nav-link.logout:hover { background: rgba(239,68,68,.1); color: #EF4444; }
 
-        /* ── Main ── */
         main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
         .topbar {
@@ -92,7 +90,6 @@
         .user-name { font-size: 13px; font-weight: 600; color: #E2E0F0; line-height: 1.2; }
         .user-role { font-size: 10px; color: #6B6A8A; }
 
-        /* ── Videos Panel ── */
         .videos-panel {
             flex: 1; overflow-y: auto; padding: 24px 28px;
         }
@@ -100,9 +97,8 @@
         .panel-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
         .panel-sub   { font-size: 12px; color: #6B6A8A; margin-bottom: 20px; }
 
-        /* Filter row */
         .filters-row {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 24px;
+            display: flex; align-items: center; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;
         }
         .filter-search {
             background: #211F38; border: 1px solid #2A2845; border-radius: 8px;
@@ -135,7 +131,6 @@
         }
         .btn-add:hover { opacity: .85; }
 
-        /* ── Video Grid ── */
         .video-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -149,7 +144,6 @@
         }
         .video-card:hover { border-color: #8B5CF6; transform: translateY(-2px); }
 
-        /* Thumbnail */
         .video-thumb {
             position: relative; width: 100%; aspect-ratio: 16/9;
             background: #1A1836; overflow: hidden;
@@ -164,7 +158,6 @@
             background: linear-gradient(135deg, #2A2060, #1A1040);
         }
 
-        /* Play overlay */
         .play-overlay {
             position: absolute; inset: 0;
             display: flex; align-items: center; justify-content: center;
@@ -179,24 +172,13 @@
         }
         .play-btn i { font-size: 14px; color: #fff; margin-left: 2px; }
 
-        /* Duration badge */
-        .duration-badge {
-            position: absolute; bottom: 7px; right: 8px;
-            background: rgba(0,0,0,0.75); color: #fff;
-            font-size: 10px; font-weight: 600;
-            padding: 2px 6px; border-radius: 5px;
-        }
-
-        /* Status badge on thumbnail */
         .status-pill {
             position: absolute; top: 8px; left: 8px;
             font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 20px;
         }
         .status-pill.published { background: rgba(52,211,153,.9); color: #064E3B; }
         .status-pill.draft     { background: rgba(251,191,36,.9);  color: #78350F; }
-        .status-pill.scheduled { background: rgba(139,92,246,.9);  color: #fff; }
 
-        /* Card body */
         .video-body { padding: 12px 14px 14px; }
         .video-category {
             font-size: 9px; font-weight: 700; color: #8B5CF6;
@@ -211,19 +193,15 @@
         .video-meta {
             display: flex; align-items: center; justify-content: space-between;
         }
-        .video-views {
-            display: flex; align-items: center; gap: 4px;
-            font-size: 10px; color: #6B6A8A;
-        }
-        .video-views i { font-size: 9px; color: #4B4A6A; }
+        .video-actions { display: flex; gap: 6px; }
         .card-menu-btn {
             background: transparent; border: none; cursor: pointer;
-            color: #4B4A6A; font-size: 13px; padding: 3px 6px;
+            color: #4B4A6A; font-size: 12px; padding: 3px 6px;
             border-radius: 6px; transition: background .15s, color .15s;
         }
         .card-menu-btn:hover { background: #2A2750; color: #C4B5FD; }
+        .card-menu-btn.danger:hover { background: rgba(239,68,68,.15); color: #EF4444; }
 
-        /* ══ BACKDROP ══ */
         .drawer-backdrop {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.55); backdrop-filter: blur(2px);
@@ -232,7 +210,6 @@
         }
         .drawer-backdrop.open { opacity: 1; pointer-events: all; }
 
-        /* ══ DRAWER ══ */
         .add-video-drawer {
             position: fixed; top: 0; right: 0;
             height: 100vh; width: 340px;
@@ -256,8 +233,11 @@
         .drawer-close:hover { background: #E5E7EB; color: #111; }
         .drawer-title {
             font-size: 15px; font-weight: 700; color: #111;
-            margin-bottom: 20px; padding-right: 36px;
+            margin-bottom: 4px; padding-right: 36px;
         }
+        .drawer-mode-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:16px;}
+        .drawer-mode-badge.create{background:rgba(139,92,246,.1);color:#8B5CF6;border:1px solid rgba(139,92,246,.2);}
+        .drawer-mode-badge.edit{background:rgba(251,191,36,.1);color:#D97706;border:1px solid rgba(251,191,36,.2);}
 
         .form-group { margin-bottom: 14px; }
         .form-row   { display: flex; gap: 10px; margin-bottom: 14px; }
@@ -279,17 +259,8 @@
 
         .form-divider { border: none; border-top: 1px solid #E5E7EB; margin: 16px 0; }
 
-        /* Thumbnail upload zone */
-        .upload-zone {
-            border: 1.5px dashed #E5E7EB; border-radius: 10px;
-            padding: 20px; text-align: center; cursor: pointer;
-            transition: border-color .15s, background .15s;
-            background: #F9FAFB;
-        }
-        .upload-zone:hover { border-color: #8B5CF6; background: #F5F3FF; }
-        .upload-zone i { font-size: 22px; color: #C4B5FD; margin-bottom: 6px; }
-        .upload-zone p { font-size: 11px; color: #9CA3AF; }
-        .upload-zone span { font-size: 11px; color: #8B5CF6; font-weight: 600; }
+        .thumb-live-preview { margin-top:8px; border-radius:8px; overflow:hidden; display:none; }
+        .thumb-live-preview img { width:100%; height:120px; object-fit:cover; display:block; }
 
         .toggle-item {
             display: flex; align-items: center; gap: 10px;
@@ -327,6 +298,12 @@
         }
         .btn-save:hover { opacity: .88; }
 
+        .empty-state { padding:60px 0; text-align:center; }
+        .empty-state i { font-size: 36px; color: #2A2845; margin-bottom: 12px; display: block; }
+
+        .toast { position: fixed; bottom: 24px; right: 28px; background: #1A1836; border: 1px solid #8B5CF6; border-radius: 10px; padding: 11px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #C4B5FD; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transform: translateY(80px); opacity: 0; transition: transform .3s, opacity .3s; z-index: 200; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #2A2845; border-radius: 4px; }
@@ -334,6 +311,12 @@
     </style>
 </head>
 <body>
+
+<script>
+  if (!localStorage.getItem('dfa_token') || !localStorage.getItem('dfa_admin')) {
+    window.location.href = 'index.html';
+  }
+</script>
 
 <!-- ══ SIDEBAR ══ -->
 <aside>
@@ -347,29 +330,19 @@
 
     <div class="sidebar-section">
         <div class="sidebar-section-label">Overview</div>
-        <a href="index.html" class="nav-link">
-            <i class="fa-solid fa-gauge-high"></i> Dashboard
-        </a>
+        <a href="overview.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
     </div>
 
     <div class="sidebar-section">
         <div class="sidebar-section-label">Operations</div>
-        <a href="event.html" class="nav-link">
-            <i class="fa-solid fa-calendar-days"></i> Events
-        </a>
-        <a href="ticket.html" class="nav-link">
-            <i class="fa-solid fa-ticket"></i> Tickets
-        </a>
-        <a href="attend.html" class="nav-link">
-            <i class="fa-solid fa-users"></i> Attendees
-        </a>
+        <a href="event.html" class="nav-link"><i class="fa-solid fa-calendar-days"></i> Events</a>
+        <a href="ticket.html" class="nav-link"><i class="fa-solid fa-ticket"></i> Tickets</a>
+        <a href="attend.html" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
     </div>
 
     <div class="sidebar-section">
         <div class="sidebar-section-label">Finance</div>
-        <a href="payment.html" class="nav-link">
-            <i class="fa-solid fa-credit-card"></i> Payments
-        </a>
+        <a href="payment.html" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
     </div>
 
     <div class="sidebar-section">
@@ -395,7 +368,7 @@
     </div>
 
     <div style="margin-top:auto;padding:16px 14px 20px;">
-        <a href="index.html" class="nav-link logout">
+        <a href="#" class="nav-link logout" onclick="logout()">
             <i class="fa-solid fa-right-from-bracket"></i> Log out
         </a>
     </div>
@@ -407,7 +380,7 @@
         <div class="topbar-title">Videos</div>
         <div class="search-bar">
             <i class="fa-solid fa-magnifying-glass" style="font-size:12px;"></i>
-            Search users, taskers, staff...
+            Search videos...
         </div>
         <div class="topbar-actions">
             <div class="icon-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
@@ -416,19 +389,19 @@
                 <span style="position:absolute;top:6px;right:6px;width:6px;height:6px;background:#8B5CF6;border-radius:50%;"></span>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
-                <div class="avatar">EE</div>
+                <div class="avatar" id="avatarInitials">EE</div>
                 <div>
-                    <div class="user-name">Elliot Eniola</div>
-                    <div class="user-role">Admin</div>
+                    <div class="user-name" id="adminName">Loading...</div>
+                    <div class="user-role" id="adminRole">Admin</div>
                 </div>
-                <i class="fa-solid fa-right-from-bracket" style="font-size:13px;color:#6B6A8A;cursor:pointer;"></i>
+                <i class="fa-solid fa-right-from-bracket" style="font-size:13px;color:#6B6A8A;cursor:pointer;" onclick="logout()"></i>
             </div>
         </div>
     </div>
 
     <div class="videos-panel">
         <div class="panel-title">Videos</div>
-        <div class="panel-sub" id="videoCount">8 total videos</div>
+        <div class="panel-sub" id="videoCount">Loading...</div>
 
         <div class="filters-row">
             <div class="filter-search">
@@ -448,21 +421,19 @@
             <div class="filter-select-wrap">
                 <select class="filter-select" id="statusFilter" onchange="filterVideos()">
                     <option value="">All Statuses</option>
-                    <option>Published</option>
-                    <option>Draft</option>
-                    <option>Scheduled</option>
+                    <option value="Published">Published</option>
+                    <option value="Draft">Draft</option>
                 </select>
             </div>
-            <button class="btn-add" onclick="openDrawer()">
+            <button class="btn-add" onclick="openCreateDrawer()">
                 <i class="fa-solid fa-plus"></i> Add Video
             </button>
         </div>
 
-        <!-- Grid -->
         <div class="video-grid" id="videoGrid"></div>
 
-        <div id="emptyState" style="display:none;padding:60px 0;text-align:center;">
-            <i class="fa-solid fa-film" style="font-size:36px;color:#2A2845;margin-bottom:12px;display:block;"></i>
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <i class="fa-solid fa-film"></i>
             <div style="font-size:14px;font-weight:600;color:#E2E0F0;margin-bottom:4px;">No videos found</div>
             <div style="font-size:12px;color:#6B6A8A;">Try adjusting filters or add a new video</div>
         </div>
@@ -472,16 +443,17 @@
 <!-- ══ BACKDROP ══ -->
 <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
 
-<!-- ══ ADD VIDEO DRAWER ══ -->
+<!-- ══ ADD / EDIT VIDEO DRAWER ══ -->
 <div class="add-video-drawer" id="videoDrawer">
     <button class="drawer-close" onclick="closeDrawer()">
         <i class="fa-solid fa-xmark"></i>
     </button>
 
-    <div class="drawer-title">Add Video</div>
+    <div class="drawer-title" id="drawerTitle">Add Video</div>
+    <div class="drawer-mode-badge create" id="drawerBadge"><i class="fa-solid fa-plus"></i> New Video</div>
 
     <div class="form-group">
-        <label class="form-label">Title</label>
+        <label class="form-label">Title *</label>
         <input type="text" class="form-input" id="f_title" placeholder="Video Title">
     </div>
 
@@ -497,56 +469,48 @@
     </div>
 
     <div class="form-group">
-        <label class="form-label">YouTube URL</label>
-        <input type="text" class="form-input" id="f_url" placeholder="https://youtube.com/watch?v=...">
-    </div>
-
-    <div class="form-group">
-        <label class="form-label">Description</label>
-        <textarea class="form-textarea" id="f_desc" placeholder="Short Description"></textarea>
-    </div>
-
-    <div class="form-group">
-        <label class="form-label">Thumbnail</label>
-        <div class="upload-zone" onclick="document.getElementById('thumbFile').click()">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-            <p>Drag & drop or <span>browse</span></p>
-            <p style="margin-top:2px;font-size:10px;">PNG, JPG up to 2MB</p>
-            <input type="file" id="thumbFile" accept="image/*" style="display:none;" onchange="previewThumb(this)">
-        </div>
-        <div id="thumbPreview" style="display:none;margin-top:8px;border-radius:8px;overflow:hidden;">
-            <img id="thumbImg" style="width:100%;height:120px;object-fit:cover;">
-        </div>
-    </div>
-
-    <div class="form-row">
-        <div class="form-group">
-            <label class="form-label">Duration</label>
-            <input type="text" class="form-input" id="f_duration" placeholder="e.g. 8:24">
-        </div>
-        <div class="form-group">
-            <label class="form-label">Tags</label>
-            <input type="text" class="form-input" id="f_tags" placeholder="faith, interview">
+        <label class="form-label">YouTube URL *</label>
+        <input type="text" class="form-input" id="f_url" placeholder="https://youtube.com/watch?v=..." oninput="updateThumbPreview()">
+        <div class="thumb-live-preview" id="thumbPreview">
+            <img id="thumbImg" alt="Thumbnail preview">
         </div>
     </div>
 
     <hr class="form-divider">
 
-    <div class="toggle-item" onclick="toggleSwitch(this)">
+    <div class="toggle-item" id="publishToggle" onclick="toggleSwitch(this)">
         <div class="toggle off"></div>
-        <div class="toggle-name">Publish</div>
+        <div class="toggle-name">Publish (visible on website)</div>
     </div>
 
     <div class="drawer-footer">
         <button class="btn-cancel" onclick="closeDrawer()">Cancel</button>
-        <button class="btn-save" onclick="saveVideo()">
-            <i class="fa-solid fa-floppy-disk"></i> Save
+        <button class="btn-save" id="saveVideoBtn" onclick="saveVideo()">
+            <i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnLabel">Save</span>
         </button>
     </div>
 </div>
 
+<div class="toast" id="toast"><i class="fa-solid fa-circle-check" style="color:#34D399;"></i><span id="toastMsg">Done</span></div>
+
 <script>
-    // Gradient thumb colours per category
+    const API = 'https://dfaummah-server.onrender.com/api/v1';
+    let allVideos  = [];
+    let editingId  = null; // null = create mode, string = edit mode
+
+    function logout() {
+        localStorage.removeItem('dfa_token');
+        localStorage.removeItem('dfa_admin');
+        window.location.href = 'index.html';
+    }
+    const adminData = JSON.parse(localStorage.getItem('dfa_admin') || '{}');
+    if (adminData.name) {
+        document.getElementById('adminName').textContent = adminData.name;
+        document.getElementById('adminRole').textContent = adminData.role || 'Admin';
+        const initials = adminData.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+        document.getElementById('avatarInitials').textContent = initials;
+    }
+
     const catColors = {
         'Street Interview': ['#4C1D95','#1E1040'],
         'Teachings':        ['#1E3A5F','#0F2040'],
@@ -562,57 +526,156 @@
         'Devotional':       'fa-sun',
     };
 
-    let videos = [
-        { id:1, title:"Does God Really Exist? — Street Answers", category:"Street Interview", url:"", duration:"8:24", views:"142k", status:"Draft",     thumb:null },
-        { id:2, title:"Does God Really Exist? — Street Answers", category:"Street Interview", url:"", duration:"8:24", views:"142k", status:"Draft",     thumb:null },
-        { id:3, title:"Does God Really Exist? — Street Answers", category:"Street Interview", url:"", duration:"8:24", views:"142k", status:"Published", thumb:null },
-        { id:4, title:"Does God Really Exist? — Street Answers", category:"Street Interview", url:"", duration:"8:24", views:"142k", status:"Draft",     thumb:null },
-        { id:5, title:"Does God Really Exist? — Street Answers", category:"Street Interview", url:"", duration:"8:24", views:"142k", status:"Draft",     thumb:null },
-        { id:6, title:"Does God Really Exist? — Street Answers", category:"Street Interview", url:"", duration:"8:24", views:"142k", status:"Draft",     thumb:null },
-        { id:7, title:"Faith That Moves Mountains — Teaching",    category:"Teachings",        url:"", duration:"22:10",views:"98k",  status:"Published", thumb:null },
-        { id:8, title:"Annual Conference Highlights 2025",        category:"Events",            url:"", duration:"15:44",views:"210k", status:"Published", thumb:null },
-    ];
-
-    function statusClass(s) {
-        return s === 'Published' ? 'published' : s === 'Scheduled' ? 'scheduled' : 'draft';
+    // ── Extract YouTube video ID & build thumbnail URL ─────────────────────
+    function getYoutubeId(url) {
+        if (!url) return null;
+        const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        return match ? match[1] : null;
     }
+    function getYoutubeThumb(url) {
+        const id = getYoutubeId(url);
+        return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
+    }
+
+    function updateThumbPreview() {
+        const url   = document.getElementById('f_url').value.trim();
+        const thumb = getYoutubeThumb(url);
+        const wrap  = document.getElementById('thumbPreview');
+        const img   = document.getElementById('thumbImg');
+        if (thumb) {
+            img.src = thumb;
+            wrap.style.display = 'block';
+        } else {
+            wrap.style.display = 'none';
+        }
+    }
+
+    // ── Drawer ────────────────────────────────────────────────────────────────
+    function openDrawer() {
+        document.getElementById('videoDrawer').classList.add('open');
+        document.getElementById('drawerBackdrop').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer() {
+        document.getElementById('videoDrawer').classList.remove('open');
+        document.getElementById('drawerBackdrop').classList.remove('open');
+        document.body.style.overflow = '';
+        editingId = null;
+    }
+    function toggleSwitch(item) { item.querySelector('.toggle').classList.toggle('off'); }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+    function clearForm() {
+        document.getElementById('f_title').value = '';
+        document.getElementById('f_url').value    = '';
+        document.getElementById('f_category').value = 'Teachings';
+        document.getElementById('publishToggle').querySelector('.toggle').classList.add('off');
+        document.getElementById('thumbPreview').style.display = 'none';
+    }
+
+    function openCreateDrawer() {
+        editingId = null;
+        clearForm();
+        document.getElementById('drawerTitle').textContent = 'Add Video';
+        document.getElementById('drawerBadge').className   = 'drawer-mode-badge create';
+        document.getElementById('drawerBadge').innerHTML   = '<i class="fa-solid fa-plus"></i> New Video';
+        document.getElementById('saveBtnLabel').textContent = 'Save';
+        openDrawer();
+    }
+
+    function openEditDrawer(id) {
+        const v = allVideos.find(v => v._id === id);
+        if (!v) return;
+        editingId = id;
+
+        document.getElementById('f_title').value    = v.title || '';
+        document.getElementById('f_category').value = v.category || 'Teachings';
+        document.getElementById('f_url').value      = v.youtubeUrl || '';
+        updateThumbPreview();
+
+        const toggle = document.getElementById('publishToggle').querySelector('.toggle');
+        if (v.isPublished) toggle.classList.remove('off'); else toggle.classList.add('off');
+
+        document.getElementById('drawerTitle').textContent = 'Edit Video';
+        document.getElementById('drawerBadge').className   = 'drawer-mode-badge edit';
+        document.getElementById('drawerBadge').innerHTML   = '<i class="fa-solid fa-pen"></i> Editing';
+        document.getElementById('saveBtnLabel').textContent = 'Update Video';
+        openDrawer();
+    }
+
+    // ── Load videos from backend ─────────────────────────────────────────────
+    async function loadVideos() {
+        try {
+            const token = localStorage.getItem('dfa_token');
+            const res   = await fetch(`${API}/content/videos`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Failed to load videos');
+            allVideos = result.data?.videos || [];
+            filterVideos();
+        } catch(err) {
+            document.getElementById('videoGrid').innerHTML = '';
+            document.getElementById('videoCount').textContent = 'Failed to load videos';
+            const empty = document.getElementById('emptyState');
+            empty.style.display = 'block';
+            empty.querySelector('div').textContent = err.message || 'Failed to load';
+        }
+    }
+
+    function statusClass(v) { return v.isPublished ? 'published' : 'draft'; }
+    function statusLabel(v) { return v.isPublished ? 'Published' : 'Draft'; }
 
     function renderGrid(data) {
         const grid  = document.getElementById('videoGrid');
         const empty = document.getElementById('emptyState');
         document.getElementById('videoCount').textContent = `${data.length} total video${data.length !== 1 ? 's' : ''}`;
 
-        if (data.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+        if (data.length === 0) {
+            grid.innerHTML = '';
+            empty.style.display = 'block';
+            empty.querySelector('div').textContent = 'No videos found';
+            return;
+        }
         empty.style.display = 'none';
 
         grid.innerHTML = data.map(v => {
             const colors = catColors[v.category] || ['#2A2060','#1A1040'];
             const icon   = catIcons[v.category]  || 'fa-play';
-            const thumb  = v.thumb
-                ? `<img src="${v.thumb}" alt="${v.title}">`
+            const thumb  = getYoutubeThumb(v.youtubeUrl);
+            const thumbHtml = thumb
+                ? `<img src="${thumb}" alt="${v.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                   <div class="thumb-placeholder" style="display:none;background:linear-gradient(135deg,${colors[0]},${colors[1]});">
+                       <i class="fa-solid ${icon}" style="font-size:32px;color:rgba(255,255,255,0.25);"></i>
+                   </div>`
                 : `<div class="thumb-placeholder" style="background:linear-gradient(135deg,${colors[0]},${colors[1]});">
                        <i class="fa-solid ${icon}" style="font-size:32px;color:rgba(255,255,255,0.25);"></i>
                    </div>`;
 
             return `
-            <div class="video-card">
+            <div class="video-card" onclick="openEditDrawer('${v._id}')">
                 <div class="video-thumb">
-                    ${thumb}
+                    ${thumbHtml}
                     <div class="play-overlay">
                         <div class="play-btn"><i class="fa-solid fa-play"></i></div>
                     </div>
-                    <span class="status-pill ${statusClass(v.status)}">${v.status}</span>
-                    <span class="duration-badge">${v.duration}</span>
+                    <span class="status-pill ${statusClass(v)}">${statusLabel(v)}</span>
                 </div>
                 <div class="video-body">
-                    <div class="video-category">${v.category}</div>
+                    <div class="video-category">${v.category || 'General'}</div>
                     <div class="video-title">${v.title}</div>
                     <div class="video-meta">
-                        <div class="video-views">
-                            <i class="fa-solid fa-eye"></i>
-                            ${v.views} views
+                        <span style="font-size:10px;color:#6B6A8A;">
+                            <i class="fa-brands fa-youtube" style="color:#4B4A6A;margin-right:4px;"></i>${v.youtubeUrl ? 'Linked' : 'No link'}
+                        </span>
+                        <div class="video-actions">
+                            <button class="card-menu-btn" onclick="event.stopPropagation(); openEditDrawer('${v._id}')" title="Edit">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button class="card-menu-btn danger" onclick="event.stopPropagation(); deleteVideoById('${v._id}')" title="Delete">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </div>
-                        <button class="card-menu-btn"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                     </div>
                 </div>
             </div>`;
@@ -623,76 +686,89 @@
         const q      = document.getElementById('searchInput').value.toLowerCase();
         const cat    = document.getElementById('categoryFilter').value;
         const status = document.getElementById('statusFilter').value;
-        const filtered = videos.filter(v => {
-            const matchQ   = !q      || v.title.toLowerCase().includes(q);
+        const filtered = allVideos.filter(v => {
+            const matchQ   = !q      || (v.title || '').toLowerCase().includes(q);
             const matchCat = !cat    || v.category === cat;
-            const matchSt  = !status || v.status   === status;
+            const matchSt  = !status || (status === 'Published' ? v.isPublished : !v.isPublished);
             return matchQ && matchCat && matchSt;
         });
         renderGrid(filtered);
     }
 
-    function openDrawer() {
-        document.getElementById('videoDrawer').classList.add('open');
-        document.getElementById('drawerBackdrop').classList.add('open');
-        document.body.style.overflow = 'hidden';
+    // ── Save (Create or Update) ──────────────────────────────────────────────
+    async function saveVideo() {
+        const title       = document.getElementById('f_title').value.trim();
+        const category    = document.getElementById('f_category').value;
+        const youtubeUrl  = document.getElementById('f_url').value.trim();
+        const isPublished = !document.getElementById('publishToggle').querySelector('.toggle').classList.contains('off');
+
+        if (!title || !youtubeUrl) {
+            alert('Please enter both a title and a YouTube URL.');
+            return;
+        }
+
+        const btn = document.getElementById('saveVideoBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+        const payload = { title, category, youtubeUrl, isPublished };
+
+        try {
+            const token = localStorage.getItem('dfa_token');
+            let res;
+            if (editingId) {
+                res = await fetch(`${API}/content/videos/${editingId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                res = await fetch(`${API}/content/videos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                });
+            }
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Failed to save video');
+
+            showToast(editingId ? 'Video updated!' : 'Video added!');
+            await loadVideos();
+            closeDrawer();
+        } catch(err) {
+            alert(err.message || 'Failed to save video');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnLabel">${editingId ? 'Update Video' : 'Save'}</span>`;
+        }
     }
 
-    function closeDrawer() {
-        document.getElementById('videoDrawer').classList.remove('open');
-        document.getElementById('drawerBackdrop').classList.remove('open');
-        document.body.style.overflow = '';
+    // ── Delete ────────────────────────────────────────────────────────────────
+    async function deleteVideoById(id) {
+        if (!confirm('Delete this video? This cannot be undone.')) return;
+        try {
+            const token = localStorage.getItem('dfa_token');
+            const res = await fetch(`${API}/content/videos/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Failed to delete video');
+            showToast('Video deleted');
+            await loadVideos();
+        } catch(err) {
+            alert(err.message || 'Failed to delete video');
+        }
     }
 
-    function toggleSwitch(item) {
-        item.querySelector('.toggle').classList.toggle('off');
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    function previewThumb(input) {
-        if (!input.files || !input.files[0]) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-            document.getElementById('thumbImg').src = e.target.result;
-            document.getElementById('thumbPreview').style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-
-    function saveVideo() {
-        const title    = document.getElementById('f_title').value.trim();
-        const category = document.getElementById('f_category').value;
-        const url      = document.getElementById('f_url').value.trim();
-        const duration = document.getElementById('f_duration').value.trim() || '0:00';
-        const publish  = !document.querySelector('#videoDrawer .toggle').classList.contains('off');
-        const thumbEl  = document.getElementById('thumbImg');
-        const thumb    = thumbEl.src && document.getElementById('thumbPreview').style.display !== 'none' ? thumbEl.src : null;
-
-        if (!title) { alert('Please enter a video title.'); return; }
-
-        videos.unshift({
-            id: Date.now(), title, category, url, duration,
-            views: '0',
-            status: publish ? 'Published' : 'Draft',
-            thumb
-        });
-
-        // Reset
-        document.getElementById('f_title').value    = '';
-        document.getElementById('f_url').value      = '';
-        document.getElementById('f_desc').value     = '';
-        document.getElementById('f_duration').value = '';
-        document.getElementById('f_tags').value     = '';
-        document.getElementById('thumbPreview').style.display = 'none';
-        document.querySelector('#videoDrawer .toggle').classList.add('off');
-
-        filterVideos();
-        closeDrawer();
-    }
-
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
-
-    // Init
-    renderGrid(videos);
+    loadVideos();
 </script>
 </body>
 </html>
