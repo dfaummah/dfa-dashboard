@@ -432,11 +432,11 @@
             <div class="filter-select-wrap">
                 <select class="filter-select" id="categoryFilter" onchange="filterVideos()">
                     <option value="">All Categories</option>
-                    <option>Street Interview</option>
-                    <option>Teachings</option>
-                    <option>Events</option>
-                    <option>Testimonies</option>
-                    <option>Devotional</option>
+                    <option>Event Highlight</option>
+                    <option>Tutorial</option>
+                    <option>Testimonial</option>
+                    <option>Promo</option>
+                    <option>Other</option>
                 </select>
             </div>
             <div class="filter-select-wrap">
@@ -481,11 +481,11 @@
     <div class="form-group">
         <label class="form-label">Category</label>
         <select class="form-select" id="f_category">
-            <option>Teachings</option>
-            <option>Street Interview</option>
-            <option>Events</option>
-            <option>Testimonies</option>
-            <option>Devotional</option>
+            <option>Event Highlight</option>
+            <option>Tutorial</option>
+            <option>Testimonial</option>
+            <option>Promo</option>
+            <option>Other</option>
         </select>
     </div>
 
@@ -545,18 +545,18 @@
     applyThemeUI(savedTheme);
 
     const catColors = {
-        'Street Interview': ['#4C1D95','#1E1040'],
-        'Teachings':        ['#1E3A5F','#0F2040'],
-        'Events':           ['#1A3A2A','#0D2019'],
-        'Testimonies':      ['#3B2A1A','#251A0D'],
-        'Devotional':       ['#1A1A3A','#0D0D25'],
+        'Event Highlight': ['#1A3A2A','#0D2019'],
+        'Tutorial':        ['#1E3A5F','#0F2040'],
+        'Testimonial':     ['#3B2A1A','#251A0D'],
+        'Promo':           ['#4C1D95','#1E1040'],
+        'Other':           ['#1A1A3A','#0D0D25'],
     };
     const catIcons = {
-        'Street Interview': 'fa-microphone',
-        'Teachings':        'fa-book-open',
-        'Events':           'fa-calendar-star',
-        'Testimonies':      'fa-heart',
-        'Devotional':       'fa-sun',
+        'Event Highlight': 'fa-calendar-star',
+        'Tutorial':        'fa-book-open',
+        'Testimonial':     'fa-heart',
+        'Promo':           'fa-bullhorn',
+        'Other':           'fa-play',
     };
 
     // ── Extract YouTube video ID & build thumbnail URL ─────────────────────
@@ -601,7 +601,7 @@
     function clearForm() {
         document.getElementById('f_title').value = '';
         document.getElementById('f_url').value    = '';
-        document.getElementById('f_category').value = 'Teachings';
+        document.getElementById('f_category').value = 'Event Highlight';
         document.getElementById('publishToggle').querySelector('.toggle').classList.add('off');
         document.getElementById('thumbPreview').style.display = 'none';
     }
@@ -622,7 +622,7 @@
         editingId = id;
 
         document.getElementById('f_title').value    = v.title || '';
-        document.getElementById('f_category').value = v.category || 'Teachings';
+        document.getElementById('f_category').value = v.category || 'Event Highlight';
         document.getElementById('f_url').value      = v.youtubeUrl || '';
         updateThumbPreview();
 
