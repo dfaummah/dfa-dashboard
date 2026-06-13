@@ -327,7 +327,6 @@
     }
     applyThemeUI(savedTheme);
 
-    // ── Drawer ────────────────────────────────────────────────────────────────
     function openDrawer() {
         document.getElementById('ticketDrawer').classList.add('open');
         document.getElementById('drawerBackdrop').classList.add('open');
@@ -391,7 +390,12 @@
         sel.disabled = true;
 
         document.getElementById('ticket-name').value     = tier.ticketName || tier.name || '';
-        document.getElementById('ticket-type').value     = tier.ticketType || 'Standard';
+        
+        // 🔴 FIX: Only set to valid values (Standard or Free)
+        const validType = (tier.ticketType === 'Standard' || tier.ticketType === 'Free') ? tier.ticketType : 'Standard';
+        console.log('📝 Setting ticket type to:', validType, '(from:', tier.ticketType, ')');
+        document.getElementById('ticket-type').value = validType;
+        
         document.getElementById('ticket-price').value    = tier.price ?? '';
         document.getElementById('ticket-capacity').value = tier.capacity ?? '';
         document.getElementById('ticket-status').value   = tier.status || 'Available';
@@ -520,6 +524,10 @@
         if (!eventId) { alert('Please select an Event'); return; }
         if (!ticketName) { alert('Please enter Ticket Name'); return; }
         if (!ticketType) { alert('Please select Ticket Type (Standard or Free)'); return; }
+        if (ticketType !== 'Standard' && ticketType !== 'Free') { 
+            alert('❌ INVALID: Ticket Type must be "Standard" or "Free" only. Got: ' + ticketType);
+            return; 
+        }
         if (!price) { alert('Please enter Price'); return; }
         if (!capacity) { alert('Please enter Quantity'); return; }
         if (enableEarlyBird && !earlyBirdPrice) { alert('Please enter Early Bird Price'); return; }
@@ -531,19 +539,17 @@
         // Build payload - only include fields that backend expects
         const payload = {
             ticketName: ticketName,
-            ticketType: ticketType,  // Must be "Standard" or "Free" exactly
+            ticketType: ticketType,  // MUST be "Standard" or "Free" exactly
             price: Number(price),
             capacity: Number(capacity),
             status: status || 'Available',
-            perks: perks.trim() ? perks.split('\n').map(p => p.trim()).filter(p => p) : []
+            perks: perks.trim() ? perks.split('\n').map(p => p.trim()).filter(p => p) : [],
+            enableEarlyBird: enableEarlyBird ? true : false
         };
 
-        // Add early bird fields only if enabled
+        // Add early bird price only if enabled
         if (enableEarlyBird) {
-            payload.enableEarlyBird = true;
             payload.earlyBirdPrice = Number(earlyBirdPrice);
-        } else {
-            payload.enableEarlyBird = false;
         }
 
         // Add optional toggles only if enabled
@@ -551,6 +557,7 @@
         if (isGroupTicket) payload.isGroupTicket = true;
 
         console.log('✅ Final Payload:', JSON.stringify(payload, null, 2));
+        console.log('🔍 ticketType value:', payload.ticketType, '(typeof:', typeof payload.ticketType + ')');
 
         try {
             const token = localStorage.getItem('dfa_token');
