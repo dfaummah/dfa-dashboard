@@ -219,6 +219,7 @@
         <div class="form-group">
             <label class="form-label">Ticket Type *</label>
             <select class="form-select" id="ticket-type">
+                <option value="">-- Select Type --</option>
                 <option value="Standard">Standard</option>
                 <option value="Free">Free</option>
             </select>
@@ -353,7 +354,7 @@
         document.getElementById('ticket-price').value    = '';
         document.getElementById('ticket-capacity').value = '';
         document.getElementById('ticket-perks').value    = '';
-        document.getElementById('ticket-type').value     = 'Standard';
+        document.getElementById('ticket-type').value     = '';
         document.getElementById('ticket-status').value   = 'Available';
         document.getElementById('early-bird-price').value = '';
         document.getElementById('toggle-discounts').querySelector('.toggle').classList.add('off');
@@ -362,23 +363,19 @@
         document.getElementById('earlyBirdFields').classList.remove('active');
     }
 
-    // ── Open in CREATE mode ──────────────────────────────────────────────────
     function openCreateDrawer() {
         editingEventId = null;
         editingTierId  = null;
         clearForm();
         document.getElementById('ticket-event').disabled = false;
-
         document.getElementById('drawerTitle').textContent = 'Add Ticket Type';
         document.getElementById('drawerBadge').className   = 'drawer-mode-badge create';
         document.getElementById('drawerBadge').innerHTML   = '<i class="fa-solid fa-plus"></i> New Ticket';
         document.getElementById('saveBtnLabel').textContent = 'Save Changes';
         document.getElementById('deleteTicketBtn').style.display = 'none';
-
         openDrawer();
     }
 
-    // ── Open in EDIT mode ────────────────────────────────────────────────────
     function openEditDrawer(eventId, tierId) {
         const event = allEvents.find(e => e._id === eventId);
         if (!event) return;
@@ -506,11 +503,10 @@
         renderTickets(filtered);
     }
 
-    // ── Save (Create or Update) ──────────────────────────────────────────────
     async function saveTicketTier() {
         const eventId         = document.getElementById('ticket-event').value;
         const ticketName      = document.getElementById('ticket-name').value.trim();
-        const ticketType      = document.getElementById('ticket-type').value;
+        const ticketType      = document.getElementById('ticket-type').value.trim();
         const price           = document.getElementById('ticket-price').value;
         const capacity        = document.getElementById('ticket-capacity').value;
         const status          = document.getElementById('ticket-status').value;
@@ -519,42 +515,48 @@
         const earlyBirdPrice  = document.getElementById('early-bird-price').value;
         const enableDiscounts = !document.getElementById('toggle-discounts').querySelector('.toggle').classList.contains('off');
         const isGroupTicket   = !document.getElementById('toggle-group').querySelector('.toggle').classList.contains('off');
-        const finalName       = ticketName || ticketType;
 
-        if (!eventId || !finalName || !price || !capacity) {
-            alert('Please fill all required fields: Event, Ticket Name, Price, Quantity');
-            return;
-        }
-
-        if (enableEarlyBird && !earlyBirdPrice) {
-            alert('Please enter Early Bird Price');
-            return;
-        }
+        // Strict validation
+        if (!eventId) { alert('Please select an Event'); return; }
+        if (!ticketName) { alert('Please enter Ticket Name'); return; }
+        if (!ticketType) { alert('Please select Ticket Type (Standard or Free)'); return; }
+        if (!price) { alert('Please enter Price'); return; }
+        if (!capacity) { alert('Please enter Quantity'); return; }
+        if (enableEarlyBird && !earlyBirdPrice) { alert('Please enter Early Bird Price'); return; }
 
         const btn = document.getElementById('saveTicketBtn');
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
-        // ✅ Build payload matching backend expectations
+        // Build payload - only include fields that backend expects
         const payload = {
-            ticketName: finalName,
-            ticketType: ticketType,
+            ticketName: ticketName,
+            ticketType: ticketType,  // Must be "Standard" or "Free" exactly
             price: Number(price),
             capacity: Number(capacity),
-            status: status,
-            perks: perks.trim() ? perks.split('\n').filter(p => p.trim()) : [],
-            enableEarlyBird: enableEarlyBird,
-            earlyBirdPrice: enableEarlyBird ? Number(earlyBirdPrice) : undefined,
-            enableDiscounts: enableDiscounts,
-            isGroupTicket: isGroupTicket
+            status: status || 'Available',
+            perks: perks.trim() ? perks.split('\n').map(p => p.trim()).filter(p => p) : []
         };
+
+        // Add early bird fields only if enabled
+        if (enableEarlyBird) {
+            payload.enableEarlyBird = true;
+            payload.earlyBirdPrice = Number(earlyBirdPrice);
+        } else {
+            payload.enableEarlyBird = false;
+        }
+
+        // Add optional toggles only if enabled
+        if (enableDiscounts) payload.enableDiscounts = true;
+        if (isGroupTicket) payload.isGroupTicket = true;
+
+        console.log('✅ Final Payload:', JSON.stringify(payload, null, 2));
 
         try {
             const token = localStorage.getItem('dfa_token');
             let res;
 
             if (editingTierId) {
-                // EDIT mode
                 res = await fetch(`${API}/events/${editingEventId}/tiers/${editingTierId}`, {
                     method: 'PUT',
                     headers: {
@@ -564,7 +566,6 @@
                     body: JSON.stringify(payload)
                 });
             } else {
-                // CREATE mode
                 res = await fetch(`${API}/events/${eventId}/tiers`, {
                     method: 'POST',
                     headers: {
@@ -576,21 +577,23 @@
             }
 
             const result = await res.json();
-            if (!res.ok) throw new Error(result.message || 'Failed to save ticket');
+            if (!res.ok) {
+                console.error('❌ Backend Error:', result);
+                throw new Error(result.message || 'Failed to save ticket');
+            }
 
             showToast(editingTierId ? 'Ticket type updated!' : 'Ticket type added!');
             await loadEvents();
             closeDrawer();
         } catch(err) {
+            console.error('❌ Error:', err);
             alert(err.message || 'Failed to save ticket');
-            console.error('Error:', err);
         } finally {
             btn.disabled = false;
             btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnLabel">${editingTierId ? 'Update Ticket' : 'Save Changes'}</span>`;
         }
     }
 
-    // ── Delete ticket tier ───────────────────────────────────────────────────
     async function deleteTicketTier() {
         if (!editingEventId || !editingTierId) return;
         if (!confirm('Delete this ticket type? This cannot be undone.')) return;
