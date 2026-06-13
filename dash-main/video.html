@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,27 +9,43 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root[data-theme="dark"] {
+            --bg:var(--bg); --sidebar:var(--sidebar); --card:var(--search); --border:var(--border);
+            --text:var(--text); --text2:var(--text2); --muted:var(--muted); --muted2:var(--label-sec);
+            --hover:var(--hover); --hover2:var(--hover2); --search:var(--search); --topbar:var(--sidebar);
+            --label-sec:var(--label-sec); --tog-bg:var(--border); --shadow:rgba(0,0,0,0.3);
+            --thumb-bg:var(--thumb-bg);
+        }
+        :root[data-theme="light"] {
+            --bg:#F4F3FF; --sidebar:#FFFFFF; --card:#FFFFFF; --border:#E5E3F5;
+            --text:var(--bg); --text2:#5B5A7A; --muted:#8B89A8; --muted2:#A09EBF;
+            --hover:#F0EEFF; --hover2:#E9E6FF; --search:#F4F3FF; --topbar:#FFFFFF;
+            --label-sec:#A09EBF; --tog-bg:#E5E3F5; --shadow:rgba(139,92,246,0.08);
+            --thumb-bg:#F0EEFF;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color .25s, border-color .25s, color .2s; }
         body {
             font-family: 'DM Sans', sans-serif;
-            background-color: #1C1B2E;
-            color: #E2E0F0;
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
             min-height: 100vh;
         }
 
         aside {
             width: 220px; min-height: 100vh;
-            background-color: #15142A;
-            border-right: 1px solid #2A2845;
+            background-color: var(--sidebar);
+            border-right: 1px solid var(--border);
             display: flex; flex-direction: column;
             position: sticky; top: 0; height: 100vh;
             overflow-y: auto; flex-shrink: 0;
+            box-shadow: 2px 0 12px var(--shadow);
         }
         .sidebar-logo {
             padding: 20px 16px 14px;
             display: flex; align-items: center; gap: 8px;
-            border-bottom: 1px solid #2A2845;
+            border-bottom: 1px solid var(--border);
         }
         .logo-icon {
             width: 34px; height: 34px;
@@ -39,20 +55,20 @@
             color: white; font-weight: 800; font-size: 11px;
         }
         .logo-text  { font-size: 15px; font-weight: 700; color: #fff; }
-        .logo-sub   { font-size: 10px; color: #6B6A8A; }
+        .logo-sub   { font-size: 10px; color: var(--muted); }
         .sidebar-section { padding: 18px 14px 4px; }
         .sidebar-section-label {
-            font-size: 9px; font-weight: 700; color: #4B4A6A;
+            font-size: 9px; font-weight: 700; color: var(--label-sec);
             text-transform: uppercase; letter-spacing: 1.5px;
             padding: 0 6px; margin-bottom: 6px;
         }
         .nav-link {
             display: flex; align-items: center; gap: 10px;
             padding: 8px 10px; border-radius: 8px;
-            font-size: 13px; font-weight: 500; color: #7B79A0;
+            font-size: 13px; font-weight: 500; color: var(--text2);
             text-decoration: none; transition: all 0.15s ease; margin-bottom: 1px;
         }
-        .nav-link:hover  { background: #221F40; color: #C4B5FD; }
+        .nav-link:hover  { background: var(--hover); color: var(--text2); }
         .nav-link.active { background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff; font-weight:600; box-shadow:0 4px 12px rgba(139,92,246,.35); }
         .nav-link i      { width: 16px; font-size: 13px; text-align: center; }
         .nav-link.logout { color: #EF4444; }
@@ -61,65 +77,67 @@
         main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
         .topbar {
-            background: #15142A; border-bottom: 1px solid #2A2845;
+            background: var(--sidebar); border-bottom: 1px solid var(--border);
             padding: 12px 28px;
             display: flex; align-items: center; justify-content: space-between; gap: 16px;
         }
         .topbar-title { font-size: 16px; font-weight: 700; color: #fff; }
         .search-bar {
             flex: 1; max-width: 380px;
-            background: #211F38; border: 1px solid #2A2845; border-radius: 10px;
+            background: var(--search); border: 1px solid var(--border); border-radius: 10px;
             padding: 8px 14px; display: flex; align-items: center; gap: 8px;
-            color: #5C5A80; font-size: 12px;
+            color: var(--muted); font-size: 12px;
         }
         .topbar-actions { display: flex; align-items: center; gap: 14px; }
         .icon-btn {
             width: 34px; height: 34px; border-radius: 8px;
-            background: #211F38; border: 1px solid #2A2845;
+            background: var(--search); border: 1px solid var(--border);
             display: flex; align-items: center; justify-content: center;
-            color: #9390B8; cursor: pointer; font-size: 13px; transition: all .15s;
+            color: var(--muted); cursor: pointer; font-size: 13px; transition: all .15s;
             position: relative;
         }
-        .icon-btn:hover { background: #2A2750; color: #C4B5FD; }
+        .icon-btn:hover { background: var(--hover2); color: var(--text2); }
+        .theme-toggle { display: flex; align-items: center; gap: 7px; background: var(--tog-bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; cursor: pointer; user-select: none; font-size: 11px; font-weight: 600; color: var(--text2); }
+        .theme-toggle:hover { border-color: #8B5CF6; color: #8B5CF6; }
         .avatar {
             width: 34px; height: 34px; border-radius: 50%;
             background: linear-gradient(135deg,#8B5CF6,#6D28D9);
             display: flex; align-items: center; justify-content: center;
             color: white; font-size: 12px; font-weight: 700;
         }
-        .user-name { font-size: 13px; font-weight: 600; color: #E2E0F0; line-height: 1.2; }
-        .user-role { font-size: 10px; color: #6B6A8A; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
+        .user-role { font-size: 10px; color: var(--muted); }
 
         .videos-panel {
             flex: 1; overflow-y: auto; padding: 24px 28px;
         }
 
         .panel-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-        .panel-sub   { font-size: 12px; color: #6B6A8A; margin-bottom: 20px; }
+        .panel-sub   { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
 
         .filters-row {
             display: flex; align-items: center; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;
         }
         .filter-search {
-            background: #211F38; border: 1px solid #2A2845; border-radius: 8px;
+            background: var(--search); border: 1px solid var(--border); border-radius: 8px;
             padding: 7px 12px; display: flex; align-items: center; gap: 8px;
-            color: #5C5A80; font-size: 12px; flex: 1; max-width: 260px;
+            color: var(--muted); font-size: 12px; flex: 1; max-width: 260px;
         }
         .filter-search input {
             background: transparent; border: none; outline: none;
-            color: #9390B8; font-size: 12px; font-family: inherit; width: 100%;
+            color: var(--muted); font-size: 12px; font-family: inherit; width: 100%;
         }
         .filter-select-wrap { position: relative; }
         .filter-select {
-            background: #211F38; border: 1px solid #2A2845; border-radius: 8px;
-            padding: 7px 32px 7px 12px; font-size: 12px; color: #9390B8;
+            background: var(--search); border: 1px solid var(--border); border-radius: 8px;
+            padding: 7px 32px 7px 12px; font-size: 12px; color: var(--muted);
             font-family: inherit; outline: none; cursor: pointer; appearance: none;
             min-width: 130px;
         }
         .filter-select-wrap::after {
             content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
             position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-            font-size: 9px; color: #5C5A80; pointer-events: none;
+            font-size: 9px; color: var(--muted); pointer-events: none;
         }
         .btn-add {
             display: flex; align-items: center; gap: 6px;
@@ -138,7 +156,7 @@
         }
 
         .video-card {
-            background: #211F38; border: 1px solid #2A2845; border-radius: 14px;
+            background: var(--search); border: 1px solid var(--border); border-radius: 14px;
             overflow: hidden; cursor: pointer;
             transition: border-color .15s, transform .15s;
         }
@@ -146,7 +164,7 @@
 
         .video-thumb {
             position: relative; width: 100%; aspect-ratio: 16/9;
-            background: #1A1836; overflow: hidden;
+            background: var(--thumb-bg); overflow: hidden;
         }
         .video-thumb img {
             width: 100%; height: 100%; object-fit: cover;
@@ -185,7 +203,7 @@
             text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;
         }
         .video-title {
-            font-size: 13px; font-weight: 600; color: #E2E0F0;
+            font-size: 13px; font-weight: 600; color: var(--text);
             line-height: 1.4; margin-bottom: 8px;
             display: -webkit-box; -webkit-line-clamp: 2;
             -webkit-box-orient: vertical; overflow: hidden;
@@ -196,10 +214,10 @@
         .video-actions { display: flex; gap: 6px; }
         .card-menu-btn {
             background: transparent; border: none; cursor: pointer;
-            color: #4B4A6A; font-size: 12px; padding: 3px 6px;
+            color: var(--label-sec); font-size: 12px; padding: 3px 6px;
             border-radius: 6px; transition: background .15s, color .15s;
         }
-        .card-menu-btn:hover { background: #2A2750; color: #C4B5FD; }
+        .card-menu-btn:hover { background: var(--hover2); color: var(--text2); }
         .card-menu-btn.danger:hover { background: rgba(239,68,68,.15); color: #EF4444; }
 
         .drawer-backdrop {
@@ -213,7 +231,7 @@
         .add-video-drawer {
             position: fixed; top: 0; right: 0;
             height: 100vh; width: 340px;
-            background: #fff; color: #1C1B2E;
+            background: #fff; color: var(--bg);
             z-index: 100; overflow-y: auto;
             padding: 22px 20px;
             box-shadow: -8px 0 40px rgba(0,0,0,0.4);
@@ -299,14 +317,14 @@
         .btn-save:hover { opacity: .88; }
 
         .empty-state { padding:60px 0; text-align:center; }
-        .empty-state i { font-size: 36px; color: #2A2845; margin-bottom: 12px; display: block; }
+        .empty-state i { font-size: 36px; color: var(--border); margin-bottom: 12px; display: block; }
 
-        .toast { position: fixed; bottom: 24px; right: 28px; background: #1A1836; border: 1px solid #8B5CF6; border-radius: 10px; padding: 11px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #C4B5FD; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transform: translateY(80px); opacity: 0; transition: transform .3s, opacity .3s; z-index: 200; }
+        .toast { position: fixed; bottom: 24px; right: 28px; background: var(--thumb-bg); border: 1px solid #8B5CF6; border-radius: 10px; padding: 11px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text2); box-shadow: 0 8px 24px rgba(0,0,0,0.4); transform: translateY(80px); opacity: 0; transition: transform .3s, opacity .3s; z-index: 200; }
         .toast.show { transform: translateY(0); opacity: 1; }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #2A2845; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
         .add-video-drawer::-webkit-scrollbar-thumb { background: #D1D5DB; }
     </style>
 </head>
@@ -316,6 +334,8 @@
   if (!localStorage.getItem('dfa_token') || !localStorage.getItem('dfa_admin')) {
     window.location.href = 'index.html';
   }
+  const savedTheme = localStorage.getItem('dfa_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
 </script>
 
 <!-- ══ SIDEBAR ══ -->
@@ -383,6 +403,7 @@
             Search videos...
         </div>
         <div class="topbar-actions">
+            <div class="theme-toggle" onclick="toggleTheme()" id="themeBtn"><i class="fa-solid fa-moon" id="themeIcon"></i><span id="themeLabel">Dark</span></div>
             <div class="icon-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
             <div class="icon-btn">
                 <i class="fa-solid fa-bell"></i>
@@ -510,6 +531,18 @@
         const initials = adminData.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
         document.getElementById('avatarInitials').textContent = initials;
     }
+
+    function applyThemeUI(theme) {
+        document.getElementById('themeIcon').className    = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        document.getElementById('themeLabel').textContent = theme === 'dark' ? 'Dark' : 'Light';
+    }
+    function toggleTheme() {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('dfa_theme', next);
+        applyThemeUI(next);
+    }
+    applyThemeUI(savedTheme);
 
     const catColors = {
         'Street Interview': ['#4C1D95','#1E1040'],
