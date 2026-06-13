@@ -10,15 +10,15 @@
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
         :root[data-theme="dark"] {
-            --bg:var(--bg); --sidebar:var(--sidebar); --card:var(--search); --border:var(--border);
-            --text:var(--text); --text2:var(--text2); --muted:var(--muted); --muted2:var(--label-sec);
-            --hover:var(--hover); --hover2:var(--hover2); --search:var(--search); --topbar:var(--sidebar);
-            --label-sec:var(--label-sec); --tog-bg:var(--border); --shadow:rgba(0,0,0,0.3);
-            --thumb-bg:var(--thumb-bg);
+            --bg:#1C1B2E; --sidebar:#15142A; --card:#211F38; --border:#2A2845;
+            --text:#E2E0F0; --text2:#7B79A0; --muted:#6B6A8A; --muted2:#4B4A6A;
+            --hover:#221F40; --hover2:#2A2750; --search:#211F38; --topbar:#15142A;
+            --label-sec:#4B4A6A; --tog-bg:#2A2845; --shadow:rgba(0,0,0,0.3);
+            --thumb-bg:#15142A;
         }
         :root[data-theme="light"] {
             --bg:#F4F3FF; --sidebar:#FFFFFF; --card:#FFFFFF; --border:#E5E3F5;
-            --text:var(--bg); --text2:#5B5A7A; --muted:#8B89A8; --muted2:#A09EBF;
+            --text:#1C1B2E; --text2:#5B5A7A; --muted:#8B89A8; --muted2:#A09EBF;
             --hover:#F0EEFF; --hover2:#E9E6FF; --search:#F4F3FF; --topbar:#FFFFFF;
             --label-sec:#A09EBF; --tog-bg:#E5E3F5; --shadow:rgba(139,92,246,0.08);
             --thumb-bg:#F0EEFF;
@@ -432,11 +432,11 @@
             <div class="filter-select-wrap">
                 <select class="filter-select" id="categoryFilter" onchange="filterVideos()">
                     <option value="">All Categories</option>
-                    <option>Event Highlight</option>
-                    <option>Tutorial</option>
-                    <option>Testimonial</option>
-                    <option>Promo</option>
-                    <option>Other</option>
+                    <option>All</option>
+                    <option>Street Interview</option>
+                    <option>Teachings</option>
+                    <option>Reflections</option>
+                    <option>Every Moments</option>
                 </select>
             </div>
             <div class="filter-select-wrap">
@@ -481,11 +481,11 @@
     <div class="form-group">
         <label class="form-label">Category</label>
         <select class="form-select" id="f_category">
-            <option>Event Highlight</option>
-            <option>Tutorial</option>
-            <option>Testimonial</option>
-            <option>Promo</option>
-            <option>Other</option>
+            <option>All</option>
+            <option>Street Interview</option>
+            <option>Teachings</option>
+            <option>Reflections</option>
+            <option>Every Moments</option>
         </select>
     </div>
 
@@ -517,7 +517,7 @@
 <script>
     const API = 'https://dfaummah-server.onrender.com/api/v1';
     let allVideos  = [];
-    let editingId  = null; // null = create mode, string = edit mode
+    let editingId  = null;
 
     function logout() {
         localStorage.removeItem('dfa_token');
@@ -545,21 +545,20 @@
     applyThemeUI(savedTheme);
 
     const catColors = {
-        'Event Highlight': ['#1A3A2A','#0D2019'],
-        'Tutorial':        ['#1E3A5F','#0F2040'],
-        'Testimonial':     ['#3B2A1A','#251A0D'],
-        'Promo':           ['#4C1D95','#1E1040'],
-        'Other':           ['#1A1A3A','#0D0D25'],
+        'All':            ['#1A3A2A','#0D2019'],
+        'Street Interview': ['#1E3A5F','#0F2040'],
+        'Teachings':      ['#3B2A1A','#251A0D'],
+        'Reflections':    ['#4C1D95','#1E1040'],
+        'Every Moments':  ['#1A1A3A','#0D0D25'],
     };
     const catIcons = {
-        'Event Highlight': 'fa-calendar-star',
-        'Tutorial':        'fa-book-open',
-        'Testimonial':     'fa-heart',
-        'Promo':           'fa-bullhorn',
-        'Other':           'fa-play',
+        'All':            'fa-play',
+        'Street Interview': 'fa-microphone',
+        'Teachings':      'fa-book-open',
+        'Reflections':    'fa-lightbulb',
+        'Every Moments':  'fa-camera',
     };
 
-    // ── Extract YouTube video ID & build thumbnail URL ─────────────────────
     function getYoutubeId(url) {
         if (!url) return null;
         const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
@@ -583,7 +582,6 @@
         }
     }
 
-    // ── Drawer ────────────────────────────────────────────────────────────────
     function openDrawer() {
         document.getElementById('videoDrawer').classList.add('open');
         document.getElementById('drawerBackdrop').classList.add('open');
@@ -601,7 +599,7 @@
     function clearForm() {
         document.getElementById('f_title').value = '';
         document.getElementById('f_url').value    = '';
-        document.getElementById('f_category').value = 'Event Highlight';
+        document.getElementById('f_category').value = 'All';
         document.getElementById('publishToggle').querySelector('.toggle').classList.add('off');
         document.getElementById('thumbPreview').style.display = 'none';
     }
@@ -622,7 +620,7 @@
         editingId = id;
 
         document.getElementById('f_title').value    = v.title || '';
-        document.getElementById('f_category').value = v.category || 'Event Highlight';
+        document.getElementById('f_category').value = v.category || 'All';
         document.getElementById('f_url').value      = v.youtubeUrl || '';
         updateThumbPreview();
 
@@ -636,7 +634,6 @@
         openDrawer();
     }
 
-    // ── Load videos from backend ─────────────────────────────────────────────
     async function loadVideos() {
         try {
             const token = localStorage.getItem('dfa_token');
@@ -728,7 +725,6 @@
         renderGrid(filtered);
     }
 
-    // ── Save (Create or Update) ──────────────────────────────────────────────
     async function saveVideo() {
         const title       = document.getElementById('f_title').value.trim();
         const category    = document.getElementById('f_category').value;
@@ -776,7 +772,6 @@
         }
     }
 
-    // ── Delete ────────────────────────────────────────────────────────────────
     async function deleteVideoById(id) {
         if (!confirm('Delete this video? This cannot be undone.')) return;
         try {
