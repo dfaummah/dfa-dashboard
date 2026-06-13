@@ -456,22 +456,6 @@
             <button class="preview-remove" onclick="clearPreview()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <div class="form-group">
-            <label class="form-label">Title (Optional)</label>
-            <input type="text" class="form-input" id="f_title" placeholder="Image title">
-        </div>
-        <div class="form-group">
-            <label class="form-label">Category</label>
-            <select class="form-select" id="f_cat">
-                <option>Events</option>
-                <option>Community</option>
-                <option>Street Interview</option>
-                <option>Conference</option>
-                <option>Worship</option>
-                <option>Behind the Scene</option>
-            </select>
-        </div>
-
         <div class="toggle-item" onclick="this.querySelector('.toggle').classList.toggle('off')">
             <div class="toggle"></div>
             <div class="toggle-name">Visible on site</div>
@@ -563,7 +547,6 @@
                 </div>
                 <div class="img-overlay">
                     <div class="ov-title">${img.title || 'Untitled'}</div>
-                    <div class="ov-cat">${img.category || ''}</div>
                 </div>
                 ${dim}
             </div>`;
@@ -628,7 +611,6 @@
         document.getElementById('modalOverlay').classList.remove('open');
         document.body.style.overflow = '';
         clearPreview();
-        document.getElementById('f_title').value = '';
         const tog = document.querySelector('#modalBox .toggle');
         tog.classList.remove('off');
     }
@@ -680,8 +662,6 @@
             return;
         }
 
-        const title    = document.getElementById('f_title').value.trim();
-        const category = document.getElementById('f_cat').value;
         const visible  = !document.querySelector('#modalBox .toggle').classList.contains('off');
 
         const btn = document.getElementById('saveBtn');
@@ -691,8 +671,6 @@
         try {
             const formData = new FormData();
             formData.append('file', selectedFile);
-            formData.append('title', title);
-            formData.append('category', category);
             formData.append('visibleOnSite', visible);
 
             const res = await fetch(`${API}/content/media`, {
