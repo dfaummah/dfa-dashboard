@@ -519,40 +519,45 @@
 
     let mediaItems = [];
     let selectedFile = null;
+    let pendingDeleteId = null;
 
     function logout() {
         localStorage.removeItem('dfa_token');
         localStorage.removeItem('dfa_admin');
         window.location.href = 'index.html';
     }
+
     const adminData = JSON.parse(localStorage.getItem('dfa_admin') || '{}');
     if (adminData.name) {
         document.getElementById('adminName').textContent = adminData.name;
         document.getElementById('adminRole').textContent = adminData.role || 'Admin';
-        const initials = adminData.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+        const initials = adminData.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
         document.getElementById('avatarInitials').textContent = initials;
     }
 
     function applyThemeUI(theme) {
-        document.getElementById('themeIcon').className    = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        document.getElementById('themeIcon').className = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
         document.getElementById('themeLabel').textContent = theme === 'dark' ? 'Dark' : 'Light';
     }
+
     function toggleTheme() {
         const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('dfa_theme', next);
         applyThemeUI(next);
     }
+
     applyThemeUI(savedTheme);
 
-    // ── Load gallery from backend ────────────────────────────────────────────
     async function loadGallery() {
         try {
             const res = await fetch(`${API}/content/media`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+
             const result = await res.json();
             if (!res.ok) throw new Error(result.message || 'Failed to load gallery');
+
             mediaItems = result.data?.media || [];
             render();
         } catch (err) {
@@ -564,44 +569,64 @@
 
     function render() {
         const grid = document.getElementById('masonryGrid');
-        const dz   = document.getElementById('dropZone');
-        const vis  = mediaItems.filter(i => i.visibleOnSite).length;
+        const dz = document.getElementById('dropZone');
+        const vis = mediaItems.filter(i => i.visibleOnSite).length;
+
         document.getElementById('galleryCount').textContent =
             `${mediaItems.length} image${mediaItems.length !== 1 ? 's' : ''} • ${vis} visible`;
 
-        if (mediaItems.length === 0) { dz.style.display = 'block'; grid.style.display = 'none'; return; }
-        dz.style.display = 'none'; grid.style.display = 'block';
+        if (mediaItems.length === 0) {
+            dz.style.display = 'block';
+            grid.style.display = 'none';
+            return;
+        }
 
-        const addC = `<div class="add-card" onclick="openModal()">
-            <i class="fa-solid fa-plus"></i><span>Add Image</span></div>`;
+        dz.style.display = 'none';
+        grid.style.display = 'block';
+
+        const addC = `
+            <div class="add-card" onclick="openModal()">
+                <i class="fa-solid fa-plus"></i>
+                <span>Add Image</span>
+            </div>
+        `;
 
         const cards = mediaItems.map(img => {
+            const id = img._id || img.id;
             const eye = img.visibleOnSite ? 'fa-eye' : 'fa-eye-slash';
-            const dim = img.visibleOnSite ? '' : '<div class="hidden-dim"><i class="fa-solid fa-eye-slash" style="color:rgba(255,255,255,.35);font-size:18px;"></i></div>';
-            return `<div class="img-card" data-id="${img._id}">
-                <img src="${img.fileUrl}" alt="${img.title || ''}" onclick="openLB('${img.fileUrl}')">
-                <div class="img-actions">
-                    <button class="act-btn" onclick="togVis('${img._id}',event)" title="Toggle visibility">
-                        <i class="fa-solid ${eye}"></i></button>
-                    <button class="act-btn del" onclick="delImg('${img._id}',event)" title="Delete">
-                        <i class="fa-solid fa-trash"></i></button>
+            const dim = img.visibleOnSite
+                ? ''
+                : '<div class="hidden-dim"><i class="fa-solid fa-eye-slash" style="color:rgba(255,255,255,.35);font-size:18px;"></i></div>';
+
+            return `
+                <div class="img-card" data-id="${id}">
+                    <img src="${img.fileUrl}" alt="${img.title || ''}" onclick="openLB('${img.fileUrl}')">
+                    <div class="img-actions">
+                        <button class="act-btn" onclick="togVis('${id}', event)" title="Toggle visibility">
+                            <i class="fa-solid ${eye}"></i>
+                        </button>
+                        <button class="act-btn del" onclick="delImg('${id}', event)" title="Delete">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="img-overlay">
+                        <div class="ov-title">${img.title || 'Untitled'}</div>
+                        <div class="ov-cat">${img.category || ''}</div>
+                    </div>
+                    ${dim}
                 </div>
-                <div class="img-overlay">
-                    <div class="ov-title">${img.title || 'Untitled'}</div>
-                    <div class="ov-cat">${img.category || ''}</div>
-                </div>
-                ${dim}
-            </div>`;
+            `;
         });
 
         grid.innerHTML = addC + cards.join('');
     }
 
-    // ── Toggle visibility (PATCH /content/media/:id) ────────────────────────
     async function togVis(id, e) {
         e.stopPropagation();
-        const item = mediaItems.find(x => x._id === id);
+
+        const item = mediaItems.find(x => (x._id || x.id) === id);
         if (!item) return;
+
         const newVisible = !item.visibleOnSite;
 
         try {
@@ -613,8 +638,10 @@
                 },
                 body: JSON.stringify({ visibleOnSite: newVisible })
             });
+
             const result = await res.json();
             if (!res.ok) throw new Error(result.message || 'Failed to update visibility');
+
             item.visibleOnSite = newVisible;
             render();
             showToast(newVisible ? 'Image is now visible' : 'Image hidden from site');
@@ -623,52 +650,85 @@
         }
     }
 
-    // ── Delete (DELETE /content/media/:id) ───────────────────────────────────
-    let pendingDeleteId = null;
-
     function closeConfirm() {
         document.getElementById('confirmBox').classList.remove('open');
+        document.getElementById('confirmDeleteBtn').onclick = null;
         pendingDeleteId = null;
     }
 
-    async function delImg(id, e) {
+    async function deleteImageNow(id) {
+        try {
+            const res = await fetch(`${API}/content/media/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            let result = null;
+            const contentType = res.headers.get('content-type') || '';
+
+            if (contentType.includes('application/json')) {
+                result = await res.json();
+            }
+
+            if (!res.ok) {
+                throw new Error(result?.message || 'Failed to delete image');
+            }
+
+            mediaItems = mediaItems.filter(item => (item._id || item.id) !== id);
+            render();
+            showToast('Image deleted');
+        } catch (err) {
+            alert(err.message || 'Failed to delete image');
+        }
+    }
+
+    function delImg(id, e) {
         e.stopPropagation();
         pendingDeleteId = id;
-        document.getElementById('confirmBox').classList.add('open');
-        document.getElementById('confirmDeleteBtn').onclick = async () => {
+
+        const confirmBox = document.getElementById('confirmBox');
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+
+        confirmBox.classList.add('open');
+
+        confirmBtn.onclick = async () => {
+            const imageId = pendingDeleteId;
             closeConfirm();
-            try {
-                const res = await fetch(`${API}/content/media/${pendingDeleteId || id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const result = await res.json();
-                if (!res.ok) throw new Error(result.message || 'Failed to delete');
-                mediaItems = mediaItems.filter(x => x._id !== id);
-                render();
-                showToast('Image deleted');
-            } catch (err) {
-                showToast('Delete failed: ' + (err.message || 'Unknown error'));
-            }
+
+            if (!imageId) return;
+            await deleteImageNow(imageId);
         };
     }
 
-    function openLB(s) { document.getElementById('lbImg').src = s; document.getElementById('lightbox').classList.add('open'); }
-    function closeLB() { document.getElementById('lightbox').classList.remove('open'); }
+    function openLB(src) {
+        document.getElementById('lbImg').src = src;
+        document.getElementById('lightbox').classList.add('open');
+    }
+
+    function closeLB() {
+        document.getElementById('lightbox').classList.remove('open');
+    }
 
     function openModal() {
         document.getElementById('modalOverlay').classList.add('open');
         document.body.style.overflow = 'hidden';
     }
+
     function closeModal() {
         document.getElementById('modalOverlay').classList.remove('open');
         document.body.style.overflow = '';
         clearPreview();
         document.getElementById('f_title').value = '';
+        document.getElementById('f_cat').selectedIndex = 0;
         const tog = document.querySelector('#modalBox .toggle');
         tog.classList.remove('off');
     }
-    function overlayClick(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+
+    function overlayClick(e) {
+        if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
 
     function showPrev(src, file) {
         document.getElementById('imgPreview').src = src;
@@ -676,6 +736,7 @@
         document.getElementById('uploadZone').style.display = 'none';
         selectedFile = file || null;
     }
+
     function clearPreview() {
         document.getElementById('imgPreviewBox').style.display = 'none';
         document.getElementById('uploadZone').style.display = 'block';
@@ -683,42 +744,52 @@
         document.getElementById('imgFile').value = '';
         selectedFile = null;
     }
+
     function pickFile(inp) {
         if (!inp.files || !inp.files[0]) return;
+
         const file = inp.files[0];
         const r = new FileReader();
         r.onload = e => showPrev(e.target.result, file);
         r.readAsDataURL(file);
     }
 
-    function ev(e) { e.preventDefault(); }
+    function ev(e) {
+        e.preventDefault();
+    }
+
     function dropModal(e) {
         e.preventDefault();
         const f = e.dataTransfer.files[0];
         if (!f || !f.type.startsWith('image/')) return;
+
         const r = new FileReader();
-        r.onload = ev => showPrev(ev.target.result, f);
+        r.onload = ev2 => showPrev(ev2.target.result, f);
         r.readAsDataURL(f);
     }
+
     function dropOnZone(e) {
         e.preventDefault();
         const f = e.dataTransfer.files[0];
         if (!f || !f.type.startsWith('image/')) return;
+
         const r = new FileReader();
-        r.onload = ev => { openModal(); setTimeout(() => showPrev(ev.target.result, f), 60); };
+        r.onload = ev2 => {
+            openModal();
+            setTimeout(() => showPrev(ev2.target.result, f), 60);
+        };
         r.readAsDataURL(f);
     }
 
-    // ── Save (Upload via POST /content/media, multipart) ─────────────────────
     async function saveImg() {
         if (!selectedFile) {
             alert('Please select or drop an image file to upload.');
             return;
         }
 
-        const title    = document.getElementById('f_title').value.trim();
+        const title = document.getElementById('f_title').value.trim();
         const category = document.getElementById('f_cat').value;
-        const visible  = !document.querySelector('#modalBox .toggle').classList.contains('off');
+        const visible = !document.querySelector('#modalBox .toggle').classList.contains('off');
 
         const btn = document.getElementById('saveBtn');
         btn.disabled = true;
@@ -729,13 +800,14 @@
             formData.append('file', selectedFile);
             formData.append('title', title);
             formData.append('category', category);
-            formData.append('visibleOnSite', visible);
+            formData.append('visibleOnSite', String(visible));
 
             const res = await fetch(`${API}/content/media`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             });
+
             const result = await res.json();
             if (!res.ok) throw new Error(result.message || 'Upload failed');
 
@@ -757,7 +829,13 @@
         setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLB(); closeModal(); } });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            closeLB();
+            closeModal();
+            closeConfirm();
+        }
+    });
 
     loadGallery();
 </script>
