@@ -323,6 +323,19 @@
         .toast { position: fixed; bottom: 24px; right: 28px; background: #1A1836; border: 1px solid #8B5CF6; border-radius: 10px; padding: 11px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #C4B5FD; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transform: translateY(80px); opacity: 0; transition: transform .3s, opacity .3s; z-index: 200; }
         .toast.show { transform: translateY(0); opacity: 1; }
 
+        /* Confirm dialog */
+        .confirm-box { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+        .confirm-box.open { opacity: 1; pointer-events: all; }
+        .confirm-inner { background: #fff; border-radius: 14px; padding: 24px; max-width: 320px; width: 90%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+        .confirm-inner h4 { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 8px; }
+        .confirm-inner p { font-size: 12px; color: #6B7280; margin-bottom: 20px; }
+        .confirm-btns { display: flex; gap: 10px; }
+        .confirm-btns button { flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; border: none; }
+        .confirm-cancel { background: #F3F4F6; color: #374151; }
+        .confirm-cancel:hover { background: #E5E7EB; }
+        .confirm-delete { background: #EF4444; color: #fff; }
+        .confirm-delete:hover { background: #DC2626; }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -456,6 +469,22 @@
             <button class="preview-remove" onclick="clearPreview()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
+        <div class="form-group">
+            <label class="form-label">Title (Optional)</label>
+            <input type="text" class="form-input" id="f_title" placeholder="Image title">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="f_cat">
+                <option>Events</option>
+                <option>Community</option>
+                <option>Street Interview</option>
+                <option>Conference</option>
+                <option>Worship</option>
+                <option>Behind the Scene</option>
+            </select>
+        </div>
+
         <div class="toggle-item" onclick="this.querySelector('.toggle').classList.toggle('off')">
             <div class="toggle"></div>
             <div class="toggle-name">Visible on site</div>
@@ -471,6 +500,18 @@
 </div>
 
 <div class="toast" id="toast"><i class="fa-solid fa-circle-check" style="color:#34D399;"></i><span id="toastMsg">Done</span></div>
+
+<!-- Confirm delete dialog -->
+<div class="confirm-box" id="confirmBox">
+    <div class="confirm-inner">
+        <h4>Delete Image?</h4>
+        <p>This will permanently remove the image from your gallery and website.</p>
+        <div class="confirm-btns">
+            <button class="confirm-cancel" onclick="closeConfirm()">Cancel</button>
+            <button class="confirm-delete" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
 
 <script>
     const API = 'https://dfaummah-server.onrender.com/api/v1';
@@ -547,6 +588,7 @@
                 </div>
                 <div class="img-overlay">
                     <div class="ov-title">${img.title || 'Untitled'}</div>
+                    <div class="ov-cat">${img.category || ''}</div>
                 </div>
                 ${dim}
             </div>`;
@@ -582,22 +624,33 @@
     }
 
     // ── Delete (DELETE /content/media/:id) ───────────────────────────────────
+    let pendingDeleteId = null;
+
+    function closeConfirm() {
+        document.getElementById('confirmBox').classList.remove('open');
+        pendingDeleteId = null;
+    }
+
     async function delImg(id, e) {
         e.stopPropagation();
-        if (!confirm('Delete this image?')) return;
-        try {
-            const res = await fetch(`${API}/content/media/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const result = await res.json();
-            if (!res.ok) throw new Error(result.message || 'Failed to delete');
-            mediaItems = mediaItems.filter(x => x._id !== id);
-            render();
-            showToast('Image deleted');
-        } catch (err) {
-            alert(err.message || 'Failed to delete image');
-        }
+        pendingDeleteId = id;
+        document.getElementById('confirmBox').classList.add('open');
+        document.getElementById('confirmDeleteBtn').onclick = async () => {
+            closeConfirm();
+            try {
+                const res = await fetch(`${API}/content/media/${pendingDeleteId || id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.message || 'Failed to delete');
+                mediaItems = mediaItems.filter(x => x._id !== id);
+                render();
+                showToast('Image deleted');
+            } catch (err) {
+                showToast('Delete failed: ' + (err.message || 'Unknown error'));
+            }
+        };
     }
 
     function openLB(s) { document.getElementById('lbImg').src = s; document.getElementById('lightbox').classList.add('open'); }
@@ -611,6 +664,7 @@
         document.getElementById('modalOverlay').classList.remove('open');
         document.body.style.overflow = '';
         clearPreview();
+        document.getElementById('f_title').value = '';
         const tog = document.querySelector('#modalBox .toggle');
         tog.classList.remove('off');
     }
@@ -662,6 +716,8 @@
             return;
         }
 
+        const title    = document.getElementById('f_title').value.trim();
+        const category = document.getElementById('f_cat').value;
         const visible  = !document.querySelector('#modalBox .toggle').classList.contains('off');
 
         const btn = document.getElementById('saveBtn');
@@ -671,6 +727,8 @@
         try {
             const formData = new FormData();
             formData.append('file', selectedFile);
+            formData.append('title', title);
+            formData.append('category', category);
             formData.append('visibleOnSite', visible);
 
             const res = await fetch(`${API}/content/media`, {
