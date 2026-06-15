@@ -111,6 +111,20 @@
         .ticket-type-hint.show{display:block;}
         .toast{position:fixed;bottom:24px;right:28px;background:#1A1836;border:1px solid #8B5CF6;border-radius:10px;padding:11px 16px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#C4B5FD;box-shadow:0 8px 24px rgba(0,0,0,0.4);transform:translateY(80px);opacity:0;transition:transform .3s,opacity .3s;z-index:200;}
         .toast.show{transform:translateY(0);opacity:1;}
+
+        /* ── Custom confirm dialog ── */
+        .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(2px);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+        .confirm-overlay.open{opacity:1;pointer-events:all;}
+        .confirm-box{background:#fff;border-radius:16px;padding:28px 24px;max-width:340px;width:90%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.4);}
+        .confirm-box h4{font-size:15px;font-weight:700;color:#111;margin-bottom:8px;}
+        .confirm-box p{font-size:12px;color:#6B7280;margin-bottom:22px;line-height:1.6;}
+        .confirm-btns{display:flex;gap:10px;}
+        .confirm-btns button{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:none;}
+        .cbtn-cancel{background:#F3F4F6;color:#374151;}
+        .cbtn-cancel:hover{background:#E5E7EB;}
+        .cbtn-delete{background:#EF4444;color:#fff;}
+        .cbtn-delete:hover{background:#DC2626;}
+
         ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
         .add-ticket-drawer::-webkit-scrollbar-thumb{background:#D1D5DB;}
     </style>
@@ -201,6 +215,18 @@
     </div>
 </main>
 
+<!-- Custom confirm dialog -->
+<div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+        <h4>Delete Ticket Type?</h4>
+        <p>This will permanently remove this ticket type. This action cannot be undone.</p>
+        <div class="confirm-btns">
+            <button class="cbtn-cancel" onclick="closeConfirm()">Cancel</button>
+            <button class="cbtn-delete" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
 <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
 
 <div class="add-ticket-drawer" id="ticketDrawer">
@@ -230,7 +256,6 @@
         </div>
     </div>
 
-    <!-- Ticket type hint -->
     <div class="ticket-type-hint" id="typeHint"></div>
 
     <div class="form-row">
@@ -247,7 +272,6 @@
         </div>
     </div>
 
-    <!-- Early Bird Section -->
     <div class="early-bird-section">
         <div class="toggle-item" onclick="toggleEarlyBird()">
             <div class="toggle off" id="earlyBirdToggle"></div>
@@ -301,7 +325,7 @@
             <i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnLabel">Save Changes</span>
         </button>
     </div>
-    <button class="btn-delete" id="deleteTicketBtn" onclick="deleteTicketTier()" style="display:none;">
+    <button class="btn-delete" id="deleteTicketBtn" onclick="openConfirm()" style="display:none;">
         <i class="fa-solid fa-trash"></i> Delete Ticket Type
     </button>
 </div>
@@ -310,27 +334,20 @@
 
 <script>
     const API = 'https://dfaummah-server.onrender.com/api/v1';
-    let allEvents  = [];
+    let allEvents      = [];
     let editingEventId = null;
     let editingTierId  = null;
 
-    const TYPE_HINTS = {
-        'Standard':          '1 person · 1 ticket · fixed price',
-        'Myself and friends':'2–5 people · price multiplies by quantity · each gets their own QR',
-        'Family':            '5 people · fixed price (does not multiply) · all 5 get QR emails',
-        'School pass':       'Min 50 students · org name & headcount only · fixed price'
-    };
-
-    function onTicketTypeChange(val) {
-        const hint = document.getElementById('typeHint');
-        if (val && TYPE_HINTS[val]) {
-            hint.textContent = '📌 ' + TYPE_HINTS[val];
-            hint.classList.add('show');
-        } else {
-            hint.classList.remove('show');
-        }
+    // ── Custom confirm dialog ─────────────────────────────────────────────────
+    function openConfirm() {
+        document.getElementById('confirmOverlay').classList.add('open');
+        document.getElementById('confirmDeleteBtn').onclick = doDeleteTicket;
+    }
+    function closeConfirm() {
+        document.getElementById('confirmOverlay').classList.remove('open');
     }
 
+    // ── Auth / Admin info ─────────────────────────────────────────────────────
     function logout() { localStorage.removeItem('dfa_token'); localStorage.removeItem('dfa_admin'); window.location.href = 'index.html'; }
     const adminData = JSON.parse(localStorage.getItem('dfa_admin') || '{}');
     if (adminData.name) {
@@ -340,6 +357,7 @@
         document.getElementById('avatarInitials').textContent = initials;
     }
 
+    // ── Theme ─────────────────────────────────────────────────────────────────
     function applyThemeUI(theme) {
         document.getElementById('themeIcon').className    = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
         document.getElementById('themeLabel').textContent = theme === 'dark' ? 'Dark' : 'Light';
@@ -352,6 +370,20 @@
     }
     applyThemeUI(savedTheme);
 
+    // ── Ticket type hint ──────────────────────────────────────────────────────
+    const TYPE_HINTS = {
+        'Standard':           '1 person · 1 ticket · fixed price',
+        'Myself and friends': '2–5 people · price multiplies by quantity · each gets their own QR',
+        'Family':             '5 people · fixed price (does not multiply) · all 5 get QR emails',
+        'School pass':        'Min 50 students · org name & headcount only · fixed price'
+    };
+    function onTicketTypeChange(val) {
+        const hint = document.getElementById('typeHint');
+        if (val && TYPE_HINTS[val]) { hint.textContent = '📌 ' + TYPE_HINTS[val]; hint.classList.add('show'); }
+        else hint.classList.remove('show');
+    }
+
+    // ── Drawer open/close ─────────────────────────────────────────────────────
     function openDrawer() {
         document.getElementById('ticketDrawer').classList.add('open');
         document.getElementById('drawerBackdrop').classList.add('open');
@@ -361,16 +393,16 @@
         document.getElementById('ticketDrawer').classList.remove('open');
         document.getElementById('drawerBackdrop').classList.remove('open');
         document.body.style.overflow = '';
-        editingEventId = null;
-        editingTierId  = null;
+        editingEventId = null; editingTierId = null;
     }
     function toggleSwitch(item) { item.querySelector('.toggle').classList.toggle('off'); }
     function toggleEarlyBird() {
         document.getElementById('earlyBirdToggle').classList.toggle('off');
         document.getElementById('earlyBirdFields').classList.toggle('active');
     }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeConfirm(); } });
 
+    // ── Clear form ────────────────────────────────────────────────────────────
     function clearForm() {
         document.getElementById('ticket-name').value      = '';
         document.getElementById('ticket-price').value     = '';
@@ -386,6 +418,7 @@
         document.getElementById('typeHint').classList.remove('show');
     }
 
+    // ── Open create drawer ────────────────────────────────────────────────────
     function openCreateDrawer() {
         editingEventId = null; editingTierId = null;
         clearForm();
@@ -398,6 +431,7 @@
         openDrawer();
     }
 
+    // ── Open edit drawer ──────────────────────────────────────────────────────
     function openEditDrawer(eventId, tierId) {
         const event = allEvents.find(e => e._id === eventId);
         if (!event) return;
@@ -427,17 +461,19 @@
 
         if (tier.enableDiscounts)    discToggle.classList.remove('off');  else discToggle.classList.add('off');
         if (tier.showAvailableCount) countToggle.classList.remove('off'); else countToggle.classList.add('off');
-        if (tier.enableEarlyBird)  { ebToggle.classList.remove('off'); document.getElementById('earlyBirdFields').classList.add('active'); }
-        else                       { ebToggle.classList.add('off');    document.getElementById('earlyBirdFields').classList.remove('active'); }
+        if (tier.enableEarlyBird) { ebToggle.classList.remove('off'); document.getElementById('earlyBirdFields').classList.add('active'); }
+        else                      { ebToggle.classList.add('off');    document.getElementById('earlyBirdFields').classList.remove('active'); }
 
         document.getElementById('drawerTitle').textContent  = 'Edit Ticket Type';
         document.getElementById('drawerBadge').className    = 'drawer-mode-badge edit';
         document.getElementById('drawerBadge').innerHTML    = '<i class="fa-solid fa-pen"></i> Editing';
         document.getElementById('saveBtnLabel').textContent = 'Update Ticket';
+        // Only show delete if no tickets sold
         document.getElementById('deleteTicketBtn').style.display = (tier.sold > 0) ? 'none' : 'flex';
         openDrawer();
     }
 
+    // ── Load events ───────────────────────────────────────────────────────────
     async function loadEvents() {
         try {
             const res    = await fetch(`${API}/events`);
@@ -456,6 +492,7 @@
         }
     }
 
+    // ── Render ticket cards ───────────────────────────────────────────────────
     function renderTickets(events) {
         const container = document.getElementById('tickets-container');
         const total = events.reduce((sum, e) => sum + (e.ticketTiers?.length || 0), 0);
@@ -469,13 +506,13 @@
         const typeBgMap  = { 'Standard':'standard','Myself and friends':'group','Family':'vip','School pass':'school' };
 
         container.innerHTML = events.map(event => {
-            const tiersHTML = (event.ticketTiers || []).map((tier) => {
-                const sold        = tier.sold || 0;
-                const left        = tier.capacity - sold;
-                const pct         = tier.capacity > 0 ? (sold / tier.capacity) * 100 : 0;
-                const availClass  = pct >= 100 ? 'avail-sold' : pct >= 80 ? 'avail-low' : 'avail-ok';
-                const availText   = pct >= 100 ? 'Sold Out' : tier.showAvailableCount ? `${left} Left` : 'Available';
-                const colorClass  = typeBgMap[tier.ticketType] || 'standard';
+            const tiersHTML = (event.ticketTiers || []).map(tier => {
+                const sold       = tier.sold || 0;
+                const left       = tier.capacity - sold;
+                const pct        = tier.capacity > 0 ? (sold / tier.capacity) * 100 : 0;
+                const availClass = pct >= 100 ? 'avail-sold' : pct >= 80 ? 'avail-low' : 'avail-ok';
+                const availText  = pct >= 100 ? 'Sold Out' : tier.showAvailableCount ? `${left} Left` : 'Available';
+                const colorClass = typeBgMap[tier.ticketType] || 'standard';
                 const displayName = tier.ticketName || tier.name || 'Ticket';
                 const priceDisplay = tier.enableEarlyBird && tier.earlyBirdPrice
                     ? `₦${Number(tier.price).toLocaleString()} / ₦${Number(tier.earlyBirdPrice).toLocaleString()}`
@@ -517,6 +554,7 @@
         })).filter(e => e.ticketTiers.length > 0));
     }
 
+    // ── Save ticket tier ──────────────────────────────────────────────────────
     async function saveTicketTier() {
         const eventId         = document.getElementById('ticket-event').value;
         const ticketName      = document.getElementById('ticket-name').value.trim();
@@ -525,17 +563,17 @@
         const capacity        = document.getElementById('ticket-capacity').value;
         const status          = document.getElementById('ticket-status').value;
         const perks           = document.getElementById('ticket-perks').value;
-        const enableEarlyBird = !document.getElementById('earlyBirdToggle').classList.contains('off');
-        const earlyBirdPrice  = document.getElementById('early-bird-price').value;
+        const enableEarlyBird    = !document.getElementById('earlyBirdToggle').classList.contains('off');
+        const earlyBirdPrice     = document.getElementById('early-bird-price').value;
         const enableDiscounts    = !document.getElementById('toggle-discounts').querySelector('.toggle').classList.contains('off');
         const showAvailableCount = !document.getElementById('toggle-show-count').querySelector('.toggle').classList.contains('off');
 
         const validTypes = ['Standard','Myself and friends','Family','School pass'];
-        if (!eventId)               { alert('Please select an Event'); return; }
-        if (!ticketName)            { alert('Please enter Ticket Name'); return; }
+        if (!eventId)                     { alert('Please select an Event'); return; }
+        if (!ticketName)                  { alert('Please enter Ticket Name'); return; }
         if (!validTypes.includes(ticketType)) { alert('Please select a valid Ticket Type'); return; }
-        if (!price)                 { alert('Please enter Price'); return; }
-        if (!capacity)              { alert('Please enter Quantity'); return; }
+        if (!price)                       { alert('Please enter Price'); return; }
+        if (!capacity)                    { alert('Please enter Quantity'); return; }
         if (enableEarlyBird && !earlyBirdPrice) { alert('Please enter Early Bird Price'); return; }
 
         const btn = document.getElementById('saveTicketBtn');
@@ -548,9 +586,7 @@
             capacity:           Number(capacity),
             status:             status || 'Available',
             perks:              perks.trim() ? perks.split('\n').map(p => p.trim()).filter(p => p) : [],
-            enableEarlyBird,
-            enableDiscounts,
-            showAvailableCount
+            enableEarlyBird, enableDiscounts, showAvailableCount
         };
         if (enableEarlyBird) payload.earlyBirdPrice = Number(earlyBirdPrice);
 
@@ -577,22 +613,32 @@
         }
     }
 
-    async function deleteTicketTier() {
+    // ── Delete ticket tier (called from confirm dialog) ───────────────────────
+    async function doDeleteTicket() {
         if (!editingEventId || !editingTierId) return;
-        if (!confirm('Delete this ticket type? This cannot be undone.')) return;
+        closeConfirm();
+
         const btn = document.getElementById('deleteTicketBtn');
-        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+
         try {
             const token = localStorage.getItem('dfa_token');
             const res   = await fetch(`${API}/events/${editingEventId}/tiers/${editingTierId}`, {
-                method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             const result = await res.json();
             if (!res.ok) throw new Error(result.message || 'Failed to delete ticket');
             showToast('Ticket type deleted');
-            await loadEvents(); closeDrawer();
-        } catch(err) { alert(err.message || 'Failed to delete ticket'); }
-        finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete Ticket Type'; }
+            await loadEvents();
+            closeDrawer();
+        } catch(err) {
+            showToast('Error: ' + (err.message || 'Failed to delete ticket'));
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete Ticket Type';
+        }
     }
 
     function showToast(msg) {
