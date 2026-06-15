@@ -107,6 +107,8 @@
         .early-bird-icon{color:#D97706;font-size:13px;margin-right:4px;}
         .early-bird-fields{margin-top:12px;padding-top:12px;border-top:1px solid #FDE68A;display:none;}
         .early-bird-fields.active{display:block;}
+        .ticket-type-hint{font-size:10px;color:#8B5CF6;background:#F5F3FF;border:1px solid #EDE9FE;border-radius:8px;padding:8px 10px;margin-bottom:14px;display:none;}
+        .ticket-type-hint.show{display:block;}
         .toast{position:fixed;bottom:24px;right:28px;background:#1A1836;border:1px solid #8B5CF6;border-radius:10px;padding:11px 16px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#C4B5FD;box-shadow:0 8px 24px rgba(0,0,0,0.4);transform:translateY(80px);opacity:0;transition:transform .3s,opacity .3s;z-index:200;}
         .toast.show{transform:translateY(0);opacity:1;}
         ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
@@ -218,18 +220,24 @@
         </div>
         <div class="form-group">
             <label class="form-label">Ticket Type *</label>
-            <select class="form-select" id="ticket-type">
+            <select class="form-select" id="ticket-type" onchange="onTicketTypeChange(this.value)">
                 <option value="">-- Select Type --</option>
                 <option value="Standard">Standard</option>
-                <option value="Free">Free</option>
+                <option value="Myself and friends">Myself and Friends</option>
+                <option value="Family">Family</option>
+                <option value="School pass">School Pass</option>
             </select>
         </div>
     </div>
+
+    <!-- Ticket type hint -->
+    <div class="ticket-type-hint" id="typeHint"></div>
+
     <div class="form-row">
         <div class="form-group">
-            <label class="form-label">Price (N) *</label>
+            <label class="form-label">Price (₦) *</label>
             <div class="price-wrap">
-                <span class="price-prefix">N</span>
+                <span class="price-prefix">₦</span>
                 <input type="number" class="form-input" id="ticket-price" placeholder="5000">
             </div>
         </div>
@@ -250,9 +258,9 @@
         </div>
         <div class="early-bird-fields" id="earlyBirdFields">
             <div class="form-group">
-                <label class="form-label">Early Bird Price (N) *</label>
+                <label class="form-label">Early Bird Price (₦) *</label>
                 <div class="price-wrap">
-                    <span class="price-prefix">N</span>
+                    <span class="price-prefix">₦</span>
                     <input type="number" class="form-input" id="early-bird-price" placeholder="3500">
                 </div>
             </div>
@@ -280,15 +288,6 @@
             <div class="toggle-desc">Allow promo codes on this ticket</div>
         </div>
     </div>
-    <!-- ── NEW: Group Ticket toggle ── -->
-    <div class="toggle-item" id="toggle-group" onclick="toggleSwitch(this)">
-        <div class="toggle off"></div>
-        <div class="toggle-info">
-            <div class="toggle-name">Group Ticket</div>
-            <div class="toggle-desc">Buyers can purchase up to 5 tickets per order</div>
-        </div>
-    </div>
-    <!-- ── NEW: Show Available Count toggle ── -->
     <div class="toggle-item" id="toggle-show-count" onclick="toggleSwitch(this)">
         <div class="toggle off"></div>
         <div class="toggle-info">
@@ -314,6 +313,23 @@
     let allEvents  = [];
     let editingEventId = null;
     let editingTierId  = null;
+
+    const TYPE_HINTS = {
+        'Standard':          '1 person · 1 ticket · fixed price',
+        'Myself and friends':'2–5 people · price multiplies by quantity · each gets their own QR',
+        'Family':            '5 people · fixed price (does not multiply) · all 5 get QR emails',
+        'School pass':       'Min 50 students · org name & headcount only · fixed price'
+    };
+
+    function onTicketTypeChange(val) {
+        const hint = document.getElementById('typeHint');
+        if (val && TYPE_HINTS[val]) {
+            hint.textContent = '📌 ' + TYPE_HINTS[val];
+            hint.classList.add('show');
+        } else {
+            hint.classList.remove('show');
+        }
+    }
 
     function logout() { localStorage.removeItem('dfa_token'); localStorage.removeItem('dfa_admin'); window.location.href = 'index.html'; }
     const adminData = JSON.parse(localStorage.getItem('dfa_admin') || '{}');
@@ -350,10 +366,8 @@
     }
     function toggleSwitch(item) { item.querySelector('.toggle').classList.toggle('off'); }
     function toggleEarlyBird() {
-        const toggle = document.getElementById('earlyBirdToggle');
-        const fields = document.getElementById('earlyBirdFields');
-        toggle.classList.toggle('off');
-        fields.classList.toggle('active');
+        document.getElementById('earlyBirdToggle').classList.toggle('off');
+        document.getElementById('earlyBirdFields').classList.toggle('active');
     }
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
@@ -366,17 +380,16 @@
         document.getElementById('ticket-status').value    = 'Available';
         document.getElementById('early-bird-price').value = '';
         document.getElementById('toggle-discounts').querySelector('.toggle').classList.add('off');
-        document.getElementById('toggle-group').querySelector('.toggle').classList.add('off');
         document.getElementById('toggle-show-count').querySelector('.toggle').classList.add('off');
         document.getElementById('earlyBirdToggle').classList.add('off');
         document.getElementById('earlyBirdFields').classList.remove('active');
+        document.getElementById('typeHint').classList.remove('show');
     }
 
     function openCreateDrawer() {
-        editingEventId = null;
-        editingTierId  = null;
+        editingEventId = null; editingTierId = null;
         clearForm();
-        document.getElementById('ticket-event').disabled = false;
+        document.getElementById('ticket-event').disabled    = false;
         document.getElementById('drawerTitle').textContent  = 'Add Ticket Type';
         document.getElementById('drawerBadge').className    = 'drawer-mode-badge create';
         document.getElementById('drawerBadge').innerHTML    = '<i class="fa-solid fa-plus"></i> New Ticket';
@@ -391,17 +404,17 @@
         const tier = (event.ticketTiers || []).find(t => t._id === tierId);
         if (!tier) return;
 
-        editingEventId = eventId;
-        editingTierId  = tierId;
+        editingEventId = eventId; editingTierId = tierId;
 
         const sel = document.getElementById('ticket-event');
         sel.innerHTML = `<option value="${event._id}">${event.title}</option>`;
-        sel.value = event._id;
-        sel.disabled = true;
+        sel.value = event._id; sel.disabled = true;
 
         document.getElementById('ticket-name').value      = tier.ticketName || tier.name || '';
-        const validType = (tier.ticketType === 'Standard' || tier.ticketType === 'Free') ? tier.ticketType : 'Standard';
+        const validTypes = ['Standard','Myself and friends','Family','School pass'];
+        const validType  = validTypes.includes(tier.ticketType) ? tier.ticketType : 'Standard';
         document.getElementById('ticket-type').value      = validType;
+        onTicketTypeChange(validType);
         document.getElementById('ticket-price').value     = tier.price ?? '';
         document.getElementById('ticket-capacity').value  = tier.capacity ?? '';
         document.getElementById('ticket-status').value    = tier.status || 'Available';
@@ -409,23 +422,19 @@
         document.getElementById('early-bird-price').value = tier.earlyBirdPrice ?? '';
 
         const discToggle  = document.getElementById('toggle-discounts').querySelector('.toggle');
-        const groupToggle = document.getElementById('toggle-group').querySelector('.toggle');
         const countToggle = document.getElementById('toggle-show-count').querySelector('.toggle');
         const ebToggle    = document.getElementById('earlyBirdToggle');
-        const ebFields    = document.getElementById('earlyBirdFields');
 
         if (tier.enableDiscounts)    discToggle.classList.remove('off');  else discToggle.classList.add('off');
-        if (tier.isGroupTicket)      groupToggle.classList.remove('off'); else groupToggle.classList.add('off');
         if (tier.showAvailableCount) countToggle.classList.remove('off'); else countToggle.classList.add('off');
-        if (tier.enableEarlyBird) { ebToggle.classList.remove('off'); ebFields.classList.add('active'); }
-        else                      { ebToggle.classList.add('off');    ebFields.classList.remove('active'); }
+        if (tier.enableEarlyBird)  { ebToggle.classList.remove('off'); document.getElementById('earlyBirdFields').classList.add('active'); }
+        else                       { ebToggle.classList.add('off');    document.getElementById('earlyBirdFields').classList.remove('active'); }
 
         document.getElementById('drawerTitle').textContent  = 'Edit Ticket Type';
         document.getElementById('drawerBadge').className    = 'drawer-mode-badge edit';
         document.getElementById('drawerBadge').innerHTML    = '<i class="fa-solid fa-pen"></i> Editing';
         document.getElementById('saveBtnLabel').textContent = 'Update Ticket';
         document.getElementById('deleteTicketBtn').style.display = (tier.sold > 0) ? 'none' : 'flex';
-
         openDrawer();
     }
 
@@ -434,7 +443,7 @@
             const res    = await fetch(`${API}/events`);
             const result = await res.json();
             allEvents    = result.data?.events || [];
-            const sel = document.getElementById('ticket-event');
+            const sel    = document.getElementById('ticket-event');
             sel.innerHTML = '<option value="">Select Event</option>' +
                 allEvents.map(e => `<option value="${e._id}">${e.title}</option>`).join('');
             const filter = document.getElementById('eventFilter');
@@ -456,29 +465,26 @@
             container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-ticket"></i><p>No tickets found</p></div>`;
             return;
         }
-        const priceColors = ['standard','vip','group','school','standard'];
+        const typeColors = { 'Standard':'#C4B5FD','Myself and friends':'#34D399','Family':'#FBBF24','School pass':'#60A5FA' };
+        const typeBgMap  = { 'Standard':'standard','Myself and friends':'group','Family':'vip','School pass':'school' };
+
         container.innerHTML = events.map(event => {
-            const tiersHTML = (event.ticketTiers || []).map((tier, i) => {
+            const tiersHTML = (event.ticketTiers || []).map((tier) => {
                 const sold        = tier.sold || 0;
                 const left        = tier.capacity - sold;
                 const pct         = tier.capacity > 0 ? (sold / tier.capacity) * 100 : 0;
                 const availClass  = pct >= 100 ? 'avail-sold' : pct >= 80 ? 'avail-low' : 'avail-ok';
-                // Show count only if showAvailableCount is ON, otherwise just show status
-                const availText   = pct >= 100 ? 'Sold Out'
-                    : tier.showAvailableCount ? `${left} Left`
-                    : 'Available';
-                const colorClass  = priceColors[i % priceColors.length];
+                const availText   = pct >= 100 ? 'Sold Out' : tier.showAvailableCount ? `${left} Left` : 'Available';
+                const colorClass  = typeBgMap[tier.ticketType] || 'standard';
                 const displayName = tier.ticketName || tier.name || 'Ticket';
                 const priceDisplay = tier.enableEarlyBird && tier.earlyBirdPrice
-                    ? `N${Number(tier.price).toLocaleString()} / N${Number(tier.earlyBirdPrice).toLocaleString()}`
-                    : `N${Number(tier.price).toLocaleString()}`;
-                // Small badges shown on card
-                const groupBadge = tier.isGroupTicket
-                    ? `<span style="font-size:8px;background:rgba(139,92,246,.15);color:#8B5CF6;border-radius:4px;padding:1px 5px;margin-top:4px;display:inline-block;"><i class="fa-solid fa-users" style="font-size:7px;"></i> Group</span>`
-                    : '';
+                    ? `₦${Number(tier.price).toLocaleString()} / ₦${Number(tier.earlyBirdPrice).toLocaleString()}`
+                    : `₦${Number(tier.price).toLocaleString()}`;
+                const badgeColor = typeColors[tier.ticketType] || '#C4B5FD';
+                const typeBadge  = `<span style="font-size:8px;background:${badgeColor}22;color:${badgeColor};border-radius:4px;padding:1px 5px;margin-top:4px;display:inline-block;">${tier.ticketType || 'Standard'}</span>`;
                 return `
                 <div class="ticket-card" onclick="openEditDrawer('${event._id}','${tier._id}')">
-                    <button class="ticket-card-menu" onclick="event.stopPropagation(); openEditDrawer('${event._id}','${tier._id}')">
+                    <button class="ticket-card-menu" onclick="event.stopPropagation();openEditDrawer('${event._id}','${tier._id}')">
                         <i class="fa-solid fa-pen"></i>
                     </button>
                     <div class="ticket-type-label">${displayName}</div>
@@ -486,7 +492,7 @@
                     <div class="ticket-avail ${availClass}">
                         <i class="fa-solid fa-circle" style="font-size:6px;margin-right:4px;"></i>${availText}
                     </div>
-                    ${groupBadge}
+                    ${typeBadge}
                 </div>`;
             }).join('');
             return `
@@ -494,7 +500,7 @@
                 <div class="event-group-label">${event.title}</div>
                 <div class="ticket-grid">
                     ${tiersHTML}
-                    <div class="ticket-card" onclick="openCreateDrawer(); document.getElementById('ticket-event').value='${event._id}';" style="border-style:dashed;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;min-height:90px;opacity:0.5;">
+                    <div class="ticket-card" onclick="openCreateDrawer();document.getElementById('ticket-event').value='${event._id}';" style="border-style:dashed;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;min-height:90px;opacity:0.5;">
                         <i class="fa-solid fa-plus" style="color:var(--muted);font-size:16px;"></i>
                         <span style="font-size:10px;color:var(--muted);font-weight:600;">Add Type</span>
                     </div>
@@ -503,43 +509,33 @@
         }).join('');
     }
 
-    function filterByEvent(id) {
-        if (!id) { renderTickets(allEvents); return; }
-        renderTickets(allEvents.filter(e => e._id === id));
-    }
+    function filterByEvent(id) { renderTickets(id ? allEvents.filter(e => e._id === id) : allEvents); }
     function filterTickets(q) {
         if (!q) { renderTickets(allEvents); return; }
-        const filtered = allEvents.map(e => ({
-            ...e,
-            ticketTiers: (e.ticketTiers || []).filter(t =>
-                (t.ticketName || t.name || '').toLowerCase().includes(q.toLowerCase())
-            )
-        })).filter(e => e.ticketTiers.length > 0);
-        renderTickets(filtered);
+        renderTickets(allEvents.map(e => ({
+            ...e, ticketTiers: (e.ticketTiers||[]).filter(t => (t.ticketName||t.name||'').toLowerCase().includes(q.toLowerCase()))
+        })).filter(e => e.ticketTiers.length > 0));
     }
 
     async function saveTicketTier() {
         const eventId         = document.getElementById('ticket-event').value;
         const ticketName      = document.getElementById('ticket-name').value.trim();
-        const ticketType      = document.getElementById('ticket-type').value.trim();
+        const ticketType      = document.getElementById('ticket-type').value;
         const price           = document.getElementById('ticket-price').value;
         const capacity        = document.getElementById('ticket-capacity').value;
         const status          = document.getElementById('ticket-status').value;
         const perks           = document.getElementById('ticket-perks').value;
-        const enableEarlyBird    = !document.getElementById('earlyBirdToggle').classList.contains('off');
-        const earlyBirdPrice     = document.getElementById('early-bird-price').value;
+        const enableEarlyBird = !document.getElementById('earlyBirdToggle').classList.contains('off');
+        const earlyBirdPrice  = document.getElementById('early-bird-price').value;
         const enableDiscounts    = !document.getElementById('toggle-discounts').querySelector('.toggle').classList.contains('off');
-        const isGroupTicket      = !document.getElementById('toggle-group').querySelector('.toggle').classList.contains('off');
         const showAvailableCount = !document.getElementById('toggle-show-count').querySelector('.toggle').classList.contains('off');
 
-        if (!eventId)    { alert('Please select an Event'); return; }
-        if (!ticketName) { alert('Please enter Ticket Name'); return; }
-        if (!ticketType) { alert('Please select Ticket Type (Standard or Free)'); return; }
-        if (ticketType !== 'Standard' && ticketType !== 'Free') {
-            alert('Ticket Type must be "Standard" or "Free". Got: ' + ticketType); return;
-        }
-        if (!price)    { alert('Please enter Price'); return; }
-        if (!capacity) { alert('Please enter Quantity'); return; }
+        const validTypes = ['Standard','Myself and friends','Family','School pass'];
+        if (!eventId)               { alert('Please select an Event'); return; }
+        if (!ticketName)            { alert('Please enter Ticket Name'); return; }
+        if (!validTypes.includes(ticketType)) { alert('Please select a valid Ticket Type'); return; }
+        if (!price)                 { alert('Please enter Price'); return; }
+        if (!capacity)              { alert('Please enter Quantity'); return; }
         if (enableEarlyBird && !earlyBirdPrice) { alert('Please enter Early Bird Price'); return; }
 
         const btn = document.getElementById('saveTicketBtn');
@@ -547,35 +543,27 @@
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
         const payload = {
-            ticketName,
-            ticketType,
-            price:           Number(price),
-            capacity:        Number(capacity),
-            status:          status || 'Available',
-            perks:           perks.trim() ? perks.split('\n').map(p => p.trim()).filter(p => p) : [],
-            enableEarlyBird: enableEarlyBird,
-            enableDiscounts: enableDiscounts,
-            isGroupTicket:      isGroupTicket,
-            showAvailableCount: showAvailableCount
+            ticketName, ticketType,
+            price:              Number(price),
+            capacity:           Number(capacity),
+            status:             status || 'Available',
+            perks:              perks.trim() ? perks.split('\n').map(p => p.trim()).filter(p => p) : [],
+            enableEarlyBird,
+            enableDiscounts,
+            showAvailableCount
         };
         if (enableEarlyBird) payload.earlyBirdPrice = Number(earlyBirdPrice);
 
         try {
             const token = localStorage.getItem('dfa_token');
-            let res;
-            if (editingTierId) {
-                res = await fetch(`${API}/events/${editingEventId}/tiers/${editingTierId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(payload)
-                });
-            } else {
-                res = await fetch(`${API}/events/${eventId}/tiers`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(payload)
-                });
-            }
+            const url   = editingTierId
+                ? `${API}/events/${editingEventId}/tiers/${editingTierId}`
+                : `${API}/events/${eventId}/tiers`;
+            const res = await fetch(url, {
+                method: editingTierId ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(payload)
+            });
             const result = await res.json();
             if (!res.ok) throw new Error(result.message || 'Failed to save ticket');
             showToast(editingTierId ? 'Ticket type updated!' : 'Ticket type added!');
@@ -593,25 +581,18 @@
         if (!editingEventId || !editingTierId) return;
         if (!confirm('Delete this ticket type? This cannot be undone.')) return;
         const btn = document.getElementById('deleteTicketBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
         try {
             const token = localStorage.getItem('dfa_token');
-            const res = await fetch(`${API}/events/${editingEventId}/tiers/${editingTierId}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+            const res   = await fetch(`${API}/events/${editingEventId}/tiers/${editingTierId}`, {
+                method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
             });
             const result = await res.json();
             if (!res.ok) throw new Error(result.message || 'Failed to delete ticket');
             showToast('Ticket type deleted');
-            await loadEvents();
-            closeDrawer();
-        } catch(err) {
-            alert(err.message || 'Failed to delete ticket');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete Ticket Type';
-        }
+            await loadEvents(); closeDrawer();
+        } catch(err) { alert(err.message || 'Failed to delete ticket'); }
+        finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete Ticket Type'; }
     }
 
     function showToast(msg) {
