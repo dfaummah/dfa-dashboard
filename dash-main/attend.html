@@ -410,9 +410,6 @@
                 <div class="verify-info-row"><span class="verify-info-label">Ticket</span><span class="verify-info-val" id="vi-ticket"></span></div>
                 <div class="verify-info-row"><span class="verify-info-label">Ticket ID</span><span class="verify-info-val" id="vi-id"></span></div>
             </div>
-            <button class="btn-confirm-checkin" id="confirmCheckinBtn" style="display:none;" onclick="confirmCheckin()">
-                <i class="fa-solid fa-circle-check"></i> Confirm Check-In
-            </button>
         </div>
 
     </div>
@@ -490,7 +487,7 @@
 </div>
 
 <script>
-    const API = 'https://dfaummah-server.onrender.com/api/v1';
+    const API = 'https://dfa-backend-lilj.onrender.com/api/v1';
     let attendees  = [];
     let eventsData = [];
     let currentCheckinAttendee = null; // attendee being checked in
@@ -703,10 +700,24 @@
             { facingMode: 'environment' },
             { fps: 10, qrbox: { width: 250, height: 250 } },
             async (decodedText) => {
-                // QR code scanned — decodedText is the ticket ID
+                // QR code scanned — decodedText is a JSON string: { ticketId, email, eventTitle }
                 stopQrScanner();
                 document.getElementById('qrSection').style.display = 'none';
-                await verifyAndShowResult(decodedText.trim());
+
+                let ticketId = decodedText.trim();
+                let expectedEmail = null;
+
+                try {
+                    const parsed = JSON.parse(decodedText);
+                    if (parsed.ticketId) {
+                        ticketId = parsed.ticketId;
+                        expectedEmail = parsed.email || null;
+                    }
+                } catch (e) {
+                    // Not JSON — assume the QR just contains the raw ticket ID string
+                }
+
+                await verifyAndShowResult(ticketId, expectedEmail);
             },
             (err) => { /* ignore scan errors */ }
         ).catch(err => {
@@ -726,43 +737,72 @@
     async function verifyTicket() {
         const code = document.getElementById('ticketCodeInput').value.trim().toUpperCase();
         if (!code) { alert('Please enter a ticket code'); return; }
-        await verifyAndShowResult(code);
+        await verifyAndShowResult(code, null);
     }
 
-    // ── Core verify logic ─────────────────────────────────────────────────────
-    async function verifyAndShowResult(ticketId) {
+    // ── Core verify logic — calls REAL backend, which does all validation ─────
+    async function verifyAndShowResult(ticketId, expectedEmail) {
         const btn = document.getElementById('verifyBtn');
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; }
 
-        // Find in local attendees first (fast)
-        const found = attendees.find(a => a.ticketId.toUpperCase() === ticketId.toUpperCase());
-
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Verify'; }
-
-        if (!found) {
-            // Not found = fake ticket
-            showVerifyResult(false, '❌ Invalid Ticket', `No ticket with ID "${ticketId}" found in the database. This ticket is not valid.`);
-            verifiedAttendeeId = null;
-            return;
+        // If we don't have an email from the QR payload, try to find it from
+        // the currently-targeted attendee (e.g. when checking in from the table row)
+        // or from any locally cached attendee with this ticket ID.
+        if (!expectedEmail) {
+            const localMatch = attendees.find(a => a.ticketId.toUpperCase() === ticketId.toUpperCase());
+            if (localMatch && localMatch.email && localMatch.email !== '—') {
+                expectedEmail = localMatch.email;
+            }
         }
 
-        if (found.status === 'Checked In') {
-            // Already checked in
-            showVerifyResult(false, '⚠️ Already Checked In', `${found.name} has already been checked in. This ticket cannot be used again.`);
+        try {
+            const token = localStorage.getItem('dfa_token');
+            const res   = await fetch(`${API}/attendees/checkin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ ticketId, expectedEmail })
+            });
+            const result = await res.json();
+
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Verify'; }
+
+            if (!res.ok || result.success === false) {
+                // Backend rejected — show its exact reason (fake, unpaid, duplicate, email mismatch, etc.)
+                showVerifyResult(false, '❌ Check-in Failed', result.message || 'This ticket could not be verified.');
+                verifiedAttendeeId = null;
+                return;
+            }
+
+            // Backend confirms check-in succeeded — sync local state
+            const attendeeData = result.data?.attendee || result.attendee || {};
+            const localAttendee = attendees.find(a => a.ticketId.toUpperCase() === ticketId.toUpperCase());
+
+            document.getElementById('vi-name').textContent   = attendeeData.name   || localAttendee?.name   || '—';
+            document.getElementById('vi-event').textContent  = attendeeData.eventTitle || localAttendee?.event || '—';
+            document.getElementById('vi-ticket').textContent = attendeeData.ticketType || localAttendee?.ticket || '—';
+            document.getElementById('vi-id').textContent     = ticketId;
+
+            if (localAttendee) {
+                localAttendee.status = 'Checked In';
+                verifiedAttendeeId   = localAttendee._id;
+                updateStats();
+                renderTable(attendees);
+            }
+
+            showVerifyResult(true, '✅ Checked In!', result.message || 'Ticket verified and attendee checked in successfully.');
+            document.getElementById('verifyInfo').style.display = 'block';
+
+            // Auto close after a short delay so the staff member can scan the next ticket
+            setTimeout(() => {
+                closeCheckinModal();
+                showToast(`✓ ${attendeeData.name || localAttendee?.name || 'Attendee'} checked in successfully!`);
+            }, 1500);
+
+        } catch(err) {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Verify'; }
+            showVerifyResult(false, '❌ Network Error', err.message || 'Could not reach the server. Please try again.');
             verifiedAttendeeId = null;
-            return;
         }
-
-        // Valid ticket — show info and confirm button
-        verifiedAttendeeId = found._id;
-        document.getElementById('vi-name').textContent   = found.name;
-        document.getElementById('vi-event').textContent  = found.event;
-        document.getElementById('vi-ticket').textContent = found.ticket;
-        document.getElementById('vi-id').textContent     = found.ticketId;
-
-        showVerifyResult(true, '✅ Valid Ticket!', 'Ticket verified successfully. Confirm to check in this attendee.');
-        document.getElementById('verifyInfo').style.display    = 'block';
-        document.getElementById('confirmCheckinBtn').style.display = 'flex';
     }
 
     function showVerifyResult(isSuccess, title, sub) {
@@ -777,44 +817,13 @@
         const el = document.getElementById('verifyResult');
         el.style.display = 'none';
         el.className     = 'verify-result';
-        document.getElementById('verifyInfo').style.display        = 'none';
-        document.getElementById('confirmCheckinBtn').style.display = 'none';
+        document.getElementById('verifyInfo').style.display = 'none';
         verifiedAttendeeId = null;
     }
 
-    // ── Confirm check-in after verification ───────────────────────────────────
-    async function confirmCheckin() {
-        if (!verifiedAttendeeId) return;
-        const a = attendees.find(x => x._id === verifiedAttendeeId);
-        if (!a) return;
-
-        const btn = document.getElementById('confirmCheckinBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking in...';
-
-        try {
-            const token = localStorage.getItem('dfa_token');
-            const res   = await fetch(`${API}/attendees/checkin`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ ticketId: a.ticketId })
-            });
-            const result = await res.json();
-            if (!result.success) throw new Error(result.message);
-
-            // Update local state
-            a.status = 'Checked In';
-            updateStats();
-            renderTable(attendees);
-
-            closeCheckinModal();
-            showToast(`✓ ${a.name} checked in successfully!`);
-        } catch(err) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Confirm Check-In';
-            showToast(err.message || 'Check-in failed', true);
-        }
-    }
+    // NOTE: Check-in now happens directly inside verifyAndShowResult() —
+    // the backend's /attendees/checkin endpoint does verification AND check-in
+    // in a single call, so a separate "confirm" step is no longer needed.
 
     // ── Delete attendee ───────────────────────────────────────────────────────
     async function deleteAttendee(id) {
