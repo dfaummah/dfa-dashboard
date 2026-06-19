@@ -581,7 +581,7 @@
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
         const payload = {
-            ticketName, ticketType,
+            name: ticketName, ticketType,
             price:              Number(price),
             capacity:           Number(capacity),
             status:             status || 'Available',

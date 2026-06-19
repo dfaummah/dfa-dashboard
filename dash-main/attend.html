@@ -546,7 +546,7 @@
             return;
         }
         sel.innerHTML = event.ticketTiers.map(t =>
-            `<option value="${t.name}" data-price="${t.price}">${t.name} — ₦${Number(t.price).toLocaleString()}</option>`
+            `<option value="${t.name || t.ticketName}" data-price="${t.price}">${t.name || t.ticketName} — ₦${Number(t.price).toLocaleString()}</option>`
         ).join('');
         document.getElementById('f_amount').value = event.ticketTiers[0].price;
         sel.onchange = () => {
@@ -745,13 +745,26 @@
         const btn = document.getElementById('verifyBtn');
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; }
 
+        // Enforce that the scanned/entered code belongs to the clicked attendee
+        if (currentCheckinAttendee && currentCheckinAttendee.ticketId && currentCheckinAttendee.ticketId !== '—') {
+            if (currentCheckinAttendee.ticketId.toUpperCase() !== ticketId.toUpperCase()) {
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Verify'; }
+                showVerifyResult(false, '❌ Mismatch', "This isn't the owner of the ticket");
+                return;
+            }
+        }
+
         // If we don't have an email from the QR payload, try to find it from
         // the currently-targeted attendee (e.g. when checking in from the table row)
         // or from any locally cached attendee with this ticket ID.
         if (!expectedEmail) {
-            const localMatch = attendees.find(a => a.ticketId.toUpperCase() === ticketId.toUpperCase());
-            if (localMatch && localMatch.email && localMatch.email !== '—') {
-                expectedEmail = localMatch.email;
+            if (currentCheckinAttendee && currentCheckinAttendee.email && currentCheckinAttendee.email !== '—') {
+                expectedEmail = currentCheckinAttendee.email;
+            } else {
+                const localMatch = attendees.find(a => a.ticketId.toUpperCase() === ticketId.toUpperCase());
+                if (localMatch && localMatch.email && localMatch.email !== '—') {
+                    expectedEmail = localMatch.email;
+                }
             }
         }
 
