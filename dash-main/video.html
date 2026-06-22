@@ -1014,17 +1014,12 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label">YouTube URL</label>
-            <input type="text" class="form-input" id="f_yt_url" placeholder="https://youtube.com/watch?v=..."
+            <label class="form-label">Video URL (YouTube or Instagram) *</label>
+            <input type="text" class="form-input" id="f_video_url" placeholder="https://..."
                 oninput="updateYtThumbPreview()">
             <div class="thumb-live-preview" id="ytThumbPreview" style="display:none;">
                 <img id="ytThumbImg" alt="Thumbnail preview">
             </div>
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Instagram URL</label>
-            <input type="text" class="form-input" id="f_ig_url" placeholder="https://www.instagram.com/reel/...">
         </div>
 
         <hr class="form-divider">
@@ -1101,7 +1096,7 @@
         }
 
         function updateYtThumbPreview() {
-            const url = document.getElementById('f_yt_url').value.trim();
+            const url = document.getElementById('f_video_url').value.trim();
             const thumb = getYoutubeThumb(url);
             const wrap = document.getElementById('ytThumbPreview');
             const img = document.getElementById('ytThumbImg');
@@ -1129,8 +1124,7 @@
 
         function clearForm() {
             document.getElementById('f_title').value = '';
-            document.getElementById('f_yt_url').value = '';
-            document.getElementById('f_ig_url').value = '';
+            document.getElementById('f_video_url').value = '';
             document.getElementById('f_category').value = 'All';
             document.getElementById('publishToggle').querySelector('.toggle').classList.add('off');
             document.getElementById('ytThumbPreview').style.display = 'none';
@@ -1153,8 +1147,7 @@
 
             document.getElementById('f_title').value = v.title || '';
             document.getElementById('f_category').value = v.category || 'All';
-            document.getElementById('f_yt_url').value = v.youtubeUrl || '';
-            document.getElementById('f_ig_url').value = v.instagramUrl || '';
+            document.getElementById('f_video_url').value = v.youtubeUrl || v.instagramUrl || '';
             updateYtThumbPreview();
 
             const toggle = document.getElementById('publishToggle').querySelector('.toggle');
@@ -1263,13 +1256,20 @@
         async function saveVideo() {
             const title = document.getElementById('f_title').value.trim();
             const category = document.getElementById('f_category').value;
-            const youtubeUrl = document.getElementById('f_yt_url').value.trim();
-            const instagramUrl = document.getElementById('f_ig_url').value.trim();
+            const videoUrl = document.getElementById('f_video_url').value.trim();
             const isPublished = !document.getElementById('publishToggle').querySelector('.toggle').classList.contains('off');
 
-            if (!title || (!youtubeUrl && !instagramUrl)) {
-                alert('Please enter a title and at least one video URL (YouTube or Instagram).');
+            if (!title || !videoUrl) {
+                alert('Please enter a title and a video URL (YouTube or Instagram).');
                 return;
+            }
+
+            let youtubeUrl = '';
+            let instagramUrl = '';
+            if (videoUrl.toLowerCase().includes('instagram.com') || videoUrl.toLowerCase().includes('instagr.am')) {
+                instagramUrl = videoUrl;
+            } else {
+                youtubeUrl = videoUrl;
             }
 
             const btn = document.getElementById('saveVideoBtn');
