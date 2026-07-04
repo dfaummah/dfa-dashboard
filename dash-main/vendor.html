@@ -344,24 +344,29 @@
             const token  = localStorage.getItem('dfa_token');
             const res    = await fetch(`${API}/admin/vendors`, { headers: { 'Authorization': `Bearer ${token}` } });
             
+            if (res.status === 401) {
+                alert('Session expired. Please log in again.');
+                logout();
+                return;
+            }
+            
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             
             const result = await res.json();
             
-            // Assuming response could be in data.vendors or just a direct array, adapt to API
-            const raw = result.data?.vendors || result.vendors || result || [];
+            const raw = result.data?.vendors || result.vendors || [];
             
-            vendors = raw.map(order => ({
-                id:             order._id || '—',
-                businessName:   order.vendorDetails?.businessName || 'N/A',
-                fullName:       order.buyerDetails?.name || '—',
-                vendorType:     order.vendorDetails?.vendorType || '—',
-                stallNumber:    order.vendorDetails?.stallNumber || '',
-                email:          order.buyerDetails?.email || '—',
-                whatsapp:       order.buyerDetails?.whatsapp || '—',
-                dateRaw:        order.createdAt,
-                dateStr:        order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric', hour:'2-digit', minute:'2-digit'}) : '—',
-                paymentStatus:  order.payment?.status || 'pending'
+            vendors = raw.map(v => ({
+                id:             v.id || '—',
+                businessName:   v.businessName || 'N/A',
+                fullName:       v.fullName || '—',
+                vendorType:     v.vendorType || '—',
+                stallNumber:    v.stallNumber || '',
+                email:          v.email || '—',
+                whatsapp:       v.whatsapp || '—',
+                dateRaw:        v.dateRegistered,
+                dateStr:        v.dateRegistered ? new Date(v.dateRegistered).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric', hour:'2-digit', minute:'2-digit'}) : '—',
+                paymentStatus:  v.paymentStatus || 'pending'
             }));
             
             updateStats();
