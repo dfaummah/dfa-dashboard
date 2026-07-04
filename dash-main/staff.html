@@ -400,6 +400,7 @@
         <a href="event.html"  class="nav-link"><i class="fa-solid fa-calendar-days"></i> Events</a>
         <a href="ticket.html" class="nav-link"><i class="fa-solid fa-ticket"></i> Tickets</a>
         <a href="attend.html" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
+        <a href="vendor.html" class="nav-link"><i class="fa-solid fa-store"></i> Vendors</a>
     </div>
     <div class="sidebar-section">
         <div class="sidebar-section-label">Finance</div>
@@ -580,14 +581,14 @@
     const API = 'https://dfaummah-server.onrender.com/api/v1';
 
     const ALL_MODULES = [
-        'Dashboard','Tickets','Attendees','Video','Blog',
+        'Dashboard','Tickets','Attendees','Vendors','Video','Blog',
         'Contact Messages','Staff & Roles','Settings','Events',
         'Help Payments','Media Library','Gallery','Website Content',
         'Community','Reports'
     ];
     const ROLE_PERMS = {
         'Super Admin':        ALL_MODULES,
-        'Operations Manager': ['Dashboard','Events','Tickets','Attendees','Contact Messages','Reports'],
+        'Operations Manager': ['Dashboard','Events','Tickets','Attendees','Vendors','Contact Messages','Reports'],
         'Customer Support':   ['Dashboard','Tickets','Attendees','Contact Messages'],
         'Content Manager':    ['Dashboard','Video','Blog','Gallery','Media Library','Website Content'],
         'Finance Manager':    ['Dashboard','Help Payments','Reports'],
