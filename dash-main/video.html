@@ -473,6 +473,24 @@
             color: #78350F;
         }
 
+        .platform-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            width: 24px;
+            height: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
         .video-body {
             padding: 12px 14px 14px;
         }
@@ -1209,6 +1227,13 @@
                        <i class="fa-solid ${icon}" style="font-size:32px;color:rgba(255,255,255,0.25);"></i>
                    </div>`;
 
+                let platformBadgeHtml = '';
+                if (v.youtubeUrl) {
+                    platformBadgeHtml = '<div class="platform-badge"><i class="fa-brands fa-youtube"></i></div>';
+                } else if (v.instagramUrl) {
+                    platformBadgeHtml = '<div class="platform-badge"><i class="fa-brands fa-instagram"></i></div>';
+                }
+
                 return `
             <div class="video-card" onclick="openEditDrawer('${v._id}')">
                 <div class="video-thumb">
@@ -1217,6 +1242,7 @@
                         <div class="play-btn"><i class="fa-solid fa-play"></i></div>
                     </div>
                     <span class="status-pill ${statusClass(v)}">${statusLabel(v)}</span>
+                    ${platformBadgeHtml}
                 </div>
                 <div class="video-body">
                     <div class="video-category">${v.category || 'General'}</div>

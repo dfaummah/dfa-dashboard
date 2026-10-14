@@ -259,6 +259,11 @@
 
     <div class="ticket-type-hint" id="typeHint"></div>
 
+    <div class="form-group" id="schoolNameGroup" style="display:none;">
+        <label class="form-label">School Name *</label>
+        <input type="text" class="form-input" id="ticket-school-name" placeholder="e.g. Ummah International School">
+    </div>
+
     <div class="form-row">
         <div class="form-group">
             <label class="form-label">Price (₦) *</label>
@@ -376,12 +381,14 @@
         'Standard':           '1 person · 1 ticket · fixed price',
         'Myself and friends': '2–5 people · price multiplies by quantity · each gets their own QR',
         'Family':             '5 people · fixed price (does not multiply) · all 5 get QR emails',
-        'School pass':        'Min 50 students · org name & headcount only · fixed price'
+        'School pass':        'School group · org name required · fixed price · admits 50 per ticket'
     };
     function onTicketTypeChange(val) {
         const hint = document.getElementById('typeHint');
         if (val && TYPE_HINTS[val]) { hint.textContent = '📌 ' + TYPE_HINTS[val]; hint.classList.add('show'); }
         else hint.classList.remove('show');
+        // Show/hide school name field
+        document.getElementById('schoolNameGroup').style.display = (val === 'School pass') ? 'block' : 'none';
     }
 
     // ── Drawer open/close ─────────────────────────────────────────────────────
@@ -412,11 +419,13 @@
         document.getElementById('ticket-type').value      = '';
         document.getElementById('ticket-status').value    = 'Available';
         document.getElementById('early-bird-price').value = '';
+        document.getElementById('ticket-school-name').value = '';
         document.getElementById('toggle-discounts').querySelector('.toggle').classList.add('off');
         document.getElementById('toggle-show-count').querySelector('.toggle').classList.add('off');
         document.getElementById('earlyBirdToggle').classList.add('off');
         document.getElementById('earlyBirdFields').classList.remove('active');
         document.getElementById('typeHint').classList.remove('show');
+        document.getElementById('schoolNameGroup').style.display = 'none';
     }
 
     // ── Open create drawer ────────────────────────────────────────────────────
@@ -449,6 +458,7 @@
         const validTypes = ['Standard','Myself and friends','Family','School pass'];
         const validType  = validTypes.includes(tier.ticketType) ? tier.ticketType : 'Standard';
         document.getElementById('ticket-type').value      = validType;
+        document.getElementById('ticket-school-name').value = tier.schoolName || '';
         onTicketTypeChange(validType);
         document.getElementById('ticket-price').value     = tier.price ?? '';
         document.getElementById('ticket-capacity').value  = tier.capacity ?? '';
@@ -564,6 +574,7 @@
         const capacity        = document.getElementById('ticket-capacity').value;
         const status          = document.getElementById('ticket-status').value;
         const perks           = document.getElementById('ticket-perks').value;
+        const schoolName      = document.getElementById('ticket-school-name').value.trim();
         const enableEarlyBird    = !document.getElementById('earlyBirdToggle').classList.contains('off');
         const earlyBirdPrice     = document.getElementById('early-bird-price').value;
         const enableDiscounts    = !document.getElementById('toggle-discounts').querySelector('.toggle').classList.contains('off');
@@ -575,6 +586,7 @@
         if (!validTypes.includes(ticketType)) { alert('Please select a valid Ticket Type'); return; }
         if (!price)                       { alert('Please enter Price'); return; }
         if (!capacity)                    { alert('Please enter Quantity'); return; }
+        if (ticketType === 'School pass' && !schoolName) { alert('Please enter the School Name'); return; }
         if (enableEarlyBird && !earlyBirdPrice) { alert('Please enter Early Bird Price'); return; }
 
         const btn = document.getElementById('saveTicketBtn');
@@ -589,6 +601,7 @@
             perks:              perks.trim() ? perks.split('\n').map(p => p.trim()).filter(p => p) : [],
             enableEarlyBird, enableDiscounts, showAvailableCount
         };
+        if (ticketType === 'School pass') payload.schoolName = schoolName;
         if (enableEarlyBird) payload.earlyBirdPrice = Number(earlyBirdPrice);
 
         try {

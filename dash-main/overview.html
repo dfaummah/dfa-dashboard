@@ -564,10 +564,21 @@
             document.getElementById('subscribersValue').textContent = stats.totalSubscribers ?? 0;
             document.getElementById('subscribersCard').classList.remove('loading');
 
-            // ── Second row ──
-            const av = stats.attendanceVelocity || {};
-            document.getElementById('checkinValue').textContent = `${av.totalCheckedIn ?? 0} / ${av.totalGenerated ?? 0}`;
-            document.getElementById('checkinSub').textContent   = `${av.checkInRate ?? '0%'} checked in`;
+            // ── Second row (check-in uses admitCount for accurate people count) ──
+            try {
+                const attRes = await fetch(`${API}/attendees`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const attData = await attRes.json();
+                const allAttendees = attData.attendees || [];
+                const totalAdmit = allAttendees.reduce((sum, a) => sum + (a.admitCount || 1), 0);
+                const checkedInAdmit = allAttendees.filter(a => a.checkedIn).reduce((sum, a) => sum + (a.admitCount || 1), 0);
+                const rate = totalAdmit > 0 ? Math.round((checkedInAdmit / totalAdmit) * 100) + '%' : '0%';
+                document.getElementById('checkinValue').textContent = `${checkedInAdmit} / ${totalAdmit}`;
+                document.getElementById('checkinSub').textContent   = `${rate} checked in`;
+            } catch (attErr) {
+                const av = stats.attendanceVelocity || {};
+                document.getElementById('checkinValue').textContent = `${av.totalCheckedIn ?? 0} / ${av.totalGenerated ?? 0}`;
+                document.getElementById('checkinSub').textContent   = `${av.checkInRate ?? '0%'} checked in`;
+            }
             document.getElementById('checkinCard').classList.remove('loading');
 
             const gs = stats.globalSales || {};

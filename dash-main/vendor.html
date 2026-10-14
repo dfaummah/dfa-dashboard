@@ -108,6 +108,67 @@
         .toast { position: fixed; bottom: 24px; right: 28px; background: #1A1836; border: 1px solid #8B5CF6; border-radius: 10px; padding: 11px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #C4B5FD; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transform: translateY(80px); opacity: 0; transition: transform .3s ease, opacity .3s ease; z-index: 200; }
         .toast.show { transform: translateY(0); opacity: 1; }
 
+        /* ── Register Vendor Button & Drawer ── */
+        .btn-add { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg,#8B5CF6,#7C3AED); color:#fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity .15s; font-family: inherit; margin-left: auto; box-shadow: 0 2px 8px rgba(139,92,246,.3); }
+        .btn-add:hover { opacity: .88; }
+
+        .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 120; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .drawer-backdrop.open { opacity: 1; pointer-events: all; }
+        .vendor-drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 440px; max-width: 100vw; background: #fff; color: #1C1B2E; z-index: 130; overflow-y: auto; padding: 24px 22px; box-shadow: -8px 0 40px rgba(0,0,0,0.4); transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+        .vendor-drawer.open { transform: translateX(0); }
+        .drawer-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; background: #F3F4F6; border: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6B7280; font-size: 14px; }
+        .drawer-close:hover { background: #E5E7EB; color: #111; }
+        .drawer-title { font-size: 17px; font-weight: 700; color: #111; margin-bottom: 4px; padding-right: 36px; }
+        .drawer-sub { font-size: 11px; color: #6B7280; margin-bottom: 16px; }
+        .vendor-badge-info { display: inline-flex; align-items: center; gap: 6px; background: rgba(139,92,246,0.1); color: #7C3AED; border: 1px solid rgba(139,92,246,0.2); border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; margin-bottom: 16px; }
+        .form-group { margin-bottom: 14px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 14px; }
+        .form-row .form-group { flex: 1; margin-bottom: 0; }
+        .form-label { display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input, .form-select, .form-textarea { width: 100%; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 9px 12px; font-size: 12px; color: #374151; font-family: inherit; outline: none; transition: border-color .15s; }
+        .form-input::placeholder, .form-textarea::placeholder { color: #9CA3AF; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #8B5CF6; background: #fff; }
+        .form-select { appearance: none; cursor: pointer; }
+        .form-textarea { resize: vertical; min-height: 64px; }
+        .form-divider { border: none; border-top: 1px solid #E5E7EB; margin: 16px 0; }
+        .amount-wrap { position: relative; }
+        .amount-prefix { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #6B7280; font-weight: 700; }
+        .amount-wrap .form-input { padding-left: 24px; }
+        .form-hint { font-size: 10px; color: #6B7280; margin-top: 4px; }
+        .drawer-footer { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-cancel { flex: 1; background: #F3F4F6; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; font-family: inherit; }
+        .btn-cancel:hover { background: #E5E7EB; }
+        .btn-save { flex: 2; background: linear-gradient(135deg,#8B5CF6,#7C3AED); color: #fff; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(139,92,246,.35); transition: opacity .15s; }
+        .btn-save:hover { opacity: .88; }
+        .btn-save:disabled { opacity: .6; cursor: not-allowed; }
+
+        /* ── Result Modal (Success / Warning) ── */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(6px); z-index: 150; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+        .modal-backdrop.open { opacity: 1; pointer-events: all; }
+        .result-modal { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 20px; padding: 24px; width: 480px; max-width: 95vw; position: relative; transform: scale(0.95); transition: transform .25s ease; box-shadow: 0 24px 70px rgba(0,0,0,0.5); text-align: center; }
+        .modal-backdrop.open .result-modal { transform: scale(1); }
+        .result-box-success { background: linear-gradient(180deg, rgba(16,185,129,0.12) 0%, rgba(5,150,105,0.04) 100%); border: 2px solid #10B981; border-radius: 16px; padding: 22px 18px; margin-bottom: 18px; }
+        .result-box-warning { background: linear-gradient(180deg, rgba(245,158,11,0.12) 0%, rgba(217,119,6,0.04) 100%); border: 2px solid #F59E0B; border-radius: 16px; padding: 22px 18px; margin-bottom: 18px; }
+        .result-icon-success { width: 56px; height: 56px; border-radius: 50%; background: #10B981; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 12px; box-shadow: 0 0 20px rgba(16,185,129,0.4); }
+        .result-icon-warning { width: 56px; height: 56px; border-radius: 50%; background: #F59E0B; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 12px; box-shadow: 0 0 20px rgba(245,158,11,0.4); }
+        .result-title-success { font-size: 18px; font-weight: 800; color: #10B981; margin-bottom: 6px; }
+        .result-title-warning { font-size: 18px; font-weight: 800; color: #F59E0B; margin-bottom: 6px; }
+        .result-msg { font-size: 12px; color: var(--text2); margin-bottom: 16px; line-height: 1.4; }
+        
+        .stall-callout { background: var(--search); border: 2px dashed #8B5CF6; border-radius: 12px; padding: 12px; margin-bottom: 16px; }
+        .stall-callout-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 2px; }
+        .stall-callout-val { font-size: 32px; font-weight: 900; color: #8B5CF6; letter-spacing: 1px; }
+
+        .result-grid { background: var(--search); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; margin-bottom: 18px; font-size: 11px; }
+        .result-item { display: flex; flex-direction: column; gap: 2px; }
+        .result-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .result-val { font-weight: 700; color: var(--text); word-break: break-all; }
+
+        .btn-done { width: 100%; padding: 12px; border-radius: 10px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: opacity .15s; font-family: inherit; }
+        .btn-done.success { background: linear-gradient(135deg,#10B981,#059669); color: #fff; }
+        .btn-done.warning { background: linear-gradient(135deg,#F59E0B,#D97706); color: #fff; }
+        .btn-done:hover { opacity: .9; }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -249,6 +310,9 @@
             <button class="sort-btn" id="sortBtn" onclick="toggleSort()">
                 <i class="fa-solid fa-sort"></i> <span id="sortLabel">Sort: Date Registered</span>
             </button>
+            <button class="btn-add" id="openVendorDrawerBtn" onclick="openVendorDrawer()" style="display:none;">
+                <i class="fa-solid fa-store"></i> Register Vendor
+            </button>
         </div>
 
         <div class="table-wrap">
@@ -281,6 +345,120 @@
         </div>
     </div>
 </main>
+
+<!-- ══ DRAWER BACKDROP ══ -->
+<div class="drawer-backdrop" id="vendorDrawerBackdrop" onclick="closeVendorDrawer()"></div>
+
+<!-- ══ REGISTER VENDOR DRAWER ══ -->
+<div class="vendor-drawer" id="vendorDrawer">
+    <button class="drawer-close" onclick="closeVendorDrawer()"><i class="fa-solid fa-xmark"></i></button>
+    <div class="drawer-title">Manual Vendor Registration</div>
+    <div class="drawer-sub">Register exhibitor or general vendor and auto-assign stall</div>
+    <div class="vendor-badge-info">
+        <i class="fa-solid fa-shield-halved"></i> Authenticated Admin Flow
+    </div>
+
+    <!-- Event Selection -->
+    <div class="form-group">
+        <label class="form-label">Event *</label>
+        <div class="filter-select-wrap" style="width:100%;">
+            <select class="form-select" id="v_event">
+                <option value="">Loading events...</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Buyer Details -->
+    <div class="form-group">
+        <label class="form-label">Representative Name *</label>
+        <input type="text" class="form-input" id="v_name" placeholder="e.g. Vendor Representative">
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" class="form-input" id="v_email" placeholder="vendor@example.com">
+        </div>
+        <div class="form-group">
+            <label class="form-label">WhatsApp Number *</label>
+            <input type="text" class="form-input" id="v_whatsapp" placeholder="+2348012345678">
+        </div>
+    </div>
+
+    <hr class="form-divider">
+
+    <!-- Vendor Details -->
+    <div class="form-group">
+        <label class="form-label">Vendor Type *</label>
+        <div class="filter-select-wrap" style="width:100%;">
+            <select class="form-select" id="v_type" onchange="onVendorTypeChange()">
+                <option value="Exhibitor Vendor">Exhibitor Vendor (Stalls E1 - E20)</option>
+                <option value="General Vendor">General Vendor (Stalls S1 - S20)</option>
+            </select>
+        </div>
+        <div class="form-hint" id="v_type_hint">
+            <i class="fa-solid fa-circle-info"></i> Exhibitor: Requires exhibition item. Auto-assigns next free stall in E1–E20.
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Business Name *</label>
+        <input type="text" class="form-input" id="v_business" placeholder="e.g. Excellent Books Ltd">
+    </div>
+
+    <!-- Conditional: Exhibition Item for Exhibitor -->
+    <div class="form-group" id="group_exhibition_item">
+        <label class="form-label">Exhibition Item *</label>
+        <input type="text" class="form-input" id="v_exhibit_item" placeholder="e.g. Islamic educational books">
+    </div>
+
+    <!-- Conditional: Product List for General Vendor -->
+    <div class="form-group" id="group_product_list" style="display:none;">
+        <label class="form-label">Product List *</label>
+        <textarea class="form-textarea" id="v_product_list" placeholder="e.g. Meals, drinks and snacks"></textarea>
+    </div>
+
+    <!-- Item Price Description -->
+    <div class="form-group">
+        <label class="form-label">Item / Service Price <span style="font-weight:400;color:#9CA3AF;">(Optional)</span></label>
+        <input type="text" class="form-input" id="v_item_price" placeholder="e.g. Various prices">
+    </div>
+
+    <hr class="form-divider">
+
+    <!-- Payment & Custom Note -->
+    <div class="form-group">
+        <label class="form-label">Amount Paid (₦)</label>
+        <div class="amount-wrap">
+            <span class="amount-prefix">₦</span>
+            <input type="number" class="form-input" id="v_amount" value="100000" placeholder="100000" min="0">
+        </div>
+        <div class="form-hint" id="amount_hint">
+            Default: ₦100,000 for Exhibitors, ₦50,000 for General. Sent as a plain number.
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Admin Note <span style="font-weight:400;color:#9CA3AF;">(Optional)</span></label>
+        <textarea class="form-textarea" id="v_admin_note" placeholder="e.g. Paid by bank transfer"></textarea>
+    </div>
+
+    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 12px;font-size:11px;color:#166534;margin-bottom:14px;line-height:1.4;">
+        <i class="fa-solid fa-paper-plane" style="color:#16A34A;margin-right:4px;"></i>
+        On submission, the system assigns the stall, records the manual payment, and dispatches confirmation email with WhatsApp group info to the buyer.
+    </div>
+
+    <div class="drawer-footer">
+        <button type="button" class="btn-cancel" onclick="closeVendorDrawer()">Cancel</button>
+        <button type="button" class="btn-save" id="btnSaveVendor" onclick="submitManualVendor()">
+            <i class="fa-solid fa-store"></i> Register Vendor
+        </button>
+    </div>
+</div>
+
+<!-- ══ RESULT MODAL (SUCCESS / WARNING) ══ -->
+<div class="modal-backdrop" id="vendorResultModal">
+    <div class="result-modal" id="vendorResultCard"></div>
+</div>
 
 <div class="toast" id="toast">
     <i class="fa-solid fa-circle-check" style="color:#34D399;"></i>
@@ -499,9 +677,357 @@
 
         renderTable(filtered);
     }
+
+    // ── Load Events for Vendor Drawer ─────────────────────────────────────────
+    let eventsData = [];
+    async function loadEvents() {
+        try {
+            const res = await fetch(`${API}/events`);
+            const result = await res.json();
+            eventsData = result.data?.events || [];
+            const select = document.getElementById('v_event');
+            if (!select) return;
+            if (eventsData.length === 0) {
+                select.innerHTML = '<option value="">No events found</option>';
+            } else {
+                select.innerHTML = '<option value="">Select Event</option>' +
+                    eventsData.map(e => `<option value="${e._id}">${e.title}</option>`).join('');
+                if (eventsData.length === 1) {
+                    select.value = eventsData[0]._id;
+                }
+            }
+        } catch (err) {
+            console.error('Failed to load events:', err);
+            const select = document.getElementById('v_event');
+            if (select) select.innerHTML = '<option value="">Failed to load events</option>';
+        }
+    }
+
+    // ── Check Admin Role for Manual Vendor Registration ───────────────────────
+    function checkVendorPermission() {
+        const allowedRoles = ['super admin', 'operations manager', 'event manager', 'finance manager'];
+        const userRole = (adminData.role || '').toLowerCase().trim();
+        const regBtn = document.getElementById('openVendorDrawerBtn');
+        if (regBtn && allowedRoles.includes(userRole)) {
+            regBtn.style.display = 'inline-flex';
+        }
+    }
+
+    // ── Vendor Drawer Controls ────────────────────────────────────────────────
+    function openVendorDrawer() {
+        document.getElementById('vendorDrawerBackdrop').classList.add('open');
+        document.getElementById('vendorDrawer').classList.add('open');
+        if (eventsData.length === 0) loadEvents();
+        setTimeout(() => document.getElementById('v_name')?.focus(), 200);
+    }
+
+    function closeVendorDrawer() {
+        document.getElementById('vendorDrawerBackdrop').classList.remove('open');
+        document.getElementById('vendorDrawer').classList.remove('open');
+    }
+
+    function onVendorTypeChange() {
+        const type = document.getElementById('v_type').value;
+        const exhibitGroup = document.getElementById('group_exhibition_item');
+        const productGroup = document.getElementById('group_product_list');
+        const hint = document.getElementById('v_type_hint');
+        const amountInput = document.getElementById('v_amount');
+        const amountHint = document.getElementById('amount_hint');
+
+        if (type === 'Exhibitor Vendor') {
+            exhibitGroup.style.display = 'block';
+            productGroup.style.display = 'none';
+            hint.innerHTML = '<i class="fa-solid fa-circle-info"></i> Exhibitor: Requires exhibition item. Auto-assigns next free stall in E1–E20.';
+            if (amountInput.value === '' || amountInput.value === '50000') {
+                amountInput.value = '100000';
+            }
+            amountInput.placeholder = '100000';
+            amountHint.textContent = 'Default: ₦100,000 for Exhibitors. Sent as a plain number.';
+        } else {
+            exhibitGroup.style.display = 'none';
+            productGroup.style.display = 'block';
+            hint.innerHTML = '<i class="fa-solid fa-circle-info"></i> General: Requires product list. Auto-assigns next free stall in S1–S20.';
+            if (amountInput.value === '' || amountInput.value === '100000') {
+                amountInput.value = '50000';
+            }
+            amountInput.placeholder = '50000';
+            amountHint.textContent = 'Default: ₦50,000 for General vendors. Sent as a plain number.';
+        }
+    }
+
+    // ── Submit Manual Vendor Registration ─────────────────────────────────────
+    async function submitManualVendor() {
+        const eventId = document.getElementById('v_event').value;
+        const vendorType = document.getElementById('v_type').value;
+        const buyerName = document.getElementById('v_name').value.trim();
+        const buyerEmail = document.getElementById('v_email').value.trim();
+        const buyerWhatsapp = document.getElementById('v_whatsapp').value.trim();
+        const businessName = document.getElementById('v_business').value.trim();
+        const exhibitItem = document.getElementById('v_exhibit_item').value.trim();
+        const productList = document.getElementById('v_product_list').value.trim();
+        const itemPrice = document.getElementById('v_item_price').value.trim();
+        const amountVal = document.getElementById('v_amount').value.trim();
+        const adminNote = document.getElementById('v_admin_note').value.trim();
+
+        // Validation
+        if (!eventId) {
+            alert('Please select an event.');
+            document.getElementById('v_event').focus();
+            return;
+        }
+        if (!buyerName) {
+            alert('Please enter the vendor representative name.');
+            document.getElementById('v_name').focus();
+            return;
+        }
+        if (!buyerEmail || !buyerEmail.includes('@')) {
+            alert('Please enter a valid vendor representative email address.');
+            document.getElementById('v_email').focus();
+            return;
+        }
+        if (!buyerWhatsapp) {
+            alert('Please enter the vendor WhatsApp number.');
+            document.getElementById('v_whatsapp').focus();
+            return;
+        }
+        if (!businessName) {
+            alert('Please enter the business name.');
+            document.getElementById('v_business').focus();
+            return;
+        }
+
+        if (vendorType === 'Exhibitor Vendor' && !exhibitItem) {
+            alert('Please enter the exhibition item for this Exhibitor Vendor.');
+            document.getElementById('v_exhibit_item').focus();
+            return;
+        }
+        if (vendorType === 'General Vendor' && !productList) {
+            alert('Please enter the product list for this General Vendor.');
+            document.getElementById('v_product_list').focus();
+            return;
+        }
+
+        // Construct clean payload (Strictly omit forbidden fields: stallNumber, agreedToTerms, ticketType, quantity, payment.*, status)
+        const payload = {
+            eventId: eventId,
+            buyerDetails: {
+                name: buyerName,
+                email: buyerEmail,
+                whatsapp: buyerWhatsapp
+            },
+            vendorDetails: {
+                vendorType: vendorType,
+                businessName: businessName
+            }
+        };
+
+        if (vendorType === 'Exhibitor Vendor') {
+            payload.vendorDetails.exhibitionItem = exhibitItem;
+        } else {
+            payload.vendorDetails.productList = productList;
+        }
+
+        if (itemPrice) {
+            payload.vendorDetails.itemPrice = itemPrice;
+        }
+
+        if (amountVal !== '') {
+            const num = Number(amountVal);
+            if (isNaN(num) || num < 0) {
+                alert('Please enter a valid numeric payment amount (e.g. 100000).');
+                document.getElementById('v_amount').focus();
+                return;
+            }
+            payload.amountPaid = num;
+        }
+
+        if (adminNote) {
+            payload.customData = {
+                adminNote: adminNote
+            };
+        }
+
+        const btn = document.getElementById('btnSaveVendor');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registering...';
+
+        try {
+            const token = localStorage.getItem('dfa_token');
+            const res = await fetch(`${API}/orders/manual-vendor`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.status === 401) {
+                alert('Session expired. Please log in again.');
+                logout();
+                return;
+            }
+            if (res.status === 403) {
+                alert('Forbidden: Your admin role does not have permission to register manual vendors.');
+                return;
+            }
+            if (res.status === 404) {
+                alert('Selected event not found. Please refresh and try again.');
+                return;
+            }
+
+            const result = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(result.message || 'Unable to register vendor. Please check stall availability and fields.');
+            }
+
+            // Close drawer
+            closeVendorDrawer();
+
+            // Clear inputs
+            document.getElementById('v_business').value = '';
+            document.getElementById('v_exhibit_item').value = '';
+            document.getElementById('v_product_list').value = '';
+            document.getElementById('v_item_price').value = '';
+            document.getElementById('v_admin_note').value = '';
+
+            // Display success or warning result modal
+            showVendorResultModal(result, payload);
+
+            // Refresh vendors table
+            loadVendors();
+
+        } catch (err) {
+            console.error('Manual vendor registration error:', err);
+            alert(err.message || 'An error occurred while registering the vendor.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-store"></i> Register Vendor';
+        }
+    }
+
+    // ── Result Modal Renderer ─────────────────────────────────────────────────
+    function showVendorResultModal(result, payload) {
+        const card = document.getElementById('vendorResultCard');
+        const modal = document.getElementById('vendorResultModal');
+
+        const order = result.data?.order || {};
+        const assignedStall = result.data?.assignedStall || order.vendorDetails?.stallNumber || 'Assigned';
+        const emailSent = Boolean(result.data?.emailSent);
+
+        const businessName = order.vendorDetails?.businessName || payload.vendorDetails.businessName;
+        const vendorType = order.vendorDetails?.vendorType || order.ticketType || payload.vendorDetails.vendorType;
+        const amountNum = order.payment?.totalAmount ?? payload.amountPaid ?? (vendorType.includes('Exhibitor') ? 100000 : 50000);
+        const ref = order.payment?.reference || 'N/A';
+        const recipientEmail = payload.buyerDetails?.email || 'Vendor';
+
+        if (emailSent) {
+            // Full Green Confirmation Screen
+            card.innerHTML = `
+                <div class="result-box-success">
+                    <div class="result-icon-success"><i class="fa-solid fa-check"></i></div>
+                    <div class="result-title-success">Vendor Registered & Dispatched</div>
+                    <div class="result-msg">Vendor account created, stall confirmed, and confirmation email successfully sent.</div>
+                    
+                    <div class="stall-callout">
+                        <div class="stall-callout-label">Assigned Stall Number</div>
+                        <div class="stall-callout-val">${assignedStall}</div>
+                    </div>
+
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="result-label">Business Name</span>
+                            <span class="result-val">${businessName}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Vendor Type</span>
+                            <span class="result-val">${vendorType}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Amount Paid</span>
+                            <span class="result-val" style="color:#10B981;">₦${Number(amountNum).toLocaleString()}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Manual Reference</span>
+                            <span class="result-val" style="font-family:monospace;">${ref}</span>
+                        </div>
+                        <div class="result-item" style="grid-column: span 2;">
+                            <span class="result-label">Email Status</span>
+                            <span class="result-val" style="color:#10B981;">
+                                <i class="fa-solid fa-circle-check"></i> Confirmation dispatched to ${recipientEmail}
+                            </span>
+                        </div>
+                    </div>
+
+                    <button class="btn-done success" onclick="closeVendorResultModal()">
+                        <i class="fa-solid fa-circle-check"></i> Done
+                    </button>
+                </div>
+            `;
+        } else {
+            // Yellow Warning Screen (Vendor & Stall created, but email provider failed)
+            card.innerHTML = `
+                <div class="result-box-warning">
+                    <div class="result-icon-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="result-title-warning">Vendor Registered (Email Failed)</div>
+                    <div class="result-msg" style="color:#D97706;font-weight:600;">
+                        The vendor and stall were successfully created, but the confirmation email could not be dispatched.
+                    </div>
+
+                    <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:10px 12px;font-size:11px;color:#DC2626;margin-bottom:14px;text-align:left;line-height:1.4;">
+                        <i class="fa-solid fa-circle-exclamation" style="margin-right:4px;"></i>
+                        <strong>Important:</strong> Do not submit the form again! Submitting again could create another vendor order and assign another stall.
+                    </div>
+                    
+                    <div class="stall-callout" style="border-color:#F59E0B;">
+                        <div class="stall-callout-label" style="color:#B45309;">Assigned Stall Number</div>
+                        <div class="stall-callout-val" style="color:#D97706;">${assignedStall}</div>
+                    </div>
+
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="result-label">Business Name</span>
+                            <span class="result-val">${businessName}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Vendor Type</span>
+                            <span class="result-val">${vendorType}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Amount Paid</span>
+                            <span class="result-val">₦${Number(amountNum).toLocaleString()}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Manual Reference</span>
+                            <span class="result-val" style="font-family:monospace;">${ref}</span>
+                        </div>
+                        <div class="result-item" style="grid-column: span 2;">
+                            <span class="result-label">Email Status</span>
+                            <span class="result-val" style="color:#EF4444;">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Failed to send to ${recipientEmail}
+                            </span>
+                        </div>
+                    </div>
+
+                    <button class="btn-done warning" onclick="closeVendorResultModal()">
+                        <i class="fa-solid fa-check"></i> Understood, Close
+                    </button>
+                </div>
+            `;
+        }
+
+        modal.classList.add('open');
+    }
+
+    function closeVendorResultModal() {
+        document.getElementById('vendorResultModal').classList.remove('open');
+    }
     
-    // Start by loading data
+    // Start by loading data & initializing controls
+    checkVendorPermission();
     loadVendors();
+    loadEvents();
 
 </script>
 </body>
