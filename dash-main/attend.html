@@ -115,7 +115,7 @@
 
         .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(6px); z-index: 150; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
         .modal-backdrop.open { opacity: 1; pointer-events: all; }
-        .checkin-modal { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 20px; padding: 24px; width: 460px; max-width: 95vw; position: relative; transform: scale(0.95); transition: transform .25s ease; box-shadow: 0 24px 70px rgba(0,0,0,0.5); }
+        .checkin-modal { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 20px; padding: 24px; width: 460px; max-width: 95vw; max-height: 90vh; overflow-y: auto; position: relative; transform: scale(0.95); transition: transform .25s ease; box-shadow: 0 24px 70px rgba(0,0,0,0.5); }
         .modal-backdrop.open .checkin-modal { transform: scale(1); }
         .modal-close { position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; background: var(--search); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; color: var(--muted); font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
         .modal-close:hover { background: var(--hover2); color: var(--text); }
@@ -386,7 +386,6 @@
                         <th>WhatsApp</th>
                         <th>Status</th>
                         <th>Registered</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody id="attendeeTableBody"></tbody>
@@ -401,8 +400,8 @@
 </main>
 
 <!-- ══ CHECK-IN MODAL ══ -->
-<div class="modal-backdrop" id="checkinModal">
-    <div class="checkin-modal">
+<div class="modal-backdrop" id="checkinModal" onclick="if(event.target===this)closeCheckinModal()">
+    <div class="checkin-modal" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeCheckinModal()"><i class="fa-solid fa-xmark"></i></button>
         <div class="modal-header">
             <div class="modal-title"><i class="fa-solid fa-qrcode" style="color:#8B5CF6;"></i> Check In</div>
@@ -724,11 +723,7 @@
                     `}
                 </td>
                 <td style="font-size:11px;color:var(--muted);">${a.date}</td>
-                <td>
-                    <button class="action-btn del" title="Delete" onclick="deleteAttendee('${a._id}')">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </td>
+
             </tr>`;
         }).join('');
     }
@@ -1144,7 +1139,8 @@
     document.addEventListener('click', e => {
         const modal = document.getElementById('checkinModal');
         if (modal && modal.classList.contains('open') && currentCheckinMode === 'scan') {
-            if (!e.target.closest('button') && !e.target.closest('input') && !e.target.closest('select')) {
+            // Only refocus scanner input if the click is inside the checkin-modal (not on the backdrop)
+            if (e.target.closest('.checkin-modal') && !e.target.closest('button') && !e.target.closest('input') && !e.target.closest('select')) {
                 const qrInput = document.getElementById('qrScannerInput');
                 if (qrInput && !qrInput.disabled) qrInput.focus();
             }
