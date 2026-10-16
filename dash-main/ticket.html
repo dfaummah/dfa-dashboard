@@ -125,6 +125,32 @@
         .cbtn-delete{background:#EF4444;color:#fff;}
         .cbtn-delete:hover{background:#DC2626;}
 
+        /* ── Close / Reopen Ticket Sales button ── */
+        .btn-close-sales{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:opacity .15s,transform .1s;text-transform:uppercase;letter-spacing:.5px;}
+        .btn-close-sales:hover{opacity:.88;transform:translateY(-1px);}
+        .btn-close-sales:active{transform:translateY(0);}
+        .btn-close-sales.close{background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff;}
+        .btn-close-sales.reopen{background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff;}
+        .btn-close-sales:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+        .sales-closed-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:700;color:#EF4444;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px;padding:2px 8px;margin-left:8px;text-transform:uppercase;letter-spacing:.5px;}
+
+        /* ── Success modal (Ticket Closed) ── */
+        .success-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:400;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+        .success-overlay.open{opacity:1;pointer-events:all;}
+        .success-box{background:#fff;border-radius:20px;padding:36px 32px 28px;max-width:360px;width:90%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.35);transform:scale(0.9);transition:transform .3s cubic-bezier(0.34,1.56,0.64,1);}
+        .success-overlay.open .success-box{transform:scale(1);}
+        .success-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;}
+        .success-icon.closed{background:linear-gradient(135deg,#FEE2E2,#FECACA);color:#EF4444;}
+        .success-icon.reopened{background:linear-gradient(135deg,#DCFCE7,#BBF7D0);color:#22C55E;}
+        .success-box h3{font-size:18px;font-weight:700;color:#111;margin-bottom:6px;}
+        .success-box p{font-size:13px;color:#6B7280;margin-bottom:24px;line-height:1.6;}
+        .success-ok-btn{background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:12px;padding:11px 40px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s;}
+        .success-ok-btn:hover{opacity:.88;}
+
+        /* ── Close Sales Confirm modal ── */
+        .close-sales-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(2px);z-index:350;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+        .close-sales-overlay.open{opacity:1;pointer-events:all;}
+
         ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
         .add-ticket-drawer::-webkit-scrollbar-thumb{background:#D1D5DB;}
     </style>
@@ -225,6 +251,28 @@
             <button class="cbtn-cancel" onclick="closeConfirm()">Cancel</button>
             <button class="cbtn-delete" id="confirmDeleteBtn">Delete</button>
         </div>
+    </div>
+</div>
+
+<!-- Close Ticket Sales confirmation dialog -->
+<div class="close-sales-overlay" id="closeSalesOverlay">
+    <div class="confirm-box">
+        <h4 id="closeSalesConfirmTitle">Close Ticket Sales?</h4>
+        <p id="closeSalesConfirmMsg">This will stop all online ticket sales for this event. Customers will no longer be able to purchase tickets. Admin operations will remain available.</p>
+        <div class="confirm-btns">
+            <button class="cbtn-cancel" onclick="closeCloseSalesConfirm()">Cancel</button>
+            <button class="cbtn-delete" id="closeSalesConfirmBtn">Close Sales</button>
+        </div>
+    </div>
+</div>
+
+<!-- Success modal (Ticket Closed / Reopened) -->
+<div class="success-overlay" id="successOverlay">
+    <div class="success-box">
+        <div class="success-icon closed" id="successIcon"><i class="fa-solid fa-lock"></i></div>
+        <h3 id="successTitle">Ticket Closed</h3>
+        <p id="successMsg">Online ticket sales have been closed for this event.</p>
+        <button class="success-ok-btn" onclick="closeSuccessModal()">OK</button>
     </div>
 </div>
 
@@ -408,7 +456,7 @@
         document.getElementById('earlyBirdToggle').classList.toggle('off');
         document.getElementById('earlyBirdFields').classList.toggle('active');
     }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeConfirm(); } });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeConfirm(); closeCloseSalesConfirm(); closeSuccessModal(); } });
 
     // ── Clear form ────────────────────────────────────────────────────────────
     function clearForm() {
@@ -543,9 +591,21 @@
                     ${typeBadge}
                 </div>`;
             }).join('');
+            const isClosed = !!event.ticketSalesClosed;
+            const closedBadge = isClosed ? '<span class="sales-closed-badge"><i class="fa-solid fa-lock"></i> Sales Closed</span>' : '';
+            const salesBtnClass = isClosed ? 'reopen' : 'close';
+            const salesBtnIcon  = isClosed ? 'fa-lock-open' : 'fa-lock';
+            const salesBtnText  = isClosed ? 'Reopen Ticket Sales' : 'Close Ticket Sales';
+            const canCloseSales = ['Super Admin','Operations Manager','Event Manager'].includes(adminData.role);
+            const salesBtn = canCloseSales
+                ? `<button class="btn-close-sales ${salesBtnClass}" onclick="event.stopPropagation();handleTicketSalesToggle('${event._id}', ${isClosed})" title="${salesBtnText}"><i class="fa-solid ${salesBtnIcon}"></i> ${salesBtnText}</button>`
+                : '';
             return `
             <div class="event-group">
-                <div class="event-group-label">${event.title}</div>
+                <div class="event-group-label" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                    <span>${event.title}${closedBadge}</span>
+                    ${salesBtn}
+                </div>
                 <div class="ticket-grid">
                     ${tiersHTML}
                     <div class="ticket-card" onclick="openCreateDrawer();document.getElementById('ticket-event').value='${event._id}';" style="border-style:dashed;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;min-height:90px;opacity:0.5;">
@@ -660,6 +720,110 @@
         document.getElementById('toastMsg').textContent = msg;
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ── Close / Reopen Ticket Sales ──────────────────────────────────────────
+    function handleTicketSalesToggle(eventId, currentlyClosed) {
+        if (!currentlyClosed) {
+            // Currently open → ask for confirmation before closing
+            openCloseSalesConfirm(eventId);
+        } else {
+            // Currently closed → reopen immediately
+            doUpdateTicketSales(eventId, false);
+        }
+    }
+
+    function openCloseSalesConfirm(eventId) {
+        const ev = allEvents.find(e => e._id === eventId);
+        document.getElementById('closeSalesConfirmTitle').textContent = 'Close Ticket Sales?';
+        document.getElementById('closeSalesConfirmMsg').textContent =
+            `This will stop all online ticket sales for "${ev?.title || 'this event'}". Customers will no longer be able to purchase tickets. Admin operations will remain available.`;
+        document.getElementById('closeSalesConfirmBtn').textContent = 'Close Sales';
+        document.getElementById('closeSalesConfirmBtn').onclick = () => {
+            closeCloseSalesConfirm();
+            doUpdateTicketSales(eventId, true);
+        };
+        document.getElementById('closeSalesOverlay').classList.add('open');
+    }
+
+    function closeCloseSalesConfirm() {
+        document.getElementById('closeSalesOverlay').classList.remove('open');
+    }
+
+    async function doUpdateTicketSales(eventId, closed) {
+        // Disable all close-sales buttons while the request is in-flight
+        const allBtns = document.querySelectorAll('.btn-close-sales');
+        allBtns.forEach(b => { b.disabled = true; });
+
+        try {
+            const token = localStorage.getItem('dfa_token');
+            const response = await fetch(
+                `${API}/admin/events/${eventId}/ticket-sales`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        closed,
+                        reason: closed ? 'Online ticket sales have ended.' : '',
+                    }),
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Could not update ticket sales');
+            }
+
+            // Update the local event data with the returned event
+            const updatedEvent = result.data?.event;
+            if (updatedEvent) {
+                const idx = allEvents.findIndex(e => e._id === updatedEvent._id);
+                if (idx !== -1) {
+                    allEvents[idx] = { ...allEvents[idx], ...updatedEvent };
+                }
+            }
+
+            // Re-render tickets to reflect new state
+            const filterVal = document.getElementById('eventFilter').value;
+            renderTickets(filterVal ? allEvents.filter(e => e._id === filterVal) : allEvents);
+
+            // Show success modal
+            showSuccessModal(closed);
+
+        } catch (err) {
+            showToast('Error: ' + (err.message || 'Failed to update ticket sales'));
+        } finally {
+            const remainingBtns = document.querySelectorAll('.btn-close-sales');
+            remainingBtns.forEach(b => { b.disabled = false; });
+        }
+    }
+
+    function showSuccessModal(wasClosed) {
+        const icon  = document.getElementById('successIcon');
+        const title = document.getElementById('successTitle');
+        const msg   = document.getElementById('successMsg');
+
+        if (wasClosed) {
+            icon.className = 'success-icon closed';
+            icon.innerHTML = '<i class="fa-solid fa-lock"></i>';
+            title.textContent = 'Ticket Closed';
+            msg.textContent   = 'Online ticket sales have been closed for this event. Customers will no longer be able to purchase tickets online.';
+        } else {
+            icon.className = 'success-icon reopened';
+            icon.innerHTML = '<i class="fa-solid fa-lock-open"></i>';
+            title.textContent = 'Ticket Sales Reopened';
+            msg.textContent   = 'Online ticket sales have been reopened. Customers can now purchase tickets again.';
+        }
+
+        document.getElementById('successOverlay').classList.add('open');
+    }
+
+    function closeSuccessModal() {
+        document.getElementById('successOverlay').classList.remove('open');
     }
 
     loadEvents();
