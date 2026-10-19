@@ -99,7 +99,6 @@
 
         .action-btn { background: transparent; border: none; cursor: pointer; color: var(--muted2); font-size: 13px; padding: 4px 6px; border-radius: 6px; transition: background .15s, color .15s; }
         .action-btn:hover { background: var(--hover2); color: #8B5CF6; }
-        .action-btn.del:hover { background: rgba(239,68,68,.12); color: #EF4444; }
 
         .ticket-id { font-size: 10px; color: var(--muted); font-family: monospace; }
 
@@ -115,7 +114,7 @@
 
         .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(6px); z-index: 150; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
         .modal-backdrop.open { opacity: 1; pointer-events: all; }
-        .checkin-modal { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 20px; padding: 24px; width: 460px; max-width: 95vw; max-height: 90vh; overflow-y: auto; position: relative; transform: scale(0.95); transition: transform .25s ease; box-shadow: 0 24px 70px rgba(0,0,0,0.5); }
+        .checkin-modal { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 20px; padding: 24px; width: 460px; max-width: 95vw; max-height: 90vh; overflow-y: auto; overscroll-behavior: contain; position: relative; transform: scale(0.95); transition: transform .25s ease; box-shadow: 0 24px 70px rgba(0,0,0,0.5); }
         .modal-backdrop.open .checkin-modal { transform: scale(1); }
         .modal-close { position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; background: var(--search); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; color: var(--muted); font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
         .modal-close:hover { background: var(--hover2); color: var(--text); }
@@ -400,7 +399,7 @@
 </main>
 
 <!-- ══ CHECK-IN MODAL ══ -->
-<div class="modal-backdrop" id="checkinModal" onclick="if(event.target===this)closeCheckinModal()">
+<div class="modal-backdrop" id="checkinModal" onclick="handleCheckinBackdropClick(event)">
     <div class="checkin-modal" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeCheckinModal()"><i class="fa-solid fa-xmark"></i></button>
         <div class="modal-header">
@@ -755,16 +754,31 @@
         }
     }
 
+    function handleCheckinBackdropClick(e) {
+        if (e.target !== document.getElementById('checkinModal')) return;
+        const resBox = document.getElementById('checkinResultContainer');
+        const isResultVisible = resBox && resBox.style.display !== 'none' && resBox.innerHTML.trim() !== '';
+        // If a check-in result is actively displayed, ignore backdrop clicks to prevent accidental closure
+        if (isResultVisible) return;
+        closeCheckinModal();
+    }
+
     function closeCheckinModal() {
         document.getElementById('checkinModal').classList.remove('open');
         document.body.style.overflow = '';
-        if (checkinResetTimer) clearTimeout(checkinResetTimer);
+        if (checkinResetTimer) {
+            clearTimeout(checkinResetTimer);
+            checkinResetTimer = null;
+        }
         resetToCheckinState();
     }
 
     function switchCheckinMode(mode) {
         currentCheckinMode = mode;
-        if (checkinResetTimer) clearTimeout(checkinResetTimer);
+        if (checkinResetTimer) {
+            clearTimeout(checkinResetTimer);
+            checkinResetTimer = null;
+        }
         hideCheckinResult();
 
         const tabScan   = document.getElementById('tabScan');
@@ -797,27 +811,42 @@
     }
 
     function resetToCheckinState() {
-        if (checkinResetTimer) clearTimeout(checkinResetTimer);
+        if (checkinResetTimer) {
+            clearTimeout(checkinResetTimer);
+            checkinResetTimer = null;
+        }
         hideCheckinResult();
 
         if (currentCheckinMode === 'scan') {
             const qrInput = document.getElementById('qrScannerInput');
-            qrInput.disabled = false;
-            qrInput.value = '';
-            setScannerStatus(true, 'Ready for USB scan');
-            setTimeout(() => qrInput.focus(), 50);
+            if (qrInput) {
+                qrInput.disabled = false;
+                qrInput.value = '';
+                setScannerStatus(true, 'Ready for USB scan');
+                setTimeout(() => qrInput.focus(), 50);
+            }
         } else {
             const manInput = document.getElementById('manualTicketInput');
-            manInput.disabled = false;
-            document.getElementById('manualSubmitBtn').disabled = false;
-            setTimeout(() => manInput.focus(), 50);
+            if (manInput) {
+                manInput.disabled = false;
+                manInput.value = '';
+                document.getElementById('manualSubmitBtn').disabled = false;
+                setTimeout(() => manInput.focus(), 50);
+            }
         }
     }
 
     function hideCheckinResult() {
         const resBox = document.getElementById('checkinResultContainer');
-        resBox.style.display = 'none';
-        resBox.innerHTML = '';
+        if (resBox) {
+            resBox.style.display = 'none';
+            resBox.innerHTML = '';
+        }
+        const tabs = document.querySelector('.checkin-tabs');
+        if (tabs) tabs.style.display = 'grid';
+        const hdrSub = document.querySelector('.checkin-modal .modal-sub');
+        if (hdrSub) hdrSub.style.display = 'block';
+
         document.getElementById('scanModeSection').style.display   = currentCheckinMode === 'scan' ? 'block' : 'none';
         document.getElementById('manualModeSection').style.display = currentCheckinMode === 'manual' ? 'block' : 'none';
     }
@@ -878,8 +907,7 @@
         } catch(err) {
             handleCheckinNetworkError(err);
         } finally {
-            // After displaying the result, clear and refocus the scanner input
-            prepareScannerInputForNext();
+            qrInput.disabled = false;
         }
     }
 
@@ -928,8 +956,6 @@
             manInput.disabled = false;
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> Check In';
-            // After displaying the result, clear and refocus the scanner input
-            prepareScannerInputForNext();
         }
     }
 
@@ -963,8 +989,25 @@
     }
 
     function handleCheckinResponse(isOk, result, submittedCode) {
+        if (checkinResetTimer) {
+            clearTimeout(checkinResetTimer);
+            checkinResetTimer = null;
+        }
+
+        // Hide mode sections, tabs, and subtitle so result takes full clean focus
+        document.getElementById('scanModeSection').style.display   = 'none';
+        document.getElementById('manualModeSection').style.display = 'none';
+        const tabs = document.querySelector('.checkin-tabs');
+        if (tabs) tabs.style.display = 'none';
+        const hdrSub = document.querySelector('.checkin-modal .modal-sub');
+        if (hdrSub) hdrSub.style.display = 'none';
+
         const resBox = document.getElementById('checkinResultContainer');
         resBox.style.display = 'block';
+
+        // Scroll modal to top so user sees the title and details clearly
+        const modalEl = document.querySelector('.checkin-modal');
+        if (modalEl) modalEl.scrollTop = 0;
 
         // 1. Success Screen (Green)
         if (isOk && result.success !== false) {
@@ -1026,12 +1069,6 @@
                     </button>
                 </div>
             `;
-
-            if (checkinResetTimer) clearTimeout(checkinResetTimer);
-            checkinResetTimer = setTimeout(() => {
-                resetToCheckinState();
-            }, 5000);
-
             return;
         }
 
@@ -1095,6 +1132,17 @@
     }
 
     function handleCheckinNetworkError(err) {
+        if (checkinResetTimer) {
+            clearTimeout(checkinResetTimer);
+            checkinResetTimer = null;
+        }
+        document.getElementById('scanModeSection').style.display   = 'none';
+        document.getElementById('manualModeSection').style.display = 'none';
+        const tabs = document.querySelector('.checkin-tabs');
+        if (tabs) tabs.style.display = 'none';
+        const hdrSub = document.querySelector('.checkin-modal .modal-sub');
+        if (hdrSub) hdrSub.style.display = 'none';
+
         const resBox = document.getElementById('checkinResultContainer');
         resBox.style.display = 'block';
         resBox.innerHTML = `
@@ -1109,19 +1157,6 @@
         `;
     }
 
-    // ── Delete attendee ───────────────────────────────────────────────────────
-    async function deleteAttendee(id) {
-        if (!confirm('Delete this attendee?')) return;
-        try {
-            const token = localStorage.getItem('dfa_token');
-            await fetch(`${API}/attendees/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-            attendees = attendees.filter(a => a._id !== id);
-            updateStats();
-            renderTable(attendees);
-            showToast('Attendee deleted');
-        } catch(err) { alert('Delete failed'); }
-    }
-
     // ── Drawer ────────────────────────────────────────────────────────────────
     function openDrawer() {
         document.getElementById('attendeeDrawer').classList.add('open');
@@ -1134,11 +1169,30 @@
         document.body.style.overflow = '';
     }
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') { closeDrawer(); closeCheckinModal(); }
+        if (e.key === 'Escape') { 
+            closeDrawer(); 
+            closeCheckinModal(); 
+            return;
+        }
+
+        // When a check-in result screen is shown, Enter or Space triggers "Ready for Next Scan"
+        const resBox = document.getElementById('checkinResultContainer');
+        const isResultVisible = resBox && resBox.style.display !== 'none' && resBox.innerHTML.trim() !== '';
+        if (isResultVisible && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            resetToCheckinState();
+        }
     });
     document.addEventListener('click', e => {
         const modal = document.getElementById('checkinModal');
-        if (modal && modal.classList.contains('open') && currentCheckinMode === 'scan') {
+        if (!modal || !modal.classList.contains('open')) return;
+
+        // When a result screen is actively shown, NEVER refocus the scanner input on click!
+        const resBox = document.getElementById('checkinResultContainer');
+        const isResultVisible = resBox && resBox.style.display !== 'none' && resBox.innerHTML.trim() !== '';
+        if (isResultVisible) return;
+
+        if (currentCheckinMode === 'scan') {
             // Only refocus scanner input if the click is inside the checkin-modal (not on the backdrop)
             if (e.target.closest('.checkin-modal') && !e.target.closest('button') && !e.target.closest('input') && !e.target.closest('select')) {
                 const qrInput = document.getElementById('qrScannerInput');
